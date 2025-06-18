@@ -36,7 +36,7 @@ dependencies:
   riverpod_lint: ^2.6.1
   riverpod_generator: ^2.6.1
   google_fonts: ^6.1.0
-  font_awesome_flutter: ^11.0.0
+  font_awesome_flutter: ^10.8.0
 
 
   # The following adds the Cupertino Icons font to your application.
