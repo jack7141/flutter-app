@@ -1,6 +1,7 @@
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/user_info/views/birthday_screen.dart';
+import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
 import 'package:celeb_voice/features/user_info/widgets/common_app_%20bar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -25,24 +26,7 @@ class AttitudeScreen extends StatelessWidget {
           padding: const EdgeInsets.all(Sizes.size20),
           child: Column(
             children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 32,
-                    backgroundImage: NetworkImage(
-                      "https://avatars.githubusercontent.com/u/3612017",
-                    ),
-                  ),
-                  Gaps.h12,
-                  Text(
-                    '성시경',
-                    style: TextStyle(
-                      fontSize: Sizes.size16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+              CelebAvatar(),
               Gaps.v20,
               Text(
                 "질문이 많았네요,\n 어떤 사람인지 궁금했거든요 ㅎㅎ\n 마지막으로, 혹시 제가 어떻게 말하는게 편할까요?",

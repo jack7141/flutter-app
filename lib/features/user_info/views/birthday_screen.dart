@@ -1,6 +1,7 @@
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/user_info/views/job_screen.dart';
+import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
 import 'package:celeb_voice/features/user_info/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/features/user_info/widgets/form_button.dart';
 import 'package:flutter/material.dart';
@@ -187,24 +188,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 32,
-                    backgroundImage: NetworkImage(
-                      "https://avatars.githubusercontent.com/u/3612017",
-                    ),
-                  ),
-                  Gaps.h12,
-                  Text(
-                    '성시경',
-                    style: TextStyle(
-                      fontSize: Sizes.size16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+              CelebAvatar(),
               Gaps.v20,
               Text(
                 "생일은 언제에요?",

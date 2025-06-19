@@ -1,6 +1,7 @@
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/user_info/views/interest_screen.dart';
+import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
 import 'package:celeb_voice/features/user_info/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/features/user_info/widgets/form_button.dart';
 import 'package:flutter/material.dart';
@@ -25,24 +26,7 @@ class WelcomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 32,
-                    backgroundImage: NetworkImage(
-                      "https://avatars.githubusercontent.com/u/3612017",
-                    ),
-                  ),
-                  Gaps.h12,
-                  Text(
-                    '성시경',
-                    style: TextStyle(
-                      fontSize: Sizes.size16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+              CelebAvatar(),
               Gaps.v20,
               Text(
                 '안녕하세요, 우리 오늘부터 자주 볼 사이니까 궁금한 거 몇 가지 물어봐도 될까요?',
