@@ -2,6 +2,7 @@ import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/authentication/widgets/circular_checkbox.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 // 이용약관 동의 화면
 class TermsScreen extends StatefulWidget {
@@ -238,9 +239,8 @@ class _TermsScreenState extends State<TermsScreen> {
         child: GestureDetector(
           onTap: _canProceed
               ? () {
-                  // 다음 화면으로 이동 로직
-                  print("필수 약관 동의 완료!");
-                  // context.push('/next-screen');
+                  // 뒤로가기 불가능하게 이동
+                  context.pushReplacement('/welcome');
                 }
               : null,
           child: Row(
