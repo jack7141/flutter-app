@@ -1,10 +1,17 @@
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
+import 'package:celeb_voice/features/user_info/views/interest_screen.dart';
 import 'package:celeb_voice/features/user_info/widgets/form_button.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+// 환영 화면
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
+
+  void _onNextTap(BuildContext context) {
+    context.pushNamed(InterestScreen.routeName);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +58,7 @@ class WelcomeScreen extends StatelessWidget {
               ),
               Gaps.v20,
               GestureDetector(
-                onTap: () {},
+                onTap: () => _onNextTap(context),
                 child: FormButton(text: '네, 그럼요'),
               ),
             ],

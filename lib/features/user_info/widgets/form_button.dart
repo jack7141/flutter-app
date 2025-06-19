@@ -16,14 +16,22 @@ class FormButton extends StatelessWidget {
           color: const Color(0xff9e9ef4),
           borderRadius: BorderRadius.circular(Sizes.size64),
         ),
-        child: Text(
-          text,
+        child: AnimatedDefaultTextStyle(
+          duration: const Duration(milliseconds: 300),
           style: TextStyle(
             fontSize: Sizes.size18,
             fontWeight: FontWeight.w500,
             color: Colors.white,
           ),
-          textAlign: TextAlign.center,
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: Sizes.size18,
+              fontWeight: FontWeight.w500,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
     );

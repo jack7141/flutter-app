@@ -1,5 +1,7 @@
 import 'package:celeb_voice/features/authentication/views/login_screen.dart';
 import 'package:celeb_voice/features/authentication/views/terms_screens.dart';
+import 'package:celeb_voice/features/user_info/views/interest_screen.dart';
+import 'package:celeb_voice/features/user_info/views/mbti_screen.dart';
 import 'package:celeb_voice/features/user_info/views/welcome_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -19,6 +21,16 @@ final router = GoRouter(
       path: '/welcome',
       name: 'welcome',
       builder: (context, state) => const WelcomeScreen(),
+    ),
+    GoRoute(
+      path: '/interest',
+      name: 'interest',
+      builder: (context, state) => const InterestScreen(),
+    ),
+    GoRoute(
+      path: '/mbti',
+      name: 'mbti',
+      builder: (context, state) => const MbtiScreen(),
     ),
   ],
 );
