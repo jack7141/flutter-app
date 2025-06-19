@@ -3,6 +3,7 @@ import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/authentication/widgets/circular_checkbox.dart';
 import 'package:flutter/material.dart';
 
+// 이용약관 동의 화면
 class TermsScreen extends StatefulWidget {
   const TermsScreen({super.key});
 
@@ -34,12 +35,11 @@ class _TermsScreenState extends State<TermsScreen> {
   }
 
   void _onPressIconButton() {
-    print("아이콘 버튼 클릭");
     Navigator.of(context).pop();
   }
 
   // 다음 버튼 활성화 조건 (필수 항목만 체크되면 됨)
-  bool get _canProceed => _agreeService;
+  bool get _canProceed => _agreeService && _agreePrivacy;
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +131,7 @@ class _TermsScreenState extends State<TermsScreen> {
             ),
             Gaps.v10,
 
-            // 개인정보 수집 동의 (선택)
+            // 개인정보 수집 동의 (필수)
             Row(
               children: [
                 CircularCheckbox(
@@ -153,7 +153,7 @@ class _TermsScreenState extends State<TermsScreen> {
                       _onIndividualChanged();
                     },
                     child: const Text(
-                      "(선택) 개인정보 수집 및 이용 동의",
+                      "(필수) 개인정보 수집 및 이용 동의",
                       style: TextStyle(
                         color: Color(0xff463e8d),
                         fontSize: Sizes.size16,
