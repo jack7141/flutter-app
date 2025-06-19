@@ -4,6 +4,7 @@ import 'package:celeb_voice/features/user_info/views/birthday_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+// 말투 선택 화면
 class AttitudeScreen extends StatelessWidget {
   static const String routeName = "attitude";
 
