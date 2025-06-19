@@ -1,6 +1,6 @@
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
-import 'package:celeb_voice/features/user_info/views/birthday_screen.dart';
+import 'package:celeb_voice/features/user_info/views/attitude_screen.dart';
 import 'package:celeb_voice/features/user_info/widgets/form_button.dart';
 import 'package:celeb_voice/features/user_info/widgets/interest_button.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +36,7 @@ class JobScreen extends StatelessWidget {
   }
 
   void _onNextTap(BuildContext context) {
-    context.pushNamed(BirthdayScreen.routeName);
+    context.pushNamed(AttitudeScreen.routeName);
   }
 
   @override

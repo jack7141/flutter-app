@@ -1,5 +1,6 @@
 import 'package:celeb_voice/features/authentication/views/login_screen.dart';
 import 'package:celeb_voice/features/authentication/views/terms_screens.dart';
+import 'package:celeb_voice/features/user_info/views/attitude_screen.dart';
 import 'package:celeb_voice/features/user_info/views/birthday_screen.dart';
 import 'package:celeb_voice/features/user_info/views/interest_screen.dart';
 import 'package:celeb_voice/features/user_info/views/job_screen.dart';
@@ -43,6 +44,11 @@ final router = GoRouter(
       path: '/job',
       name: 'job',
       builder: (context, state) => const JobScreen(),
+    ),
+    GoRoute(
+      path: '/attitude',
+      name: 'attitude',
+      builder: (context, state) => const AttitudeScreen(),
     ),
   ],
 );
