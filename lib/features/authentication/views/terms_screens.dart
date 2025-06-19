@@ -11,12 +11,10 @@ class TermsScreen extends StatefulWidget {
 }
 
 class _TermsScreenState extends State<TermsScreen> {
-  bool _agreeAll = false;
-  bool _agreeService = false;
-  bool _agreePrivacy = false;
-  bool _agreeMarketing = false;
-
-  // 원형 체크박스 위젯
+  bool _agreeAll = false; // 전체 동의
+  bool _agreeService = false; // 서비스 이용약관 동의
+  bool _agreePrivacy = false; // 개인정보 수집 및 이용 동의
+  bool _agreeMarketing = false; // 광고 및 마케팅 활용 동의
 
   // 전체 동의 체크박스 처리
   void _onAgreeAllChanged(bool value) {
@@ -35,6 +33,11 @@ class _TermsScreenState extends State<TermsScreen> {
     });
   }
 
+  void _onPressIconButton() {
+    print("아이콘 버튼 클릭");
+    Navigator.of(context).pop();
+  }
+
   // 다음 버튼 활성화 조건 (필수 항목만 체크되면 됨)
   bool get _canProceed => _agreeService;
 
@@ -50,7 +53,7 @@ class _TermsScreenState extends State<TermsScreen> {
         titleSpacing: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, size: 28),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => _onPressIconButton(),
         ),
       ),
       body: Padding(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// 원형 체크박스 위젯
 class CircularCheckbox extends StatelessWidget {
   const CircularCheckbox({
     super.key,
