@@ -225,106 +225,111 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
               Gaps.v20,
 
               // 날짜 선택 및 양력/음력 선택을 같은 Row에 배치
-              Row(
-                children: [
-                  // 날짜 선택 부분
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: _selectDate,
-                      child: Container(
-                        height: 56,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: Sizes.size16,
-                          vertical: Sizes.size12,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(
+              FractionallySizedBox(
+                widthFactor: 1.0,
+                child: GestureDetector(
+                  onTap: _selectDate,
+                  child: Container(
+                    height: 56,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Sizes.size16,
+                      vertical: Sizes.size12,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: _selectedDate != null
+                            ? const Color(0xff463e8d)
+                            : Colors.grey.shade300,
+                        width: 1.5,
+                      ),
+                      borderRadius: BorderRadius.circular(Sizes.size8),
+                      color: _selectedDate != null
+                          ? const Color(0xff463e8d).withOpacity(0.05)
+                          : Colors.grey.shade50,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _selectedDate != null
+                              ? '${_selectedDate!.year}.${_selectedDate!.month.toString().padLeft(2, '0')}.${_selectedDate!.day.toString().padLeft(2, '0')}'
+                              : 'YYYY.MM.DD',
+                          style: TextStyle(
+                            fontSize: Sizes.size16,
                             color: _selectedDate != null
                                 ? const Color(0xff463e8d)
-                                : Colors.grey.shade300,
-                            width: 1.5,
+                                : const Color(0xff868e96),
+                            fontWeight: _selectedDate != null
+                                ? FontWeight.w600
+                                : FontWeight.normal,
                           ),
-                          borderRadius: BorderRadius.circular(Sizes.size8),
-                          color: _selectedDate != null
-                              ? const Color(0xff463e8d).withOpacity(0.05)
-                              : Colors.grey.shade50,
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Row(
                           children: [
-                            Text(
-                              _selectedDate != null
-                                  ? '${_selectedDate!.year}.${_selectedDate!.month.toString().padLeft(2, '0')}.${_selectedDate!.day.toString().padLeft(2, '0')}'
-                                  : 'YYYY.MM.DD',
-                              style: TextStyle(
-                                fontSize: Sizes.size16,
-                                color: _selectedDate != null
-                                    ? const Color(0xff463e8d)
-                                    : const Color(0xff868e96),
-                                fontWeight: _selectedDate != null
-                                    ? FontWeight.w600
-                                    : FontWeight.normal,
-                              ),
-                            ), // 양력/음력 선택 버튼들
-                            Row(
-                              children: [
-                                _buildCalendarTypeButton("양력", !_isLunar),
-                                Gaps.h10,
-                                _buildCalendarTypeButton("음력", _isLunar),
-                              ],
-                            ),
+                            _buildCalendarTypeButton("양력", !_isLunar),
+                            Gaps.h10,
+                            _buildCalendarTypeButton("음력", _isLunar),
                           ],
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
               Gaps.v24,
 
               // 태어난 시간 입력 영역
               Row(
                 children: [
-                  // AM/PM 드롭다운
-                  Container(
-                    height: 56,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(8),
-                      color: _timeUnknown ? Colors.grey.shade100 : Colors.white,
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _selectedAmPm,
-                        items: ["AM", "PM"].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              value,
-                              style: TextStyle(
-                                color: _timeUnknown
-                                    ? Colors.grey
-                                    : Colors.black,
-                                fontSize: Sizes.size14,
+                  // AM/PM 드롭다운 (전체 너비의 20%)
+                  FractionallySizedBox(
+                    widthFactor: 0.2,
+                    child: Container(
+                      height: 56,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(8),
+                        color: _timeUnknown
+                            ? Colors.grey.shade100
+                            : Colors.white,
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _selectedAmPm,
+                          isExpanded: true,
+                          items: ["AM", "PM"].map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(
+                                value,
+                                style: TextStyle(
+                                  color: _timeUnknown
+                                      ? Colors.grey
+                                      : Colors.black,
+                                  fontSize: Sizes.size14,
+                                ),
                               ),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: _timeUnknown
-                            ? null
-                            : (String? newValue) {
-                                setState(() {
-                                  _selectedAmPm = newValue!;
-                                });
-                              },
+                            );
+                          }).toList(),
+                          onChanged: _timeUnknown
+                              ? null
+                              : (String? newValue) {
+                                  setState(() {
+                                    _selectedAmPm = newValue!;
+                                  });
+                                },
+                        ),
                       ),
                     ),
                   ),
-                  Gaps.h12,
 
-                  // 시간 선택 + 시간모름 버튼
-                  Expanded(
+                  // 간격 (전체 너비의 3%)
+                  FractionallySizedBox(widthFactor: 0.03, child: Container()),
+
+                  // 시간 선택 + 시간모름 버튼 (전체 너비의 77%)
+                  FractionallySizedBox(
+                    widthFactor: 0.8,
                     child: GestureDetector(
                       onTap: _timeUnknown ? null : _selectTime,
                       child: Container(
@@ -366,7 +371,6 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                                     : FontWeight.normal,
                               ),
                             ),
-                            // 시간모름 버튼 (양력/음력과 같은 디자인)
                             _buildTimeUnknownButton(),
                           ],
                         ),
