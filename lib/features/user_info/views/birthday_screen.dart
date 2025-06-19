@@ -1,6 +1,7 @@
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/user_info/views/job_screen.dart';
+import 'package:celeb_voice/features/user_info/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/features/user_info/widgets/form_button.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -40,10 +41,6 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
         ),
       );
     }
-  }
-
-  void _onPressIconButton(BuildContext context) {
-    context.pop();
   }
 
   // 날짜 선택기 표시
@@ -183,13 +180,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-      appBar: AppBar(
-        titleSpacing: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, size: 28),
-          onPressed: () => _onPressIconButton(context),
-        ),
-      ),
+      appBar: const CommonAppBar(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(Sizes.size20),

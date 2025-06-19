@@ -9,7 +9,7 @@ import 'package:celeb_voice/features/user_info/views/welcome_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
-  initialLocation: "/", // 앱의 시작 경로
+  initialLocation: "/terms", // 앱의 시작 경로
   routes: [
     GoRoute(
       path: "/", // 기본 경로

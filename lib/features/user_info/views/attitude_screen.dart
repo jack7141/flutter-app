@@ -1,6 +1,7 @@
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/user_info/views/birthday_screen.dart';
+import 'package:celeb_voice/features/user_info/widgets/common_app_%20bar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,10 +11,6 @@ class AttitudeScreen extends StatelessWidget {
 
   const AttitudeScreen({super.key});
 
-  void _onPressIconButton(BuildContext context) {
-    context.pop();
-  }
-
   void _onNextTap(BuildContext context) {
     context.pushNamed(BirthdayScreen.routeName);
   }
@@ -22,13 +19,7 @@ class AttitudeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-      appBar: AppBar(
-        titleSpacing: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, size: 28),
-          onPressed: () => _onPressIconButton(context),
-        ),
-      ),
+      appBar: const CommonAppBar(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(Sizes.size20),

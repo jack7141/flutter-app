@@ -1,6 +1,7 @@
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/user_info/views/mbti_screen.dart';
+import 'package:celeb_voice/features/user_info/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/features/user_info/widgets/form_button.dart';
 import 'package:celeb_voice/features/user_info/widgets/interest_button.dart';
 import 'package:flutter/material.dart';
@@ -29,21 +30,11 @@ class InterestScreen extends StatelessWidget {
     context.pushNamed(MbtiScreen.routeName);
   }
 
-  void _onPressIconButton(BuildContext context) {
-    context.pop();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-      appBar: AppBar(
-        titleSpacing: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, size: 28),
-          onPressed: () => _onPressIconButton(context),
-        ),
-      ),
+      appBar: const CommonAppBar(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(Sizes.size20),
