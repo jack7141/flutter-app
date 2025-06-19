@@ -1,5 +1,6 @@
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
+import 'package:celeb_voice/features/authentication/widgets/circular_checkbox.dart';
 import 'package:flutter/material.dart';
 
 class TermsScreen extends StatefulWidget {
@@ -16,26 +17,6 @@ class _TermsScreenState extends State<TermsScreen> {
   bool _agreeMarketing = false;
 
   // 원형 체크박스 위젯
-  Widget _buildCircularCheckbox(bool value, Function(bool) onChanged) {
-    return GestureDetector(
-      onTap: () => onChanged(!value),
-      child: Container(
-        width: 24,
-        height: 24,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: value ? const Color(0xff9e9ef4) : Colors.grey,
-            width: 2,
-          ),
-          color: value ? const Color(0xff9e9ef4) : Colors.transparent,
-        ),
-        child: value
-            ? const Icon(Icons.check, color: Colors.white, size: 16)
-            : null,
-      ),
-    );
-  }
 
   // 전체 동의 체크박스 처리
   void _onAgreeAllChanged(bool value) {
@@ -80,7 +61,10 @@ class _TermsScreenState extends State<TermsScreen> {
             // 전체 동의
             Row(
               children: [
-                _buildCircularCheckbox(_agreeAll, _onAgreeAllChanged),
+                CircularCheckbox(
+                  value: _agreeAll,
+                  onChanged: _onAgreeAllChanged,
+                ),
                 Gaps.h12,
                 Expanded(
                   child: GestureDetector(
@@ -105,12 +89,15 @@ class _TermsScreenState extends State<TermsScreen> {
             // 서비스 이용약관 동의 (필수)
             Row(
               children: [
-                _buildCircularCheckbox(_agreeService, (value) {
-                  setState(() {
-                    _agreeService = value;
-                  });
-                  _onIndividualChanged();
-                }),
+                CircularCheckbox(
+                  value: _agreeService,
+                  onChanged: (value) {
+                    setState(() {
+                      _agreeService = value;
+                    });
+                    _onIndividualChanged();
+                  },
+                ),
                 Gaps.h12,
                 Expanded(
                   child: GestureDetector(
@@ -143,12 +130,15 @@ class _TermsScreenState extends State<TermsScreen> {
             // 개인정보 수집 동의 (선택)
             Row(
               children: [
-                _buildCircularCheckbox(_agreePrivacy, (value) {
-                  setState(() {
-                    _agreePrivacy = value;
-                  });
-                  _onIndividualChanged();
-                }),
+                CircularCheckbox(
+                  value: _agreePrivacy,
+                  onChanged: (value) {
+                    setState(() {
+                      _agreePrivacy = value;
+                    });
+                    _onIndividualChanged();
+                  },
+                ),
                 Gaps.h12,
                 Expanded(
                   child: GestureDetector(
@@ -181,12 +171,15 @@ class _TermsScreenState extends State<TermsScreen> {
             // 마케팅 동의 (선택)
             Row(
               children: [
-                _buildCircularCheckbox(_agreeMarketing, (value) {
-                  setState(() {
-                    _agreeMarketing = value;
-                  });
-                  _onIndividualChanged();
-                }),
+                CircularCheckbox(
+                  value: _agreeMarketing,
+                  onChanged: (value) {
+                    setState(() {
+                      _agreeMarketing = value;
+                    });
+                    _onIndividualChanged();
+                  },
+                ),
                 Gaps.h12,
                 Expanded(
                   child: GestureDetector(
