@@ -17,10 +17,19 @@ class BirthdayScreen extends StatefulWidget {
 class _BirthdayScreenState extends State<BirthdayScreen> {
   DateTime? _selectedDate;
   bool _isLunar = false; // 양력(false) / 음력(true) 상태
+  TimeOfDay? _selectedTime;
+  String _selectedAmPm = "AM";
+  bool _timeUnknown = false;
 
   void _onNextTap(BuildContext context) {
     if (_selectedDate != null) {
       // 선택된 날짜와 양력/음력 정보와 함께 다음 화면으로 이동
+      print("선택된 날짜: $_selectedDate, ${_isLunar ? '음력' : '양력'}");
+      if (!_timeUnknown && _selectedTime != null) {
+        print("선택된 시간: $_selectedAmPm ${_selectedTime!.format(context)}");
+      } else if (_timeUnknown) {
+        print("시간: 모름");
+      }
       context.pushNamed(MbtiScreen.routeName);
     } else {
       // 날짜를 선택하지 않았을 때 알림
@@ -69,6 +78,35 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
     }
   }
 
+  // 시간 선택기 표시
+  Future<void> _selectTime() async {
+    if (_timeUnknown) return; // 시간모름이 체크되어 있으면 선택 불가
+
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime ?? const TimeOfDay(hour: 12, minute: 0),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: const Color(0xff463e8d),
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedTime = picked;
+      });
+    }
+  }
+
   // 양력/음력 선택 버튼 위젯
   Widget _buildCalendarTypeButton(String text, bool isSelected) {
     return GestureDetector(
@@ -78,8 +116,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
         });
       },
       child: Container(
-        width: 50,
-        height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: Sizes.size20),
         decoration: BoxDecoration(
           color: isSelected ? Colors.transparent : Colors.white,
           borderRadius: BorderRadius.circular(Sizes.size32),
@@ -97,6 +134,44 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
               color: isSelected ? Color(0xff9e9ef4) : Colors.black87,
               fontSize: Sizes.size14,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 시간모름 버튼 위젯 (양력/음력과 같은 디자인)
+  Widget _buildTimeUnknownButton() {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _timeUnknown = !_timeUnknown;
+          if (_timeUnknown) {
+            _selectedTime = null;
+          }
+        });
+      },
+      child: Container(
+        width: 70,
+        height: 32,
+        decoration: BoxDecoration(
+          color: _timeUnknown ? Colors.transparent : Colors.white,
+          borderRadius: BorderRadius.circular(Sizes.size32),
+          border: Border.all(
+            color: _timeUnknown
+                ? const Color(0xff9e9ef4)
+                : Colors.black.withOpacity(0.1),
+            width: 1,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            "시간모름",
+            style: TextStyle(
+              color: _timeUnknown ? Color(0xff9e9ef4) : Colors.black87,
+              fontSize: Sizes.size12,
+              fontWeight: _timeUnknown ? FontWeight.w600 : FontWeight.w400,
             ),
           ),
         ),
@@ -203,9 +278,104 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                       ),
                     ),
                   ),
-                  Gaps.h12,
                 ],
               ),
+              Gaps.v24,
+
+              // 태어난 시간 입력 영역
+              Row(
+                children: [
+                  // AM/PM 드롭다운
+                  Container(
+                    height: 56,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                      color: _timeUnknown ? Colors.grey.shade100 : Colors.white,
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _selectedAmPm,
+                        items: ["AM", "PM"].map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(
+                              value,
+                              style: TextStyle(
+                                color: _timeUnknown
+                                    ? Colors.grey
+                                    : Colors.black,
+                                fontSize: Sizes.size14,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: _timeUnknown
+                            ? null
+                            : (String? newValue) {
+                                setState(() {
+                                  _selectedAmPm = newValue!;
+                                });
+                              },
+                      ),
+                    ),
+                  ),
+                  Gaps.h12,
+
+                  // 시간 선택 + 시간모름 버튼
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _timeUnknown ? null : _selectTime,
+                      child: Container(
+                        height: 56,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: _timeUnknown
+                                ? Colors.grey.shade300
+                                : (_selectedTime != null
+                                      ? const Color(0xff463e8d)
+                                      : Colors.grey.shade300),
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                          color: _timeUnknown
+                              ? Colors.grey.shade100
+                              : (_selectedTime != null
+                                    ? const Color(0xff463e8d).withOpacity(0.05)
+                                    : Colors.white),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              _timeUnknown
+                                  ? "시간모름"
+                                  : (_selectedTime != null
+                                        ? '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}'
+                                        : 'HH:MM'),
+                              style: TextStyle(
+                                fontSize: Sizes.size16,
+                                color: _timeUnknown
+                                    ? Colors.grey
+                                    : (_selectedTime != null
+                                          ? const Color(0xff463e8d)
+                                          : const Color(0xff868e96)),
+                                fontWeight: _selectedTime != null
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                            // 시간모름 버튼 (양력/음력과 같은 디자인)
+                            _buildTimeUnknownButton(),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
               Gaps.v24,
               // 다음 버튼
               GestureDetector(
