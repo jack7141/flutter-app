@@ -11,7 +11,7 @@ class AuthButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FractionallySizedBox(
-      widthFactor: 1, // 부모 위젯 너비의 100%를 차지
+      widthFactor: 1,
       child: Container(
         padding: const EdgeInsets.all(Sizes.size14),
         decoration: BoxDecoration(

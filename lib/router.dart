@@ -1,4 +1,4 @@
-import 'package:celeb_voice/features/authentication/login_screen.dart';
+import 'package:celeb_voice/features/authentication/views/login_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
