@@ -1,6 +1,6 @@
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
-import 'package:celeb_voice/features/user_info/views/mbti_screen.dart';
+import 'package:celeb_voice/features/user_info/views/job_screen.dart';
 import 'package:celeb_voice/features/user_info/widgets/form_button.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -30,7 +30,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
       } else if (_timeUnknown) {
         print("시간: 모름");
       }
-      context.pushNamed(MbtiScreen.routeName);
+      context.pushNamed(JobScreen.routeName);
     } else {
       // 날짜를 선택하지 않았을 때 알림
       ScaffoldMessenger.of(context).showSnackBar(
