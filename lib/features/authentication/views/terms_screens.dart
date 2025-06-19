@@ -121,11 +121,18 @@ class _TermsScreenState extends State<TermsScreen> {
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.chevron_right),
+
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xff868e96),
+                  ),
                   onPressed: () {
                     // 약관 상세보기 기능
                   },
+                  child: const Text(
+                    "보기",
+                    style: TextStyle(decoration: TextDecoration.underline),
+                  ),
                 ),
               ],
             ),
@@ -162,11 +169,17 @@ class _TermsScreenState extends State<TermsScreen> {
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.chevron_right),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xff868e96),
+                  ),
                   onPressed: () {
                     // 약관 상세보기 기능
                   },
+                  child: const Text(
+                    "보기",
+                    style: TextStyle(decoration: TextDecoration.underline),
+                  ),
                 ),
               ],
             ),
@@ -203,11 +216,17 @@ class _TermsScreenState extends State<TermsScreen> {
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.chevron_right),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xff868e96),
+                  ),
                   onPressed: () {
                     // 약관 상세보기 기능
                   },
+                  child: const Text(
+                    "보기",
+                    style: TextStyle(decoration: TextDecoration.underline),
+                  ),
                 ),
               ],
             ),
