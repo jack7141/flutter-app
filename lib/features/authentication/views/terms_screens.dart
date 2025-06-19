@@ -10,6 +10,53 @@ class TermsScreen extends StatefulWidget {
 }
 
 class _TermsScreenState extends State<TermsScreen> {
+  bool _agreeAll = false;
+  bool _agreeService = false;
+  bool _agreePrivacy = false;
+  bool _agreeMarketing = false;
+
+  // 원형 체크박스 위젯
+  Widget _buildCircularCheckbox(bool value, Function(bool) onChanged) {
+    return GestureDetector(
+      onTap: () => onChanged(!value),
+      child: Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: value ? const Color(0xff9e9ef4) : Colors.grey,
+            width: 2,
+          ),
+          color: value ? const Color(0xff9e9ef4) : Colors.transparent,
+        ),
+        child: value
+            ? const Icon(Icons.check, color: Colors.white, size: 16)
+            : null,
+      ),
+    );
+  }
+
+  // 전체 동의 체크박스 처리
+  void _onAgreeAllChanged(bool value) {
+    setState(() {
+      _agreeAll = value;
+      _agreeService = _agreeAll;
+      _agreePrivacy = _agreeAll;
+      _agreeMarketing = _agreeAll;
+    });
+  }
+
+  // 개별 체크박스 처리
+  void _onIndividualChanged() {
+    setState(() {
+      _agreeAll = _agreeService && _agreePrivacy && _agreeMarketing;
+    });
+  }
+
+  // 다음 버튼 활성화 조건 (필수 항목만 체크되면 됨)
+  bool get _canProceed => _agreeService;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,59 +72,174 @@ class _TermsScreenState extends State<TermsScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "전체 동의",
-            style: TextStyle(
-              fontSize: Sizes.size18,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          Gaps.v10,
-          Text(
-            "(필수) 서비스 이용약관 동의",
-            style: TextStyle(
-              color: const Color(0xff463e8d),
-              fontSize: Sizes.size18,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          Gaps.v10,
-          Text(
-            "(선택) 개인정보 수집 및 이용 동의",
-            style: TextStyle(
-              color: const Color(0xff463e8d),
-              fontSize: Sizes.size18,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          Gaps.v10,
-          Text(
-            "(선택) 광고 및 마케팅 활용 동의",
-            style: TextStyle(
-              color: const Color(0xff463e8d),
-              fontSize: Sizes.size18,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomAppBar(
-        color: const Color(0xff9e9ef4),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+      body: Padding(
+        padding: const EdgeInsets.all(Sizes.size20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "다음",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: Sizes.size24,
-                fontWeight: FontWeight.w600,
-              ),
+            // 전체 동의
+            Row(
+              children: [
+                _buildCircularCheckbox(_agreeAll, _onAgreeAllChanged),
+                Gaps.h12,
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _onAgreeAllChanged(!_agreeAll),
+                    child: const Text(
+                      "전체 동의",
+                      style: TextStyle(
+                        fontSize: Sizes.size18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Gaps.v10,
+
+            // 구분선
+            const Divider(),
+            Gaps.v10,
+
+            // 서비스 이용약관 동의 (필수)
+            Row(
+              children: [
+                _buildCircularCheckbox(_agreeService, (value) {
+                  setState(() {
+                    _agreeService = value;
+                  });
+                  _onIndividualChanged();
+                }),
+                Gaps.h12,
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _agreeService = !_agreeService;
+                      });
+                      _onIndividualChanged();
+                    },
+                    child: const Text(
+                      "(필수) 서비스 이용약관 동의",
+                      style: TextStyle(
+                        color: Color(0xff463e8d),
+                        fontSize: Sizes.size16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right),
+                  onPressed: () {
+                    // 약관 상세보기 기능
+                  },
+                ),
+              ],
+            ),
+            Gaps.v10,
+
+            // 개인정보 수집 동의 (선택)
+            Row(
+              children: [
+                _buildCircularCheckbox(_agreePrivacy, (value) {
+                  setState(() {
+                    _agreePrivacy = value;
+                  });
+                  _onIndividualChanged();
+                }),
+                Gaps.h12,
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _agreePrivacy = !_agreePrivacy;
+                      });
+                      _onIndividualChanged();
+                    },
+                    child: const Text(
+                      "(선택) 개인정보 수집 및 이용 동의",
+                      style: TextStyle(
+                        color: Color(0xff463e8d),
+                        fontSize: Sizes.size16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right),
+                  onPressed: () {
+                    // 약관 상세보기 기능
+                  },
+                ),
+              ],
+            ),
+            Gaps.v10,
+
+            // 마케팅 동의 (선택)
+            Row(
+              children: [
+                _buildCircularCheckbox(_agreeMarketing, (value) {
+                  setState(() {
+                    _agreeMarketing = value;
+                  });
+                  _onIndividualChanged();
+                }),
+                Gaps.h12,
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _agreeMarketing = !_agreeMarketing;
+                      });
+                      _onIndividualChanged();
+                    },
+                    child: const Text(
+                      "(선택) 광고 및 마케팅 활용 동의",
+                      style: TextStyle(
+                        color: Color(0xff463e8d),
+                        fontSize: Sizes.size16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right),
+                  onPressed: () {
+                    // 약관 상세보기 기능
+                  },
+                ),
+              ],
             ),
           ],
+        ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: _canProceed ? const Color(0xff9e9ef4) : Colors.grey,
+        child: GestureDetector(
+          onTap: _canProceed
+              ? () {
+                  // 다음 화면으로 이동 로직
+                  print("필수 약관 동의 완료!");
+                  // context.push('/next-screen');
+                }
+              : null,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "다음",
+                style: TextStyle(
+                  color: _canProceed ? Colors.white : Colors.white70,
+                  fontSize: Sizes.size24,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
