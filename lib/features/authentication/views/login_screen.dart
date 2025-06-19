@@ -5,6 +5,7 @@ import 'package:celeb_voice/features/authentication/widgets/auth_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class LoginScreen extends ConsumerWidget {
@@ -12,6 +13,28 @@ class LoginScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 로그인 상태 감시
+    ref.listen(socialAuthProvider, (previous, next) {
+      if (next.isLoading) return; // 로딩 중이면 무시
+
+      next.when(
+        data: (_) {
+          // 로그인 성공 시 Terms 화면으로 이동
+          context.push('/terms'); // 또는 context.pushNamed('terms')
+        },
+        error: (error, stackTrace) {
+          // 에러 시 스낵바 표시
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('로그인 실패: $error'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        },
+        loading: () {}, // 로딩 상태는 버튼에서 처리
+      );
+    });
+
     return Scaffold(
       body: SafeArea(
         // 상단 노치, 하단 인디케이터 등 시스템 UI를 피해서 UI를 그려줍니다.
@@ -26,14 +49,24 @@ class LoginScreen extends ConsumerWidget {
                 textAlign: TextAlign.center,
               ),
               Gaps.v40,
-              GestureDetector(
-                onTap: () {
-                  ref.read(socialAuthProvider.notifier).googleSignIn();
+              Consumer(
+                builder: (context, ref, child) {
+                  final authState = ref.watch(socialAuthProvider);
+                  return GestureDetector(
+                    onTap: authState.isLoading
+                        ? null
+                        : () {
+                            ref
+                                .read(socialAuthProvider.notifier)
+                                .googleSignIn();
+                          },
+                    child: AuthButton(
+                      icon: FontAwesomeIcons.google,
+                      text: "Continue with Google",
+                      isLoading: authState.isLoading,
+                    ),
+                  );
                 },
-                child: const AuthButton(
-                  icon: FontAwesomeIcons.google,
-                  text: "Continue with Google",
-                ),
               ),
               // 다른 SNS 버튼들도 이런 식으로 추가할 수 있습니다.
               // Gaps.v16,
