@@ -1,3 +1,4 @@
+import 'package:celeb_voice/common/main_navigation_screen.dart';
 import 'package:celeb_voice/features/authentication/views/login_screen.dart';
 import 'package:celeb_voice/features/authentication/views/terms_screens.dart';
 import 'package:celeb_voice/features/user_info/views/attitude_screen.dart';
@@ -9,7 +10,7 @@ import 'package:celeb_voice/features/user_info/views/welcome_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
-  initialLocation: "/terms", // 앱의 시작 경로
+  initialLocation: "/main", // 앱의 시작 경로
   routes: [
     GoRoute(
       path: "/", // 기본 경로
@@ -49,6 +50,11 @@ final router = GoRouter(
       path: '/attitude',
       name: 'attitude',
       builder: (context, state) => const AttitudeScreen(),
+    ),
+    GoRoute(
+      path: '/main',
+      name: 'main',
+      builder: (context, state) => const MainNavigationScreen(),
     ),
   ],
 );

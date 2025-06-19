@@ -9,6 +9,8 @@ import 'package:go_router/go_router.dart';
 
 // 환영 화면
 class WelcomeScreen extends StatelessWidget {
+  static const String routeName = "welcome";
+  static const String routePath = "/welcome";
   const WelcomeScreen({super.key});
 
   void _onNextTap(BuildContext context) {
