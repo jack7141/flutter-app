@@ -1,20 +1,107 @@
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/user_info/views/mbti_screen.dart';
+import 'package:celeb_voice/features/user_info/widgets/form_button.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class BirthdayScreen extends StatelessWidget {
+class BirthdayScreen extends StatefulWidget {
   static const String routeName = "birthday";
 
   const BirthdayScreen({super.key});
 
+  @override
+  State<BirthdayScreen> createState() => _BirthdayScreenState();
+}
+
+class _BirthdayScreenState extends State<BirthdayScreen> {
+  DateTime? _selectedDate;
+  bool _isLunar = false; // 양력(false) / 음력(true) 상태
+
   void _onNextTap(BuildContext context) {
-    context.pushNamed(MbtiScreen.routeName);
+    if (_selectedDate != null) {
+      // 선택된 날짜와 양력/음력 정보와 함께 다음 화면으로 이동
+      context.pushNamed(MbtiScreen.routeName);
+    } else {
+      // 날짜를 선택하지 않았을 때 알림
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('생일을 선택해주세요'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _onPressIconButton(BuildContext context) {
     context.pop();
+  }
+
+  // 날짜 선택기 표시
+  Future<void> _selectDate() async {
+    print("날짜 선택 버튼 클릭됨!");
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime(2000, 1, 1),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: const Color(0xff463e8d),
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
+      print("날짜 선택됨: $picked");
+    }
+  }
+
+  // 양력/음력 선택 버튼 위젯
+  Widget _buildCalendarTypeButton(String text, bool isSelected) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _isLunar = text == "음력";
+        });
+      },
+      child: Container(
+        width: 50,
+        height: 32,
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.transparent : Colors.white,
+          borderRadius: BorderRadius.circular(Sizes.size32),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xff9e9ef4)
+                : Colors.black.withOpacity(0.1),
+            width: 1,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            text,
+            style: TextStyle(
+              color: isSelected ? Color(0xff9e9ef4) : Colors.black87,
+              fontSize: Sizes.size14,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -60,6 +147,72 @@ class BirthdayScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              Gaps.v20,
+
+              // 날짜 선택 및 양력/음력 선택을 같은 Row에 배치
+              Row(
+                children: [
+                  // 날짜 선택 부분
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _selectDate,
+                      child: Container(
+                        height: 56,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: Sizes.size16,
+                          vertical: Sizes.size12,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: _selectedDate != null
+                                ? const Color(0xff463e8d)
+                                : Colors.grey.shade300,
+                            width: 1.5,
+                          ),
+                          borderRadius: BorderRadius.circular(Sizes.size8),
+                          color: _selectedDate != null
+                              ? const Color(0xff463e8d).withOpacity(0.05)
+                              : Colors.grey.shade50,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              _selectedDate != null
+                                  ? '${_selectedDate!.year}.${_selectedDate!.month.toString().padLeft(2, '0')}.${_selectedDate!.day.toString().padLeft(2, '0')}'
+                                  : 'YYYY.MM.DD',
+                              style: TextStyle(
+                                fontSize: Sizes.size16,
+                                color: _selectedDate != null
+                                    ? const Color(0xff463e8d)
+                                    : const Color(0xff868e96),
+                                fontWeight: _selectedDate != null
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                              ),
+                            ), // 양력/음력 선택 버튼들
+                            Row(
+                              children: [
+                                _buildCalendarTypeButton("양력", !_isLunar),
+                                Gaps.h10,
+                                _buildCalendarTypeButton("음력", _isLunar),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Gaps.h12,
+                ],
+              ),
+              Gaps.v24,
+              // 다음 버튼
+              GestureDetector(
+                onTap: () => _onNextTap(context),
+                child: FormButton(text: '제 생일이에요'),
+              ),
+              Gaps.v20,
             ],
           ),
         ),

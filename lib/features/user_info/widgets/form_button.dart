@@ -26,8 +26,8 @@ class FormButton extends StatelessWidget {
           child: Text(
             text,
             style: TextStyle(
-              fontSize: Sizes.size18,
-              fontWeight: FontWeight.w500,
+              fontSize: Sizes.size16,
+              fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
             textAlign: TextAlign.center,
