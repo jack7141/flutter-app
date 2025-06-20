@@ -1,4 +1,5 @@
 import 'package:celeb_voice/common/main_navigation_screen.dart';
+import 'package:celeb_voice/features/generation/views/gernerate_message_screen.dart';
 import 'package:celeb_voice/features/main/home_screen.dart';
 import 'package:celeb_voice/features/storage/views/voice_storage_screen.dart';
 import 'package:celeb_voice/features/user_info/views/attitude_screen.dart';
@@ -62,6 +63,11 @@ final router = GoRouter(
           path: "/voiceStorage",
           name: VoiceStorageScreen.routeName,
           builder: (context, state) => const VoiceStorageScreen(),
+        ),
+        GoRoute(
+          path: "/gernerateMessage",
+          name: GernerateMessageScreen.routeName,
+          builder: (context, state) => const GernerateMessageScreen(),
         ),
       ],
     ),

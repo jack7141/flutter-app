@@ -29,7 +29,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         context.go("/home");
         break;
       case 1:
-        context.go("/welcome");
+        context.go("/gernerateMessage");
         break;
       case 2:
         context.go("/voiceStorage");
@@ -86,18 +86,3 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 }
-
-/**
- *             icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: "",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle),
-            activeIcon: Icon(Icons.star),
-            label: "",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
- */
