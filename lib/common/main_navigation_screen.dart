@@ -44,43 +44,54 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: widget.child,
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        child: Row(
-          children: [
-            NavTab(
-              text: "",
-              isSelected: _selectedIndex == 0,
-              icon: Icons.home,
-              selectedIcon: Icons.home,
-              onTap: () => _onTap(0),
-              selectedIndex: _selectedIndex,
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: Colors.grey.shade300, // 회색 테두리
+              width: 1.0, // 테두리 두께
             ),
-            NavTab(
-              text: "",
-              isSelected: _selectedIndex == 1,
-              icon: Icons.add_circle,
-              selectedIcon: Icons.add_circle,
-              onTap: () => _onTap(1),
-              selectedIndex: _selectedIndex,
-            ),
-            NavTab(
-              text: "",
-              isSelected: _selectedIndex == 2,
-              icon: Icons.view_comfy_alt,
-              selectedIcon: Icons.view_comfy_alt,
-              onTap: () => _onTap(2),
-              selectedIndex: _selectedIndex,
-            ),
-            NavTab(
-              text: "",
-              isSelected: _selectedIndex == 3,
-              icon: Icons.person,
-              selectedIcon: Icons.person,
-              onTap: () => _onTap(3),
-              selectedIndex: _selectedIndex,
-            ),
-          ],
+          ),
+        ),
+        child: BottomAppBar(
+          color: Colors.white,
+          elevation: 0, // 그림자 제거해서 깔끔하게
+          child: Row(
+            children: [
+              NavTab(
+                text: "",
+                isSelected: _selectedIndex == 0,
+                icon: Icons.home,
+                selectedIcon: Icons.home,
+                onTap: () => _onTap(0),
+                selectedIndex: _selectedIndex,
+              ),
+              NavTab(
+                text: "",
+                isSelected: _selectedIndex == 1,
+                icon: Icons.add_circle,
+                selectedIcon: Icons.add_circle,
+                onTap: () => _onTap(1),
+                selectedIndex: _selectedIndex,
+              ),
+              NavTab(
+                text: "",
+                isSelected: _selectedIndex == 2,
+                icon: Icons.view_comfy_alt,
+                selectedIcon: Icons.view_comfy_alt,
+                onTap: () => _onTap(2),
+                selectedIndex: _selectedIndex,
+              ),
+              NavTab(
+                text: "",
+                isSelected: _selectedIndex == 3,
+                icon: Icons.person,
+                selectedIcon: Icons.person,
+                onTap: () => _onTap(3),
+                selectedIndex: _selectedIndex,
+              ),
+            ],
+          ),
         ),
       ),
     );
