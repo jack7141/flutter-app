@@ -1,57 +1,94 @@
 // lib/features/main/main_navigation_screen.dart
 
-import 'package:celeb_voice/features/main/home_screen.dart';
-import 'package:celeb_voice/features/user_info/views/welcome_screen.dart';
-import 'package:celeb_voice/features/user_profile/user_profile_screen.dart';
+import 'package:celeb_voice/common/widgets/nav_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   static const String routeName = "main";
 
-  const MainNavigationScreen({super.key});
+  final Widget child;
+
+  const MainNavigationScreen({super.key, required this.child});
 
   @override
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  final List<String> _tabs = ["home", "welcome", "userProfile"];
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    WelcomeScreen(),
-    UserProfileScreen(),
-  ];
-
   void _onTap(int index) {
-    context.go("/${_tabs[index]}");
     setState(() {
       _selectedIndex = index;
     });
+
+    // 실제 라우팅 추가
+    switch (index) {
+      case 0:
+        context.go("/home");
+        break;
+      case 1:
+        context.go("/welcome");
+        break;
+      case 2:
+        context.go("/voiceStorage");
+        break;
+      case 3:
+        context.go("/profile");
+        break;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // IndexedStack을 사용하면 _selectedIndex에 해당하는 화면만 보여줍니다.
-      body: Stack(
-        children: [
-          Offstage(offstage: _selectedIndex != 0, child: const HomeScreen()),
-          Offstage(offstage: _selectedIndex != 1, child: const WelcomeScreen()),
-          Offstage(
-            offstage: _selectedIndex != 2,
-            child: const UserProfileScreen(),
-          ),
-        ],
+      body: widget.child,
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
+        child: Row(
+          children: [
+            NavTab(
+              text: "",
+              isSelected: _selectedIndex == 0,
+              icon: Icons.home,
+              selectedIcon: Icons.home,
+              onTap: () => _onTap(0),
+              selectedIndex: _selectedIndex,
+            ),
+            NavTab(
+              text: "",
+              isSelected: _selectedIndex == 1,
+              icon: Icons.add_circle,
+              selectedIcon: Icons.add_circle,
+              onTap: () => _onTap(1),
+              selectedIndex: _selectedIndex,
+            ),
+            NavTab(
+              text: "",
+              isSelected: _selectedIndex == 2,
+              icon: Icons.view_comfy_alt,
+              selectedIcon: Icons.view_comfy_alt,
+              onTap: () => _onTap(2),
+              selectedIndex: _selectedIndex,
+            ),
+            NavTab(
+              text: "",
+              isSelected: _selectedIndex == 3,
+              icon: Icons.person,
+              selectedIcon: Icons.person,
+              onTap: () => _onTap(3),
+              selectedIndex: _selectedIndex,
+            ),
+          ],
+        ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex, // 현재 선택된 탭을 시각적으로 표시
-        onTap: _onTap, // 탭을 눌렀을 때 _onTap 함수 호출
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
+    );
+  }
+}
+
+/**
+ *             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
             label: "",
           ),
@@ -63,10 +100,4 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             activeIcon: Icon(Icons.person),
-            label: "",
-          ),
-        ],
-      ),
-    );
-  }
-}
+ */

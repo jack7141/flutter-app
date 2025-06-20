@@ -1,6 +1,6 @@
 import 'package:celeb_voice/common/main_navigation_screen.dart';
-import 'package:celeb_voice/features/authentication/views/login_screen.dart';
-import 'package:celeb_voice/features/authentication/views/terms_screens.dart';
+import 'package:celeb_voice/features/main/home_screen.dart';
+import 'package:celeb_voice/features/storage/views/voice_storage_screen.dart';
 import 'package:celeb_voice/features/user_info/views/attitude_screen.dart';
 import 'package:celeb_voice/features/user_info/views/birthday_screen.dart';
 import 'package:celeb_voice/features/user_info/views/interest_screen.dart';
@@ -11,56 +11,59 @@ import 'package:celeb_voice/features/user_profile/user_profile_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
-  initialLocation: "/main", // 앱의 시작 경로
+  initialLocation: "/home",
   routes: [
-    GoRoute(
-      path: "/", // 기본 경로
-      builder: (context, state) => const LoginScreen(), // LoginScreen을 보여줌
-    ),
-    GoRoute(
-      path: '/terms',
-      name: 'terms',
-      builder: (context, state) => const TermsScreen(),
-    ),
-    GoRoute(
-      path: '/welcome',
-      name: 'welcome',
-      builder: (context, state) => const WelcomeScreen(),
-    ),
-    GoRoute(
-      path: '/interest',
-      name: 'interest',
-      builder: (context, state) => const InterestScreen(),
-    ),
-    GoRoute(
-      path: '/mbti',
-      name: 'mbti',
-      builder: (context, state) => const MbtiScreen(),
-    ),
-    GoRoute(
-      path: '/birthday',
-      name: 'birthday',
-      builder: (context, state) => const BirthdayScreen(),
-    ),
-    GoRoute(
-      path: '/job',
-      name: 'job',
-      builder: (context, state) => const JobScreen(),
-    ),
-    GoRoute(
-      path: '/attitude',
-      name: 'attitude',
-      builder: (context, state) => const AttitudeScreen(),
-    ),
-    GoRoute(
-      path: '/main',
-      name: 'main',
-      builder: (context, state) => const MainNavigationScreen(),
-    ),
-    GoRoute(
-      path: '/userProfile',
-      name: 'userProfile',
-      builder: (context, state) => const UserProfileScreen(),
+    ShellRoute(
+      builder: (context, state, child) {
+        return MainNavigationScreen(child: child);
+      },
+      routes: [
+        GoRoute(
+          path: "/home",
+          name: HomeScreen.routeName,
+          builder: (context, state) => const HomeScreen(),
+        ),
+        GoRoute(
+          path: "/welcome",
+          name: WelcomeScreen.routeName,
+          builder: (context, state) => const WelcomeScreen(),
+        ),
+        GoRoute(
+          path: "/profile",
+          name: UserProfileScreen.routeName,
+          builder: (context, state) => const UserProfileScreen(),
+        ),
+        GoRoute(
+          path: "/interest",
+          name: InterestScreen.routeName,
+          builder: (context, state) => const InterestScreen(),
+        ),
+        GoRoute(
+          path: "/mbti",
+          name: MbtiScreen.routeName,
+          builder: (context, state) => const MbtiScreen(),
+        ),
+        GoRoute(
+          path: "/birthday",
+          name: BirthdayScreen.routeName,
+          builder: (context, state) => const BirthdayScreen(),
+        ),
+        GoRoute(
+          path: "/job",
+          name: JobScreen.routeName,
+          builder: (context, state) => const JobScreen(),
+        ),
+        GoRoute(
+          path: "/attitude",
+          name: AttitudeScreen.routeName,
+          builder: (context, state) => const AttitudeScreen(),
+        ),
+        GoRoute(
+          path: "/voiceStorage",
+          name: VoiceStorageScreen.routeName,
+          builder: (context, state) => const VoiceStorageScreen(),
+        ),
+      ],
     ),
   ],
 );
