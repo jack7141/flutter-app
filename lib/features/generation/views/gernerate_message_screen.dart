@@ -1,6 +1,6 @@
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
-import 'package:celeb_voice/features/user_info/views/birthday_screen.dart';
+import 'package:celeb_voice/features/generation/views/preview_tts_screen.dart';
 import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
 import 'package:celeb_voice/features/user_info/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/features/user_info/widgets/form_button.dart';
@@ -19,7 +19,7 @@ class GernerateMessageScreen extends StatefulWidget {
 
 class _GernerateMessageScreenState extends State<GernerateMessageScreen> {
   void _onNextTap(BuildContext context) {
-    context.pushNamed(BirthdayScreen.routeName);
+    context.pushNamed(PreviewTtsScreen.routeName);
   }
 
   @override
@@ -41,16 +41,44 @@ class _GernerateMessageScreenState extends State<GernerateMessageScreen> {
                 ),
               ),
               Gaps.v20,
-              CelebAvatar(),
-              Gaps.v20,
-              Text(
-                "MBTI가 어떻게 돼요?\n 혹시 잘 모른다면 마음에 드는거로 선택해주세요",
-                style: TextStyle(
-                  fontSize: Sizes.size16,
-                  fontWeight: FontWeight.bold,
+              Container(
+                padding: const EdgeInsets.all(4.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade300),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      spreadRadius: 1,
+                      blurRadius: 3,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.all(2.0),
+                      child: CelebAvatar(),
+                    ),
+                    Gaps.v12,
+                    Container(
+                      margin: const EdgeInsets.only(left: 2.0, right: 2.0),
+                      child: TextField(
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          hintText: "메세지를 입력해주세요",
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              Gaps.v20,
+              Gaps.v28,
               GestureDetector(
                 onTap: () => _onNextTap(context),
                 child: FormButton(text: '들어보기'),

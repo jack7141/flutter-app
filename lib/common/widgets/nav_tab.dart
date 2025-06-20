@@ -36,14 +36,14 @@ class NavTab extends StatelessWidget {
                 FaIcon(
                   size: isSelected ? 30 : 24,
                   isSelected ? selectedIcon : icon,
-                  color: isSelected ? Colors.black : Color(0xffc3c7cb),
+                  color: isSelected ? Color(0xff9e9ef4) : Color(0xffc3c7cb),
                 ),
                 SizedBox(height: 2),
                 Text(
                   text,
                   style: TextStyle(
                     fontSize: 10,
-                    color: isSelected ? Colors.black : Color(0xffc3c7cb),
+                    color: isSelected ? Color(0xff9e9ef4) : Color(0xffc3c7cb),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
