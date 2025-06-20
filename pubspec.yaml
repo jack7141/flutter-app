@@ -65,6 +65,8 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
 
+  flutter_native_splash: ^2.3.10
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -112,15 +114,15 @@ flutter:
 # dart run flutter_native_splash:create
 flutter_native_splash:
   # 스플래시 화면의 배경색
-  color: "#FFFFFF"
+  color: "#000000"
   # 스플래시 화면에 보여줄 이미지 (2단계에서 추가한 경로)
   image: assets/images/logo.png
 
   # (선택) 다크 모드용 설정
-  color_dark: "#FFFFFF"
+  color_dark: "#000000"
 
   # (권장) 안드로이드 12 이상에서의 설정
   android_12:
     image: assets/images/logo.png
-    icon_background_color: "#FFFFFF"
-    icon_background_color_dark: "#FFFFFF"
+    icon_background_color: "#000000"
+    icon_background_color_dark: "#000000"
