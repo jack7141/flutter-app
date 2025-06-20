@@ -7,6 +7,7 @@ import 'package:celeb_voice/features/user_info/views/interest_screen.dart';
 import 'package:celeb_voice/features/user_info/views/job_screen.dart';
 import 'package:celeb_voice/features/user_info/views/mbti_screen.dart';
 import 'package:celeb_voice/features/user_info/views/welcome_screen.dart';
+import 'package:celeb_voice/features/user_profile/user_profile_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
@@ -55,6 +56,11 @@ final router = GoRouter(
       path: '/main',
       name: 'main',
       builder: (context, state) => const MainNavigationScreen(),
+    ),
+    GoRoute(
+      path: '/userProfile',
+      name: 'userProfile',
+      builder: (context, state) => const UserProfileScreen(),
     ),
   ],
 );

@@ -2,10 +2,13 @@
 
 import 'package:celeb_voice/features/main/home_screen.dart';
 import 'package:celeb_voice/features/user_info/views/welcome_screen.dart';
+import 'package:celeb_voice/features/user_profile/user_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class MainNavigationScreen extends StatefulWidget {
+  static const String routeName = "main";
+
   const MainNavigationScreen({super.key});
 
   @override
@@ -13,10 +16,14 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  final List<String> _tabs = ["home", "welcome"];
+  final List<String> _tabs = ["home", "welcome", "userProfile"];
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = const [HomeScreen(), WelcomeScreen()];
+  final List<Widget> _screens = const [
+    HomeScreen(),
+    WelcomeScreen(),
+    UserProfileScreen(),
+  ];
 
   void _onTap(int index) {
     context.go("/${_tabs[index]}");
@@ -33,6 +40,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         children: [
           Offstage(offstage: _selectedIndex != 0, child: const HomeScreen()),
           Offstage(offstage: _selectedIndex != 1, child: const WelcomeScreen()),
+          Offstage(
+            offstage: _selectedIndex != 2,
+            child: const UserProfileScreen(),
+          ),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -42,17 +53,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
-            label: "홈",
+            label: "",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_box),
+            icon: Icon(Icons.add_circle),
             activeIcon: Icon(Icons.star),
-            label: "셀럽정보",
+            label: "",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             activeIcon: Icon(Icons.person),
-            label: "마이페이지",
+            label: "",
           ),
         ],
       ),
