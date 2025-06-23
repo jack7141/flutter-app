@@ -9,6 +9,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class LoginScreen extends ConsumerWidget {
+  static const String routeName = "login";
+  static const String routePath = "/login";
+
   const LoginScreen({super.key});
 
   @override

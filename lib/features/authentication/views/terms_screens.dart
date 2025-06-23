@@ -6,6 +6,9 @@ import 'package:go_router/go_router.dart';
 
 // 이용약관 동의 화면
 class TermsScreen extends StatefulWidget {
+  static const String routeName = "terms";
+  static const String routePath = "/terms";
+
   const TermsScreen({super.key});
 
   @override

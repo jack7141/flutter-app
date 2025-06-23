@@ -1,4 +1,6 @@
 import 'package:celeb_voice/common/main_navigation_screen.dart';
+import 'package:celeb_voice/features/authentication/views/login_screen.dart';
+import 'package:celeb_voice/features/authentication/views/terms_screens.dart';
 import 'package:celeb_voice/features/generation/views/gernerate_message_screen.dart';
 import 'package:celeb_voice/features/generation/views/preview_tts_screen.dart';
 import 'package:celeb_voice/features/main/home_screen.dart';
@@ -13,7 +15,7 @@ import 'package:celeb_voice/features/user_profile/user_profile_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
-  initialLocation: "/home",
+  initialLocation: "/login",
   routes: [
     ShellRoute(
       builder: (context, state, child) {
@@ -76,6 +78,16 @@ final router = GoRouter(
           builder: (context, state) => const PreviewTtsScreen(),
         ),
       ],
+    ),
+    GoRoute(
+      path: "/login",
+      name: LoginScreen.routeName,
+      builder: (context, state) => const LoginScreen(),
+    ),
+    GoRoute(
+      path: "/terms",
+      name: TermsScreen.routeName,
+      builder: (context, state) => const TermsScreen(),
     ),
   ],
 );
