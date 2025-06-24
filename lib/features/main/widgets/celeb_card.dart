@@ -13,7 +13,7 @@ class CelebCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        width: 320,
+        width: 200,
         height: 420,
         clipBehavior: Clip.none,
         decoration: BoxDecoration(

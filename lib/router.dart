@@ -15,7 +15,7 @@ import 'package:celeb_voice/features/user_profile/user_profile_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
-  initialLocation: "/login",
+  initialLocation: "/home",
   routes: [
     ShellRoute(
       builder: (context, state, child) {
