@@ -134,7 +134,6 @@ class CelebCard extends StatelessWidget {
                                             fontSize: Sizes.size15,
                                           ),
                                         ),
-                                        SizedBox(height: 4),
                                         Text(
                                           '오늘은 뭐해? 보고싶다.',
                                           style: TextStyle(
