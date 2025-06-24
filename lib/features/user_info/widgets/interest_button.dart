@@ -31,11 +31,13 @@ class _InterestButtonState extends State<InterestButton> {
           horizontal: Sizes.size20,
         ),
         decoration: BoxDecoration(
-          color: _isSelected ? Colors.transparent : Colors.white,
+          color: _isSelected
+              ? Color.fromARGB(255, 218, 218, 248)
+              : Colors.white,
           borderRadius: BorderRadius.circular(Sizes.size32),
           border: Border.all(
             color: _isSelected
-                ? const Color(0xff9e9ef4)
+                ? const Color(0xff4d458e)
                 : Colors.black.withOpacity(0.1),
           ),
         ),
@@ -43,7 +45,7 @@ class _InterestButtonState extends State<InterestButton> {
           widget.interest,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: _isSelected ? Color(0xff9e9ef4) : Colors.black87,
+            color: _isSelected ? Color(0xff4d458e) : Colors.black87,
           ),
         ),
       ),

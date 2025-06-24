@@ -1,6 +1,6 @@
+import 'package:celeb_voice/common/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
-import 'package:celeb_voice/features/user_info/widgets/common_app_%20bar.dart';
 import 'package:flutter/material.dart';
 
 class UserProfileScreen extends StatefulWidget {
