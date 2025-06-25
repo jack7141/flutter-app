@@ -34,6 +34,7 @@ class HomeScreen extends StatelessWidget {
             // 카드 목록 전체 화면 높이 78%
             CelebCard(
               screenHeight: screenHeight,
+              screenWidth: screenWidth,
               celebs: celebs,
               pageViewHeightFactor: 0.78,
             ),
