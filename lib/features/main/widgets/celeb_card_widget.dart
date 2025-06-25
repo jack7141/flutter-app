@@ -21,7 +21,7 @@ class CelebCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 30),
       child: SizedBox(
-        height: screenHeight * 0.78, // 전체화면에서 78% 높이
+        height: screenHeight * 0.8, // 전체화면에서 78% 높이
         child: PageView.builder(
           controller: PageController(
             viewportFraction: 0.85,
@@ -76,7 +76,6 @@ class CelebCard extends StatelessWidget {
                   // 파란색 카드 (연동)
                   Gaps.v24,
                   Container(
-                    height: screenHeight * 0.2,
                     width: screenWidth * 0.8,
                     decoration: BoxDecoration(
                       color: Color.fromARGB(255, 199, 199, 246),
@@ -84,8 +83,8 @@ class CelebCard extends StatelessWidget {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: Sizes.size20,
-                        vertical: Sizes.size28,
+                        horizontal: Sizes.size16,
+                        vertical: Sizes.size20,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,62 +98,9 @@ class CelebCard extends StatelessWidget {
                             ),
                           ),
                           Gaps.v8,
-                          Expanded(
-                            // ← 추가! 흰색 박스가 남은 공간 차지
-                            child: Container(
-                              padding: EdgeInsets.all(Sizes.size18),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(
-                                  Sizes.size16,
-                                ),
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Image.asset(
-                                    'assets/images/message/message_logo.png',
-                                    fit: BoxFit.contain,
-                                    height: 36,
-                                    width: 36,
-                                  ),
-                                  Gaps.h12,
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          celebs[celebIndex].name,
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: Sizes.size15,
-                                          ),
-                                        ),
-                                        Text(
-                                          '오늘은 뭐해? 보고싶다.',
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: Sizes.size14,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Text(
-                                    '2시간전',
-                                    style: TextStyle(
-                                      color: Color(0xff4968a1),
-                                      fontSize: Sizes.size12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                          _buildMessageBanner(celebIndex, '민지야 어제 하루 잘 보냈어?'),
+                          Gaps.v10,
+                          _buildMessageBanner(celebIndex, '오늘은 뭐해? 보고싶다.'),
                         ],
                       ),
                     ),
@@ -163,6 +109,73 @@ class CelebCard extends StatelessWidget {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMessageBanner(int celebIndex, String message) {
+    return IntrinsicHeight(
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: Sizes.size18,
+          vertical: Sizes.size10,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(Sizes.size16),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/message/message_logo.png',
+              fit: BoxFit.contain,
+              height: 36,
+              width: 36,
+            ),
+            Gaps.h12,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    celebs[celebIndex].name,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: Sizes.size15,
+                    ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        message,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: Sizes.size14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '2시간전',
+                  style: TextStyle(
+                    color: Color(0xff4968a1),
+                    fontSize: Sizes.size11,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
