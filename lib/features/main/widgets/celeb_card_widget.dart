@@ -36,7 +36,7 @@ class CelebCard extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 10),
               child: Column(
                 children: [
-                  // 빨간색 카드
+                  // 셀럽 카드 박스
                   Container(
                     clipBehavior: Clip.none,
                     height: screenHeight * 0.5,
@@ -75,7 +75,7 @@ class CelebCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // 파란색 카드 (연동)
+                  // 메세지 배너 카드 박스
                   Gaps.v24,
                   Container(
                     width: screenWidth * 0.8,
