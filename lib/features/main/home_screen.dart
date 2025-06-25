@@ -31,8 +31,12 @@ class HomeScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // 카드 목록
-            CelebCard(screenHeight: screenHeight, celebs: celebs),
+            // 카드 목록 전체 화면 높이 78%
+            CelebCard(
+              screenHeight: screenHeight,
+              celebs: celebs,
+              pageViewHeightFactor: 0.78,
+            ),
             Container(height: 500, color: Colors.green),
             Container(height: 500, color: Colors.yellow),
             Container(height: 500, color: Colors.purple),

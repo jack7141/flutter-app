@@ -9,10 +9,12 @@ class CelebCard extends StatelessWidget {
     super.key,
     required this.screenHeight,
     required this.celebs,
+    this.pageViewHeightFactor = 0.78,
   });
 
   final double screenHeight;
   final List<CelebModel> celebs;
+  final double pageViewHeightFactor;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +23,7 @@ class CelebCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 30),
       child: SizedBox(
-        height: screenHeight * 0.8, // 전체화면에서 78% 높이
+        height: screenHeight * pageViewHeightFactor, // 전체화면에서 78% 높이
         child: PageView.builder(
           controller: PageController(
             viewportFraction: 0.85,
