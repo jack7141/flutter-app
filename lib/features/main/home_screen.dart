@@ -171,7 +171,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       colorFilter: ColorFilter.mode(
                                         isSelected
                                             ? Colors.black
-                                            : Color(0xff9e9ef4).withOpacity(1),
+                                            : Color.fromARGB(
+                                                255,
+                                                202,
+                                                202,
+                                                255,
+                                              ).withOpacity(1),
                                         BlendMode.srcATop,
                                       ),
                                       child: Image.asset(
@@ -193,6 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
+            // 마지막 하단 배너
             Container(height: 500, color: Colors.purple),
           ],
         ),
