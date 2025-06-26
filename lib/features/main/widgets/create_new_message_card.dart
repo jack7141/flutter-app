@@ -21,7 +21,7 @@ class CreateNewMessageCard extends StatelessWidget {
             height: screenHeight * 0.17,
             width: screenWidth * 0.3,
             decoration: BoxDecoration(
-              color: Color(0xff9e9ef4),
+              color: Color(0xff9e9ef4).withOpacity(0.4),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(

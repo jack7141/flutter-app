@@ -80,7 +80,7 @@ class CelebCard extends StatelessWidget {
                   Container(
                     width: screenWidth * 0.8,
                     decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 199, 199, 246),
+                      color: Color(0xff9e9ef4).withOpacity(0.4),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Padding(
