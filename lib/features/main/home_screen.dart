@@ -1,17 +1,32 @@
 // lib/features/main/home_screen.dart
 
 import 'package:celeb_voice/constants/gaps.dart';
-import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
+import 'package:celeb_voice/features/main/models/message_model.dart';
 import 'package:celeb_voice/features/main/views_models/celeb_data.dart';
+import 'package:celeb_voice/features/main/widgets/celeb_message_card.dart';
+import 'package:celeb_voice/features/main/widgets/create_new_message_card.dart';
 import 'package:flutter/material.dart';
 
 import 'widgets/celeb_card_widget.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   static const String routeName = "home";
   static const String routePath = "/home";
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  void _onTapAddMessage() {
+    print("응생성");
+  }
+
+  void _onTapCelebMessage() {
+    print("응 메세지");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,143 +79,28 @@ class HomeScreen extends StatelessWidget {
                     height: screenHeight * 0.18,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: 11, // 예시: 1개(추가카드) + 10개(메시지카드)
+                      itemCount:
+                          celebMessageModel.length +
+                          1, // 예시: 1개(추가카드) + 10개(메시지카드)
                       itemBuilder: (context, index) {
                         if (index == 0) {
                           // 첫 번째 카드: "나만의 메시지를 만들어보세요"
-                          return Padding(
-                            padding: EdgeInsets.only(right: 16),
-                            child: Column(
-                              children: [
-                                Container(
-                                  height: screenHeight * 0.17,
-                                  width: screenWidth * 0.3,
-                                  decoration: BoxDecoration(
-                                    color: Color(0xff9e9ef4),
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 10,
-                                        offset: Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.all(20),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            CircleAvatar(
-                                              backgroundColor: Colors.white,
-                                              radius: 18,
-                                              child: Icon(
-                                                Icons.add,
-                                                color: Color(
-                                                  0xff9e9ef4,
-                                                ), // 아이콘 색상
-                                                size: 30,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: SizedBox(
-                                          width: double.infinity,
-                                          child: Column(
-                                            children: [
-                                              Text(
-                                                '나만의 메시지를\n만들어보세요',
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  fontSize: Sizes.size14,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Color(0xff211772),
-                                                ),
-                                                textAlign: TextAlign.start,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                          return GestureDetector(
+                            onTap: _onTapAddMessage,
+                            child: CreateNewMessageCard(
+                              screenHeight: screenHeight,
+                              screenWidth: screenWidth,
                             ),
                           );
                         } else {
                           // 나머지 카드: 기존 메시지 카드
-                          return Padding(
-                            padding: EdgeInsets.only(right: 16),
-                            child: Column(
-                              children: [
-                                Container(
-                                  height: screenHeight * 0.17,
-                                  width: screenWidth * 0.3,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 10,
-                                        offset: Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.all(12),
-                                        child: Row(
-                                          children: [
-                                            CircleAvatar(
-                                              radius: 20,
-                                              backgroundImage: AssetImage(
-                                                "assets/images/celebs/IU.png",
-                                              ),
-                                            ),
-                                            Gaps.h8,
-                                            Text(
-                                              'IU',
-                                              style: TextStyle(
-                                                fontSize: Sizes.size14,
-                                                fontWeight: FontWeight.w800,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: Container(
-                                          width: double.infinity,
-                                          padding: EdgeInsets.all(8),
-                                          child: Column(
-                                            children: [
-                                              Text(
-                                                '헤어지자고?\n너 누군데?',
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  fontSize: Sizes.size14,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                                textAlign: TextAlign.start,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                          return GestureDetector(
+                            onTap: _onTapCelebMessage,
+                            child: CelebMessageCard(
+                              index: index,
+                              screenHeight: screenHeight,
+                              screenWidth: screenWidth,
+                              celebMessageModel: celebMessageModel,
                             ),
                           );
                         }
