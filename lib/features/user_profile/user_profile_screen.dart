@@ -1,4 +1,6 @@
 import 'package:celeb_voice/constants/gaps.dart';
+import 'package:celeb_voice/features/authentication/repos/authentication_repo.dart';
+import 'package:celeb_voice/features/user_profile/repos/user_profile_repo.dart';
 import 'package:celeb_voice/features/user_profile/widgets/mypage_formbutton.dart';
 import 'package:flutter/material.dart';
 
@@ -12,6 +14,37 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
+  late final UserProfileRepo _userProfileRepo;
+  Map<String, dynamic>? userProfile;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // AuthenticationRepo 인스턴스를 생성해서 전달
+    final authRepo = AuthenticationRepo();
+    _userProfileRepo = UserProfileRepo(authRepo: authRepo);
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    print("🔄 사용자 프로필 로딩 시작");
+
+    final profile = await _userProfileRepo.getUserProfile();
+
+    setState(() {
+      userProfile = profile;
+      isLoading = false;
+    });
+
+    if (profile != null) {
+      print("✅ 사용자 프로필 로딩 완료");
+      print("📋 프로필 데이터: $profile");
+    } else {
+      print("❌ 사용자 프로필 로딩 실패");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,13 +66,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 children: [
                   CircleAvatar(
                     radius: 24,
-                    backgroundImage: NetworkImage(
-                      "https://avatars.githubusercontent.com/u/3612017",
-                    ),
+                    backgroundImage: _getProfileImage(),
+                    child: _getProfileImage() == null
+                        ? Icon(Icons.person, size: 24, color: Colors.grey)
+                        : null,
                   ),
                   Gaps.h12,
                   Text(
-                    "민지",
+                    _getDisplayName(),
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
                   Spacer(),
@@ -66,5 +100,33 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         ),
       ),
     );
+  }
+
+  // 프로필 이미지 가져오기
+  ImageProvider? _getProfileImage() {
+    if (isLoading) return null;
+
+    final profileLink = userProfile?['profile']?['link'];
+    if (profileLink != null && profileLink.isNotEmpty) {
+      print("🖼️ 프로필 이미지 URL: $profileLink");
+      return NetworkImage(profileLink);
+    }
+
+    return null;
+  }
+
+  // 표시할 이름 가져오기
+  String _getDisplayName() {
+    if (isLoading) {
+      return "로딩 중...";
+    }
+
+    final nickname = userProfile?['profile']?['nickname'];
+    if (nickname != null && nickname.isNotEmpty) {
+      print("👤 닉네임: $nickname");
+      return nickname;
+    }
+
+    return "사용자";
   }
 }
