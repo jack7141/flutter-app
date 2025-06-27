@@ -36,9 +36,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     List<CelebModel> celebs = CelebData.getCelebs();
     return Scaffold(
+      backgroundColor: Color(0xffeff0f4),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        backgroundColor: Color(0xffeff0f4),
         centerTitle: false,
         title: Image.asset(
           'assets/images/header_logo.png',
