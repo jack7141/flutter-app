@@ -2,6 +2,7 @@ import 'package:celeb_voice/common/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/common/widgets/form_button.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
+import 'package:celeb_voice/features/user_info/repos/job_repo.dart';
 import 'package:celeb_voice/features/user_info/views/attitude_screen.dart';
 import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
 import 'package:celeb_voice/features/user_info/widgets/interest_button.dart';
@@ -28,10 +29,41 @@ const jobs = [
   "이중엔 없어요",
 ];
 
-class JobScreen extends StatelessWidget {
+class JobScreen extends StatefulWidget {
   static const String routeName = "job";
 
   const JobScreen({super.key});
+
+  @override
+  State<JobScreen> createState() => _JobScreenState();
+}
+
+class _JobScreenState extends State<JobScreen> {
+  final JobRepo _jobRepo = JobRepo();
+  List<Map<String, dynamic>> jobs = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadJobs();
+  }
+
+  Future<void> _loadJobs() async {
+    print("🔄 직업 목록 로딩 시작");
+
+    final jobList = await _jobRepo.getJobs();
+
+    setState(() {
+      if (jobList != null) {
+        jobs = jobList;
+        print("✅ 직업 목록 로딩 완료: ${jobs.length}개");
+      } else {
+        print("❌ 직업 목록 로딩 실패");
+      }
+      isLoading = false;
+    });
+  }
 
   void _onNextTap(BuildContext context) {
     context.pushNamed(AttitudeScreen.routeName);
@@ -61,7 +93,10 @@ class JobScreen extends StatelessWidget {
               Wrap(
                 runSpacing: Sizes.size8,
                 spacing: Sizes.size8,
-                children: [for (var job in jobs) InterestButton(interest: job)],
+                children: [
+                  for (var job in jobs)
+                    InterestButton(interest: job['name'], id: job['id']),
+                ],
               ),
               Gaps.v24,
               GestureDetector(

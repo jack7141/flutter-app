@@ -78,10 +78,7 @@ class _InterestScreenState extends State<InterestScreen> {
                   spacing: Sizes.size8,
                   children: [
                     for (var hobby in hobbies)
-                      InterestButton(
-                        interest: hobby['name'],
-                        hobbyId: hobby['id'],
-                      ),
+                      InterestButton(interest: hobby['name'], id: hobby['id']),
                   ],
                 ),
               Gaps.v24,

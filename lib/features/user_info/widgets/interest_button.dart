@@ -4,9 +4,9 @@ import '../../../constants/sizes.dart';
 
 class InterestButton extends StatefulWidget {
   final String interest;
-  final int? hobbyId; // API에서 받은 hobby ID
+  final int? id; // API에서 받은 ID
 
-  const InterestButton({super.key, required this.interest, this.hobbyId});
+  const InterestButton({super.key, required this.interest, this.id});
 
   @override
   State<InterestButton> createState() => _InterestButtonState();
