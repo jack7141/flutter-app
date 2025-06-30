@@ -106,10 +106,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   ImageProvider? _getProfileImage() {
     if (isLoading) return null;
 
-    final profileLink = userProfile?['profile']?['link'];
-    if (profileLink != null && profileLink.isNotEmpty) {
-      print("🖼️ 프로필 이미지 URL: $profileLink");
-      return NetworkImage(profileLink);
+    final images = userProfile?['profile']?['images'];
+    if (images != null && images is List && images.isNotEmpty) {
+      // images 배열에서 첫 번째 이미지의 imageUrl 사용
+      final firstImage = images[0];
+      final imageUrl = firstImage['imageUrl'];
+
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        print("🖼️ 프로필 이미지 URL: $imageUrl");
+        return NetworkImage(imageUrl);
+      }
     }
 
     return null;

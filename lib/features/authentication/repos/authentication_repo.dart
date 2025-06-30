@@ -138,11 +138,12 @@ class AuthenticationRepo {
       if (googleUserInfo['name'] != null) {
         profileData["profile"]["nickname"] = googleUserInfo['name'];
       }
-      if (googleUserInfo['email'] != null) {
-        profileData["profile"]["email"] = googleUserInfo['email'];
-      }
+
+      // 이미지 정보를 profile 안에 배열로 추가 (필드명: images)
       if (googleUserInfo['picture'] != null) {
-        profileData["profile"]["link"] = googleUserInfo['picture'];
+        profileData["profile"]["images"] = [
+          {"image_url": googleUserInfo['picture'], "scale": "AVATAR"},
+        ];
       }
 
       const profileUrl = "http://127.0.0.1:8000/api/v1/users/";

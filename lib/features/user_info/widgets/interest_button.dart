@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../constants/sizes.dart';
 
 class InterestButton extends StatefulWidget {
-  const InterestButton({super.key, required this.interest});
-
   final String interest;
+  final int? hobbyId; // API에서 받은 hobby ID
+
+  const InterestButton({super.key, required this.interest, this.hobbyId});
 
   @override
   State<InterestButton> createState() => _InterestButtonState();
