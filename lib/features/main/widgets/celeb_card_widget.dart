@@ -251,14 +251,79 @@ class CelebCard extends StatelessWidget {
           child: FractionallySizedBox(
             widthFactor: 1,
             heightFactor: 1,
-            child: Image.asset(
+            child: Image.network(
               celebs[celebIndex].imagePath,
               fit: BoxFit.contain,
               alignment: Alignment.bottomRight,
+              errorBuilder: (context, error, stackTrace) {
+                print("🖼️ 이미지 로딩 에러: $error");
+                return Container(
+                  color: Colors.grey[300],
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.person, size: 80, color: Colors.grey[600]),
+                      SizedBox(height: 8),
+                      Text(
+                        celebs[celebIndex].name,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ),
       ),
+    );
+  }
+
+  // 폴백 이미지 위젯
+  Widget _buildFallbackImage(int celebIndex) {
+    // 연예인 이름에 따라 기본 asset 이미지 매핑
+    String assetPath = 'assets/images/celebs/card.png'; // 기본값
+
+    switch (celebs[celebIndex].name) {
+      case '아이유':
+        assetPath = 'assets/images/celebs/IU.png';
+        break;
+      case '이연복':
+        assetPath = 'assets/images/celebs/card.png';
+        break;
+      case '차은우':
+        assetPath = 'assets/images/celebs/card2.png';
+        break;
+      default:
+        assetPath = 'assets/images/celebs/card.png';
+    }
+
+    return Image.asset(
+      assetPath,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        // asset도 실패하면 기본 아이콘
+        return Container(
+          color: Colors.grey[300],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.person, size: 80, color: Colors.grey[600]),
+              SizedBox(height: 8),
+              Text(
+                celebs[celebIndex].name,
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

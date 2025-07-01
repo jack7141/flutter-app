@@ -8,6 +8,7 @@ import 'package:celeb_voice/features/main/widgets/celeb_message_card.dart';
 import 'package:celeb_voice/features/main/widgets/create_new_message_card.dart';
 import 'package:flutter/material.dart';
 
+import 'repos/celeb_repo.dart';
 import 'widgets/celeb_card_widget.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -21,6 +22,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int? selectedIndex;
+  final CelebRepo _celebRepo = CelebRepo();
+  List<CelebModel> celebs = [];
+  bool isLoading = true;
 
   void _onTapAddMessage() {
     print("응생성");
@@ -31,10 +35,34 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loadCelebs();
+  }
+
+  Future<void> _loadCelebs() async {
+    print("🔄 연예인 목록 로딩 시작");
+
+    final celebList = await _celebRepo.getCelebs();
+
+    setState(() {
+      if (celebList != null) {
+        celebs = celebList;
+        print("✅ 연예인 목록 로딩 완료: ${celebs.length}개");
+      } else {
+        print("❌ 연예인 목록 로딩 실패 - 기본 데이터 사용");
+        // API 실패 시 기본 데이터 사용
+        celebs = CelebData.getCelebs();
+      }
+      isLoading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    List<CelebModel> celebs = CelebData.getCelebs();
+
     return Scaffold(
       backgroundColor: Color(0xffeff0f4),
       appBar: AppBar(
@@ -52,12 +80,18 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             // 셀럽 카드 목록 전체 화면 높이 78%
-            CelebCard(
-              screenHeight: screenHeight,
-              screenWidth: screenWidth,
-              celebs: celebs,
-              pageViewHeightFactor: 0.78,
-            ),
+            if (isLoading)
+              SizedBox(
+                height: screenHeight * 0.78,
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else
+              CelebCard(
+                screenHeight: screenHeight,
+                screenWidth: screenWidth,
+                celebs: celebs,
+                pageViewHeightFactor: 0.78,
+              ),
             // 나만의 메시지 배너 카드 박스
             Container(
               alignment: Alignment.topLeft,
@@ -134,68 +168,85 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   Gaps.v10,
-                  SizedBox(
-                    height: screenHeight * 0.18,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: celebs.length,
-                      itemBuilder: (context, index) {
-                        final celeb = celebs[index];
-                        final isSelected = selectedIndex == index;
-                        return Padding(
-                          padding: EdgeInsets.only(right: 16),
-                          child: Column(
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    selectedIndex = isSelected ? null : index;
-                                  });
-                                },
-                                child: Container(
-                                  height: screenHeight * 0.17,
-                                  width: screenWidth * 0.3,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 10,
-                                        offset: Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: ColorFiltered(
-                                      colorFilter: ColorFilter.mode(
-                                        isSelected
-                                            ? Colors.black
-                                            : Color.fromARGB(
-                                                255,
-                                                202,
-                                                202,
-                                                255,
-                                              ).withOpacity(1),
-                                        BlendMode.srcATop,
-                                      ),
-                                      child: Image.asset(
-                                        celeb.imagePath,
-                                        fit: BoxFit.contain,
-                                        width: double.infinity,
-                                        height: double.infinity,
+                  if (isLoading)
+                    SizedBox(
+                      height: screenHeight * 0.18,
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else
+                    SizedBox(
+                      height: screenHeight * 0.18,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: celebs.length,
+                        itemBuilder: (context, index) {
+                          final celeb = celebs[index];
+                          final isSelected = selectedIndex == index;
+                          return Padding(
+                            padding: EdgeInsets.only(right: 16),
+                            child: Column(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      selectedIndex = isSelected ? null : index;
+                                    });
+                                  },
+                                  child: Container(
+                                    height: screenHeight * 0.17,
+                                    width: screenWidth * 0.3,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1),
+                                          blurRadius: 10,
+                                          offset: Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: ColorFiltered(
+                                        colorFilter: ColorFilter.mode(
+                                          isSelected
+                                              ? Colors.black
+                                              : Color.fromARGB(
+                                                  255,
+                                                  202,
+                                                  202,
+                                                  255,
+                                                ).withOpacity(1),
+                                          BlendMode.srcATop,
+                                        ),
+                                        child: Image.network(
+                                          celeb.imagePath,
+                                          fit: BoxFit.contain,
+                                          width: double.infinity,
+                                          height: double.infinity,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                                return Container(
+                                                  color: Colors.grey,
+                                                  child: Icon(
+                                                    Icons.person,
+                                                    color: Colors.white,
+                                                    size: 30,
+                                                  ),
+                                                );
+                                              },
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
