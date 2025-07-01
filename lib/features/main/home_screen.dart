@@ -8,6 +8,7 @@ import 'package:celeb_voice/features/main/widgets/celeb_message_card.dart';
 import 'package:celeb_voice/features/main/widgets/create_new_message_card.dart';
 import 'package:flutter/material.dart';
 
+import '../../../config/app_config.dart';
 import 'repos/celeb_repo.dart';
 import 'widgets/celeb_card_widget.dart';
 
@@ -71,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Color(0xffeff0f4),
+      backgroundColor: Color(AppConfig.backgroundColorValue),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Color(0xffeff0f4),
@@ -221,8 +222,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       height: screenHeight * 0.17,
                                       width: screenWidth * 0.3,
                                       decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(12),
+                                        color: Color(
+                                          AppConfig.messageCardColorValue,
+                                        ),
+                                        borderRadius: BorderRadius.circular(
+                                          AppConfig.cardBorderRadius,
+                                        ),
                                         boxShadow: [
                                           BoxShadow(
                                             color: Colors.black.withOpacity(
