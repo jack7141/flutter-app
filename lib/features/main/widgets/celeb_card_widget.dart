@@ -197,9 +197,36 @@ class CelebCard extends StatelessWidget {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             Gaps.v8,
-            Text(
-              celebs[celebIndex].description,
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            Container(
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 4,
+                children: celebs[celebIndex].tags
+                    .map(
+                      (tag) => Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Color(0xff0e0e0e),
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          tag,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xff0e0e0e),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
           ],
         ),
