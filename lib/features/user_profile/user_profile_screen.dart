@@ -1,3 +1,4 @@
+import 'package:celeb_voice/config/app_config.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/features/authentication/repos/authentication_repo.dart';
 import 'package:celeb_voice/features/user_profile/repos/user_profile_repo.dart';
@@ -108,13 +109,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
     final images = userProfile?['profile']?['images'];
     if (images != null && images is List && images.isNotEmpty) {
-      // images 배열에서 첫 번째 이미지의 imageUrl 사용
       final firstImage = images[0];
       final imageUrl = firstImage['imageUrl'];
 
       if (imageUrl != null && imageUrl.isNotEmpty) {
-        print("🖼️ 프로필 이미지 URL: $imageUrl");
-        return NetworkImage(imageUrl);
+        // AppConfig.getImageUrl 함수 사용해서 CloudFront URL로 변환
+        final cloudFrontUrl = AppConfig.getImageUrl(imageUrl);
+        print("🖼️ 프로필 이미지 URL: $cloudFrontUrl");
+        return NetworkImage(cloudFrontUrl);
       }
     }
 

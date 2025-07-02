@@ -1,7 +1,6 @@
 // lib/features/main/home_screen.dart
 
 import 'package:celeb_voice/constants/gaps.dart';
-import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:celeb_voice/features/main/models/message_model.dart';
 import 'package:celeb_voice/features/main/views_models/celeb_data.dart';
 import 'package:celeb_voice/features/main/widgets/celeb_message_card.dart';
@@ -9,12 +8,10 @@ import 'package:celeb_voice/features/main/widgets/create_new_message_card.dart';
 import 'package:flutter/material.dart';
 
 import '../../../config/app_config.dart';
-import 'repos/celeb_repo.dart';
 import 'widgets/celeb_card_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String routeName = "home";
-  static const String routePath = "/home";
   const HomeScreen({super.key});
 
   @override
@@ -22,48 +19,21 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int? selectedIndex;
-  final CelebRepo _celebRepo = CelebRepo();
-  List<CelebModel> celebs = [];
-  bool isLoading = true;
-
-  void _onTapAddMessage() {
-    print("응생성");
-  }
-
-  void _onTapCelebMessage() {
-    print("응 메세지");
-  }
+  final CelebData _celebData = CelebData();
 
   @override
   void initState() {
     super.initState();
-    _loadCelebs();
-  }
-
-  Future<void> _loadCelebs() async {
-    print("🔄 연예인 목록 로딩 시작");
-
-    final celebList = await _celebRepo.getCelebs();
-
-    setState(() {
-      if (celebList != null) {
-        celebs = celebList;
-        print("✅ 연예인 목록 로딩 완료: ${celebs.length}개");
-      } else {
-        print("❌ 연예인 목록 로딩 실패 - 기본 데이터 사용");
-        // API 실패 시 기본 데이터 사용
-        celebs = CelebData.getCelebs();
-      }
-      isLoading = false;
+    _celebData.loadInitialCelebs();
+    _celebData.addListener(() {
+      if (mounted) setState(() {});
     });
   }
 
-  // 새로고침 함수
-  Future<void> _onRefresh() async {
-    print("🔄 새로고침 시작");
-    await _loadCelebs();
-    print("✅ 새로고침 완료");
+  @override
+  void dispose() {
+    _celebData.dispose();
+    super.dispose();
   }
 
   @override
@@ -88,33 +58,40 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             onPressed: () {
               setState(() {
-                isLoading = true;
+                _celebData.isLoading = true;
               });
-              _onRefresh();
+              _celebData.refreshCelebs();
             },
             icon: Icon(Icons.refresh, color: Colors.black54),
           ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _onRefresh,
+        onRefresh: () => _celebData.refreshCelebs(),
         color: Color(0xff9e9ef4),
         child: SingleChildScrollView(
           physics: AlwaysScrollableScrollPhysics(), // pull-to-refresh가 작동하도록
           child: Column(
             children: [
               // 셀럽 카드 목록 전체 화면 높이 78%
-              if (isLoading)
+              if (_celebData.isLoading)
                 SizedBox(
                   height: screenHeight * 0.78,
                   child: Center(child: CircularProgressIndicator()),
                 )
-              else
+              else if (_celebData.celebs.isNotEmpty)
                 CelebCard(
                   screenHeight: screenHeight,
                   screenWidth: screenWidth,
-                  celebs: celebs,
+                  celebs: _celebData.celebs,
                   pageViewHeightFactor: 0.78,
+                )
+              else
+                Center(
+                  child: Text(
+                    '연예인 정보를 불러올 수 없습니다.',
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
               // 나만의 메시지 배너 카드 박스
               Container(
@@ -192,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                     Gaps.v10,
-                    if (isLoading)
+                    if (_celebData.isLoading)
                       SizedBox(
                         height: screenHeight * 0.18,
                         child: Center(child: CircularProgressIndicator()),
@@ -202,10 +179,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: screenHeight * 0.18,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: celebs.length,
+                          itemCount: _celebData.celebs.length,
                           itemBuilder: (context, index) {
-                            final celeb = celebs[index];
-                            final isSelected = selectedIndex == index;
+                            final celeb = _celebData.celebs[index];
+                            final isSelected =
+                                _celebData.selectedIndex == index;
                             return Padding(
                               padding: EdgeInsets.only(right: 16),
                               child: Column(
@@ -213,9 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   GestureDetector(
                                     onTap: () {
                                       setState(() {
-                                        selectedIndex = isSelected
-                                            ? null
-                                            : index;
+                                        _celebData.updateSelectedIndex(index);
                                       });
                                     },
                                     child: Container(
@@ -289,5 +265,13 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  void _onTapAddMessage() {
+    print("응생성");
+  }
+
+  void _onTapCelebMessage() {
+    print("응 메세지");
   }
 }

@@ -41,27 +41,36 @@ class CelebRepo {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        final results = data['results'] as List;
-
-        List<CelebModel> celebs = results.map((celebData) {
-          return CelebModel.fromJson({
-            'id': celebData['id'],
-            'name': celebData['name'],
-            'imagePath': celebData['images'].isNotEmpty
-                ? _convertToCloudFrontUrl(celebData['images'][0]['imageUrl'])
-                : '',
-            'description': celebData['description'] ?? '',
-            'category': celebData['category'] ?? '',
-            'tags': List<String>.from(celebData['tags'] ?? []),
-            'status': celebData['status'],
-            'index': celebData['index'],
-          });
-        }).toList();
-
         if (AppConfig.enableDebugLogs) {
-          print("✅ 연예인 목록 변환 완료: ${celebs.length}개");
+          print("📄 연예인 API 원본 응답: $data");
         }
-        return celebs;
+
+        try {
+          final results = data['results'] as List;
+          if (AppConfig.enableDebugLogs) {
+            print("📋 results 배열: $results");
+          }
+
+          final celebList = <CelebModel>[];
+          for (var celebJson in results) {
+            try {
+              final celeb = CelebModel.fromJson(celebJson);
+              celebList.add(celeb);
+            } catch (e) {
+              print("💥 개별 연예인 파싱 에러: $e");
+              // 개별 에러는 무시하고 계속 진행
+            }
+          }
+
+          if (AppConfig.enableDebugLogs) {
+            print("✅ 최종 파싱된 연예인 수: ${celebList.length}");
+          }
+
+          return celebList;
+        } catch (e) {
+          print("💥 전체 파싱 에러: $e");
+          return null;
+        }
       }
 
       return null;

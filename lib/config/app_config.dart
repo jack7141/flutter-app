@@ -21,7 +21,7 @@ class AppConfig {
 
   static const String s3Domain = String.fromEnvironment(
     'S3_DOMAIN',
-    defaultValue: 'https://celebvoice-bucket.s3.ap-northeast-2.amazonaws.com',
+    defaultValue: 'https://celebvoice-storage.s3.ap-northeast-2.amazonaws.com',
   );
 
   // Colors
@@ -53,4 +53,15 @@ class AppConfig {
     'ENABLE_DEBUG_LOGS',
     defaultValue: true,
   );
+
+  static String getImageUrl(String s3Url) {
+    if (s3Url.contains('s3.ap-northeast-2.amazonaws.com')) {
+      // S3 URL을 CloudFront URL로 변환
+      return s3Url.replaceAll(
+        'https://celebvoice-storage.s3.ap-northeast-2.amazonaws.com',
+        cloudFrontDomain,
+      );
+    }
+    return s3Url;
+  }
 }

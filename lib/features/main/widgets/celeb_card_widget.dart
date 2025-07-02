@@ -1,4 +1,5 @@
 import 'package:celeb_voice/common/widgets/form_button.dart';
+import 'package:celeb_voice/config/app_config.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
@@ -252,28 +253,12 @@ class CelebCard extends StatelessWidget {
             widthFactor: 1,
             heightFactor: 1,
             child: Image.network(
-              celebs[celebIndex].imagePath,
+              AppConfig.getImageUrl(celebs[celebIndex].imagePath),
               fit: BoxFit.contain,
               alignment: Alignment.bottomRight,
               errorBuilder: (context, error, stackTrace) {
                 print("🖼️ 이미지 로딩 에러: $error");
-                return Container(
-                  color: Colors.grey[300],
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.person, size: 80, color: Colors.grey[600]),
-                      SizedBox(height: 8),
-                      Text(
-                        celebs[celebIndex].name,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
+                return _buildFallbackImage(celebIndex);
               },
             ),
           ),
