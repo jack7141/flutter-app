@@ -88,4 +88,9 @@ class CelebModel {
       );
     }
   }
+
+  @override
+  String toString() {
+    return 'CelebModel(id: $id, name: $name, imagePath: $imagePath)';
+  }
 }

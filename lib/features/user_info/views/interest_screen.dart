@@ -2,6 +2,8 @@ import 'package:celeb_voice/common/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/common/widgets/form_button.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
+import 'package:celeb_voice/features/main/models/celeb_models.dart';
+import 'package:celeb_voice/features/main/widgets/celeb_card_widget.dart';
 import 'package:celeb_voice/features/user_info/repos/hobby_repo.dart';
 import 'package:celeb_voice/features/user_info/views/mbti_screen.dart';
 import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
@@ -11,8 +13,8 @@ import 'package:go_router/go_router.dart';
 
 class InterestScreen extends StatefulWidget {
   static const String routeName = "interest";
-
-  const InterestScreen({super.key});
+  final CelebModel? celeb; // 셀럽 정보 추가
+  const InterestScreen({super.key, this.celeb});
 
   @override
   State<InterestScreen> createState() => _InterestScreenState();
@@ -51,6 +53,7 @@ class _InterestScreenState extends State<InterestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currentCeleb = selectedCelebForWelcome;
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       appBar: const CommonAppBar(),
@@ -60,7 +63,7 @@ class _InterestScreenState extends State<InterestScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CelebAvatar(),
+              CelebAvatar(currentCeleb: currentCeleb),
               Gaps.v20,
               Text(
                 "요즘 관심사가 뭐예요?",

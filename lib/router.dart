@@ -4,6 +4,7 @@ import 'package:celeb_voice/features/authentication/views/terms_screens.dart';
 import 'package:celeb_voice/features/generation/views/gernerate_message_screen.dart';
 import 'package:celeb_voice/features/generation/views/preview_tts_screen.dart';
 import 'package:celeb_voice/features/main/home_screen.dart';
+import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:celeb_voice/features/storage/views/voice_storage_screen.dart';
 import 'package:celeb_voice/features/user_info/views/attitude_screen.dart';
 import 'package:celeb_voice/features/user_info/views/birthday_screen.dart';
@@ -30,7 +31,27 @@ final router = GoRouter(
         GoRoute(
           path: "/welcome",
           name: WelcomeScreen.routeName,
-          builder: (context, state) => const WelcomeScreen(),
+          builder: (context, state) {
+            final celebId = state.uri.queryParameters['celebId'];
+            final celebName = state.uri.queryParameters['celebName'];
+            final celebImage = state.uri.queryParameters['celebImage'];
+
+            CelebModel? celeb;
+            if (celebId != null && celebName != null && celebImage != null) {
+              celeb = CelebModel(
+                id: celebId,
+                name: celebName,
+                imagePath: celebImage,
+                tags: [],
+                description: '',
+                status: '',
+                index: 0,
+              );
+            }
+
+            print("🔍 Query로 받은 셀럽: ${celeb?.name}");
+            return WelcomeScreen(celeb: celeb);
+          },
         ),
         GoRoute(
           path: "/profile",
@@ -40,27 +61,127 @@ final router = GoRouter(
         GoRoute(
           path: "/interest",
           name: InterestScreen.routeName,
-          builder: (context, state) => const InterestScreen(),
+          builder: (context, state) {
+            final celebId = state.uri.queryParameters['celebId'];
+            final celebName = state.uri.queryParameters['celebName'];
+            final celebImage = state.uri.queryParameters['celebImage'];
+
+            CelebModel? celeb;
+            if (celebId != null && celebName != null && celebImage != null) {
+              celeb = CelebModel(
+                id: celebId,
+                name: celebName,
+                imagePath: celebImage,
+                tags: [],
+                description: '',
+                status: '',
+                index: 0,
+              );
+            }
+
+            print("🔍 Query로 받은 셀럽: ${celeb?.name}");
+            return InterestScreen(celeb: celeb);
+          },
         ),
         GoRoute(
           path: "/mbti",
           name: MbtiScreen.routeName,
-          builder: (context, state) => const MbtiScreen(),
+          builder: (context, state) {
+            final celebId = state.uri.queryParameters['celebId'];
+            final celebName = state.uri.queryParameters['celebName'];
+            final celebImage = state.uri.queryParameters['celebImage'];
+
+            CelebModel? celeb;
+            if (celebId != null && celebName != null && celebImage != null) {
+              celeb = CelebModel(
+                id: celebId,
+                name: celebName,
+                imagePath: celebImage,
+                tags: [],
+                description: '',
+                status: '',
+                index: 0,
+              );
+            }
+
+            print("🔍 Query로 받은 셀럽: ${celeb?.name}");
+            return MbtiScreen(celeb: celeb);
+          },
         ),
         GoRoute(
           path: "/birthday",
           name: BirthdayScreen.routeName,
-          builder: (context, state) => const BirthdayScreen(),
+          builder: (context, state) {
+            final celebId = state.uri.queryParameters['celebId'];
+            final celebName = state.uri.queryParameters['celebName'];
+            final celebImage = state.uri.queryParameters['celebImage'];
+
+            CelebModel? celeb;
+            if (celebId != null && celebName != null && celebImage != null) {
+              celeb = CelebModel(
+                id: celebId,
+                name: celebName,
+                imagePath: celebImage,
+                tags: [],
+                description: '',
+                status: '',
+                index: 0,
+              );
+            }
+
+            print("🔍 Query로 받은 셀럽: ${celeb?.name}");
+            return BirthdayScreen(celeb: celeb);
+          },
         ),
         GoRoute(
           path: "/job",
           name: JobScreen.routeName,
-          builder: (context, state) => const JobScreen(),
+          builder: (context, state) {
+            final celebId = state.uri.queryParameters['celebId'];
+            final celebName = state.uri.queryParameters['celebName'];
+            final celebImage = state.uri.queryParameters['celebImage'];
+
+            CelebModel? celeb;
+            if (celebId != null && celebName != null && celebImage != null) {
+              celeb = CelebModel(
+                id: celebId,
+                name: celebName,
+                imagePath: celebImage,
+                tags: [],
+                description: '',
+                status: '',
+                index: 0,
+              );
+            }
+
+            print("🔍 Query로 받은 셀럽: ${celeb?.name}");
+            return JobScreen(celeb: celeb);
+          },
         ),
         GoRoute(
           path: "/attitude",
           name: AttitudeScreen.routeName,
-          builder: (context, state) => const AttitudeScreen(),
+          builder: (context, state) {
+            final celebId = state.uri.queryParameters['celebId'];
+            final celebName = state.uri.queryParameters['celebName'];
+            final celebImage = state.uri.queryParameters['celebImage'];
+
+            CelebModel? celeb;
+            if (celebId != null && celebName != null && celebImage != null) {
+              celeb = CelebModel(
+                id: celebId,
+                name: celebName,
+                imagePath: celebImage,
+                tags: [],
+                description: '',
+                status: '',
+                index: 0,
+              );
+            }
+
+            print("🔍 Query로 받은 셀럽: ${celeb?.name}");
+            return AttitudeScreen(celeb: celeb);
+          },
         ),
         GoRoute(
           path: "/voiceStorage",

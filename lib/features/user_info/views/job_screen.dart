@@ -2,6 +2,8 @@ import 'package:celeb_voice/common/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/common/widgets/form_button.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
+import 'package:celeb_voice/features/main/models/celeb_models.dart';
+import 'package:celeb_voice/features/main/widgets/celeb_card_widget.dart';
 import 'package:celeb_voice/features/user_info/repos/job_repo.dart';
 import 'package:celeb_voice/features/user_info/views/attitude_screen.dart';
 import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
@@ -32,7 +34,8 @@ const jobs = [
 class JobScreen extends StatefulWidget {
   static const String routeName = "job";
 
-  const JobScreen({super.key});
+  final CelebModel? celeb; // 셀럽 정보 추가
+  const JobScreen({super.key, this.celeb});
 
   @override
   State<JobScreen> createState() => _JobScreenState();
@@ -71,6 +74,7 @@ class _JobScreenState extends State<JobScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currentCeleb = selectedCelebForWelcome;
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       appBar: const CommonAppBar(),
@@ -80,7 +84,7 @@ class _JobScreenState extends State<JobScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CelebAvatar(),
+              CelebAvatar(currentCeleb: currentCeleb),
               Gaps.v20,
               Text(
                 "어떤 일을 하고 있어요?",

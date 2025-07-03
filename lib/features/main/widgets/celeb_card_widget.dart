@@ -6,6 +6,8 @@ import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+CelebModel? selectedCelebForWelcome;
+
 class CelebCard extends StatelessWidget {
   const CelebCard({
     super.key,
@@ -21,7 +23,12 @@ class CelebCard extends StatelessWidget {
   final double pageViewHeightFactor;
 
   void _onTapCelebCard(int celebIndex, BuildContext context) {
-    print("🔍 셀럽 카드 클릭: ${celebs[celebIndex].name}");
+    final selectedCeleb = celebs[celebIndex];
+    print("🔍 셀럽 카드 클릭: ${selectedCeleb.name}");
+
+    // Global 변수에 저장
+    selectedCelebForWelcome = selectedCeleb;
+
     context.push('/welcome');
   }
 

@@ -20,7 +20,7 @@ class JobRepo {
       );
       if (response.statusCode == 200) {
         final data = response.data;
-        final results = data['results'] as List;
+        final results = data['data'] as List;
         return results.cast<Map<String, dynamic>>();
       }
       return null;

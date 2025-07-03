@@ -2,6 +2,8 @@ import 'package:celeb_voice/common/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/common/widgets/form_button.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
+import 'package:celeb_voice/features/main/models/celeb_models.dart';
+import 'package:celeb_voice/features/main/widgets/celeb_card_widget.dart';
 import 'package:celeb_voice/features/user_info/views/birthday_screen.dart';
 import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
 import 'package:celeb_voice/features/user_info/widgets/interest_button.dart';
@@ -31,7 +33,8 @@ const mbti = [
 class MbtiScreen extends StatelessWidget {
   static const String routeName = "mbti";
 
-  const MbtiScreen({super.key});
+  final CelebModel? celeb; // 셀럽 정보 추가
+  const MbtiScreen({super.key, this.celeb});
 
   void _onNextTap(BuildContext context) {
     context.pushNamed(BirthdayScreen.routeName);
@@ -39,6 +42,7 @@ class MbtiScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentCeleb = selectedCelebForWelcome;
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       appBar: const CommonAppBar(),
@@ -48,7 +52,7 @@ class MbtiScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CelebAvatar(),
+              CelebAvatar(currentCeleb: currentCeleb),
               Gaps.v20,
               Text(
                 "MBTI가 어떻게 돼요?\n 혹시 잘 모른다면 마음에 드는거로 선택해주세요",
