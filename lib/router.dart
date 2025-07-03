@@ -15,6 +15,37 @@ import 'package:celeb_voice/features/user_info/views/welcome_screen.dart';
 import 'package:celeb_voice/features/user_profile/user_profile_screen.dart';
 import 'package:go_router/go_router.dart';
 
+// 공통 셀럽 데이터 파싱 함수
+CelebModel? _parseCelebFromQuery(GoRouterState state) {
+  print("🔍 Router - 전체 URI: ${state.uri}");
+  print("🔍 Router - Query Parameters: ${state.uri.queryParameters}");
+
+  final celebId = state.uri.queryParameters['celebId'];
+  final celebName = state.uri.queryParameters['celebName'];
+  final celebImage = state.uri.queryParameters['celebImage'];
+
+  print("🔍 Router - celebId: $celebId");
+  print("🔍 Router - celebName: $celebName");
+  print("🔍 Router - celebImage: $celebImage");
+
+  if (celebId != null && celebName != null && celebImage != null) {
+    final celeb = CelebModel(
+      id: celebId,
+      name: celebName,
+      imagePath: celebImage,
+      tags: [],
+      description: '',
+      status: '',
+      index: 0,
+    );
+    print("🔍 Router - 생성된 셀럽: ${celeb.name}");
+    return celeb;
+  }
+
+  print("🔍 Router - 셀럽 데이터 null 반환");
+  return null;
+}
+
 final router = GoRouter(
   initialLocation: "/login",
   routes: [
@@ -32,24 +63,7 @@ final router = GoRouter(
           path: "/welcome",
           name: WelcomeScreen.routeName,
           builder: (context, state) {
-            final celebId = state.uri.queryParameters['celebId'];
-            final celebName = state.uri.queryParameters['celebName'];
-            final celebImage = state.uri.queryParameters['celebImage'];
-
-            CelebModel? celeb;
-            if (celebId != null && celebName != null && celebImage != null) {
-              celeb = CelebModel(
-                id: celebId,
-                name: celebName,
-                imagePath: celebImage,
-                tags: [],
-                description: '',
-                status: '',
-                index: 0,
-              );
-            }
-
-            print("🔍 Query로 받은 셀럽: ${celeb?.name}");
+            final celeb = state.extra as CelebModel?;
             return WelcomeScreen(celeb: celeb);
           },
         ),
@@ -62,24 +76,7 @@ final router = GoRouter(
           path: "/interest",
           name: InterestScreen.routeName,
           builder: (context, state) {
-            final celebId = state.uri.queryParameters['celebId'];
-            final celebName = state.uri.queryParameters['celebName'];
-            final celebImage = state.uri.queryParameters['celebImage'];
-
-            CelebModel? celeb;
-            if (celebId != null && celebName != null && celebImage != null) {
-              celeb = CelebModel(
-                id: celebId,
-                name: celebName,
-                imagePath: celebImage,
-                tags: [],
-                description: '',
-                status: '',
-                index: 0,
-              );
-            }
-
-            print("🔍 Query로 받은 셀럽: ${celeb?.name}");
+            final celeb = state.extra as CelebModel?;
             return InterestScreen(celeb: celeb);
           },
         ),
@@ -87,24 +84,13 @@ final router = GoRouter(
           path: "/mbti",
           name: MbtiScreen.routeName,
           builder: (context, state) {
-            final celebId = state.uri.queryParameters['celebId'];
-            final celebName = state.uri.queryParameters['celebName'];
-            final celebImage = state.uri.queryParameters['celebImage'];
+            print("🔍 Router - /mbti 경로 진입");
+            print("🔍 Router - state.extra: ${state.extra}");
+            print("🔍 Router - state.extra type: ${state.extra.runtimeType}");
 
-            CelebModel? celeb;
-            if (celebId != null && celebName != null && celebImage != null) {
-              celeb = CelebModel(
-                id: celebId,
-                name: celebName,
-                imagePath: celebImage,
-                tags: [],
-                description: '',
-                status: '',
-                index: 0,
-              );
-            }
+            final celeb = state.extra as CelebModel?;
+            print("🔍 Router - 변환된 celeb: ${celeb?.name}");
 
-            print("🔍 Query로 받은 셀럽: ${celeb?.name}");
             return MbtiScreen(celeb: celeb);
           },
         ),
@@ -112,24 +98,7 @@ final router = GoRouter(
           path: "/birthday",
           name: BirthdayScreen.routeName,
           builder: (context, state) {
-            final celebId = state.uri.queryParameters['celebId'];
-            final celebName = state.uri.queryParameters['celebName'];
-            final celebImage = state.uri.queryParameters['celebImage'];
-
-            CelebModel? celeb;
-            if (celebId != null && celebName != null && celebImage != null) {
-              celeb = CelebModel(
-                id: celebId,
-                name: celebName,
-                imagePath: celebImage,
-                tags: [],
-                description: '',
-                status: '',
-                index: 0,
-              );
-            }
-
-            print("🔍 Query로 받은 셀럽: ${celeb?.name}");
+            final celeb = state.extra as CelebModel?;
             return BirthdayScreen(celeb: celeb);
           },
         ),
@@ -137,24 +106,7 @@ final router = GoRouter(
           path: "/job",
           name: JobScreen.routeName,
           builder: (context, state) {
-            final celebId = state.uri.queryParameters['celebId'];
-            final celebName = state.uri.queryParameters['celebName'];
-            final celebImage = state.uri.queryParameters['celebImage'];
-
-            CelebModel? celeb;
-            if (celebId != null && celebName != null && celebImage != null) {
-              celeb = CelebModel(
-                id: celebId,
-                name: celebName,
-                imagePath: celebImage,
-                tags: [],
-                description: '',
-                status: '',
-                index: 0,
-              );
-            }
-
-            print("🔍 Query로 받은 셀럽: ${celeb?.name}");
+            final celeb = state.extra as CelebModel?;
             return JobScreen(celeb: celeb);
           },
         ),
@@ -162,24 +114,7 @@ final router = GoRouter(
           path: "/attitude",
           name: AttitudeScreen.routeName,
           builder: (context, state) {
-            final celebId = state.uri.queryParameters['celebId'];
-            final celebName = state.uri.queryParameters['celebName'];
-            final celebImage = state.uri.queryParameters['celebImage'];
-
-            CelebModel? celeb;
-            if (celebId != null && celebName != null && celebImage != null) {
-              celeb = CelebModel(
-                id: celebId,
-                name: celebName,
-                imagePath: celebImage,
-                tags: [],
-                description: '',
-                status: '',
-                index: 0,
-              );
-            }
-
-            print("🔍 Query로 받은 셀럽: ${celeb?.name}");
+            final celeb = state.extra as CelebModel?;
             return AttitudeScreen(celeb: celeb);
           },
         ),

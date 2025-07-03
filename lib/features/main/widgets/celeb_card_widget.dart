@@ -4,11 +4,10 @@ import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-CelebModel? selectedCelebForWelcome;
-
-class CelebCard extends StatelessWidget {
+class CelebCard extends ConsumerWidget {
   const CelebCard({
     super.key,
     required this.screenHeight,
@@ -24,16 +23,14 @@ class CelebCard extends StatelessWidget {
 
   void _onTapCelebCard(int celebIndex, BuildContext context) {
     final selectedCeleb = celebs[celebIndex];
-    print("🔍 셀럽 카드 클릭: ${selectedCeleb.name}");
+    print("🔍 CelebCard - 셀럽 카드 클릭: ${selectedCeleb.name}");
 
-    // Global 변수에 저장
-    selectedCelebForWelcome = selectedCeleb;
-
-    context.push('/welcome');
+    // Extra로 전달
+    context.push('/welcome', extra: selectedCeleb);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 30),
       child: SizedBox(

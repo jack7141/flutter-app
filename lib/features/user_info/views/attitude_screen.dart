@@ -3,7 +3,6 @@ import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/home_screen.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
-import 'package:celeb_voice/features/main/widgets/celeb_card_widget.dart';
 import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -21,7 +20,6 @@ class AttitudeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentCeleb = selectedCelebForWelcome;
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       appBar: const CommonAppBar(),
@@ -30,7 +28,7 @@ class AttitudeScreen extends StatelessWidget {
           padding: const EdgeInsets.all(Sizes.size20),
           child: Column(
             children: [
-              CelebAvatar(currentCeleb: currentCeleb),
+              CelebAvatar(currentCeleb: celeb),
               Gaps.v20,
               Text(
                 "질문이 많았네요,\n 어떤 사람인지 궁금했거든요 ㅎㅎ\n 마지막으로, 혹시 제가 어떻게 말하는게 편할까요?",

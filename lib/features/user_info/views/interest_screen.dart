@@ -3,7 +3,6 @@ import 'package:celeb_voice/common/widgets/form_button.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
-import 'package:celeb_voice/features/main/widgets/celeb_card_widget.dart';
 import 'package:celeb_voice/features/user_info/repos/hobby_repo.dart';
 import 'package:celeb_voice/features/user_info/views/mbti_screen.dart';
 import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
@@ -14,6 +13,7 @@ import 'package:go_router/go_router.dart';
 class InterestScreen extends StatefulWidget {
   static const String routeName = "interest";
   final CelebModel? celeb; // 셀럽 정보 추가
+
   const InterestScreen({super.key, this.celeb});
 
   @override
@@ -48,12 +48,20 @@ class _InterestScreenState extends State<InterestScreen> {
   }
 
   void _onNextTap(BuildContext context) {
-    context.pushNamed(MbtiScreen.routeName);
+    print("🔍 InterestScreen - _onNextTap 호출됨");
+    print("🔍 InterestScreen - widget.celeb: ${widget.celeb?.name}");
+
+    if (widget.celeb != null) {
+      print("🔍 InterestScreen - MbtiScreen으로 실제 셀럽 전달: ${widget.celeb!.name}");
+      context.push('/mbti', extra: widget.celeb);
+    } else {
+      print("🔍 InterestScreen - 셀럽 데이터 없음");
+      context.pushNamed(MbtiScreen.routeName);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentCeleb = selectedCelebForWelcome;
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       appBar: const CommonAppBar(),
@@ -63,7 +71,7 @@ class _InterestScreenState extends State<InterestScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CelebAvatar(currentCeleb: currentCeleb),
+              CelebAvatar(currentCeleb: widget.celeb), // 셀럽 정보 전달
               Gaps.v20,
               Text(
                 "요즘 관심사가 뭐예요?",

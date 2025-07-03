@@ -3,7 +3,6 @@ import 'package:celeb_voice/common/widgets/form_button.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
-import 'package:celeb_voice/features/main/widgets/celeb_card_widget.dart';
 import 'package:celeb_voice/features/user_info/views/job_screen.dart';
 import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
 import 'package:flutter/material.dart';
@@ -28,14 +27,12 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
 
   void _onNextTap(BuildContext context) {
     if (_selectedDate != null) {
-      // 선택된 날짜와 양력/음력 정보와 함께 다음 화면으로 이동
-      print("선택된 날짜: $_selectedDate, ${_isLunar ? '음력' : '양력'}");
-      if (!_timeUnknown && _selectedTime != null) {
-        print("선택된 시간: $_selectedAmPm ${_selectedTime!.format(context)}");
-      } else if (_timeUnknown) {
-        print("시간: 모름");
+      // 셀럽 정보를 다음 화면에 전달
+      if (widget.celeb != null) {
+        context.push('/attitude', extra: widget.celeb);
+      } else {
+        context.pushNamed(JobScreen.routeName);
       }
-      context.pushNamed(JobScreen.routeName);
     } else {
       // 날짜를 선택하지 않았을 때 알림
       ScaffoldMessenger.of(context).showSnackBar(
@@ -182,7 +179,6 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentCeleb = selectedCelebForWelcome;
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       appBar: const CommonAppBar(),
@@ -192,7 +188,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CelebAvatar(currentCeleb: currentCeleb),
+              CelebAvatar(currentCeleb: widget.celeb),
               Gaps.v20,
               Text(
                 "생일은 언제에요?",
