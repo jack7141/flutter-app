@@ -53,18 +53,6 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 180,
           fit: BoxFit.contain,
         ),
-        actions: [
-          // 새로고침 버튼 추가
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _celebData.isLoading = true;
-              });
-              _celebData.refreshCelebs();
-            },
-            icon: Icon(Icons.refresh, color: Colors.black54),
-          ),
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: () => _celebData.refreshCelebs(),
@@ -191,19 +179,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                   GestureDetector(
                                     onTap: () {
                                       setState(() {
-                                        _celebData.updateSelectedIndex(index);
+                                        _celebData.updateSelectedIndex(
+                                          isSelected ? -1 : index,
+                                        );
                                       });
                                     },
                                     child: Container(
                                       height: screenHeight * 0.17,
                                       width: screenWidth * 0.3,
                                       decoration: BoxDecoration(
-                                        color: Color(
-                                          AppConfig.messageCardColorValue,
-                                        ),
-                                        borderRadius: BorderRadius.circular(
-                                          AppConfig.cardBorderRadius,
-                                        ),
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
                                         boxShadow: [
                                           BoxShadow(
                                             color: Colors.black.withOpacity(
@@ -229,7 +215,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                             BlendMode.srcATop,
                                           ),
                                           child: Image.network(
-                                            celeb.imagePath,
+                                            AppConfig.getImageUrl(
+                                              celeb.imagePath,
+                                            ),
                                             fit: BoxFit.contain,
                                             width: double.infinity,
                                             height: double.infinity,

@@ -9,7 +9,7 @@ class CelebData extends ChangeNotifier {
 
   List<CelebModel> _celebs = [];
   bool _isLoading = false;
-  int _selectedIndex = 0;
+  int _selectedIndex = -1;
 
   // Getter
   List<CelebModel> get celebs => _celebs;
@@ -69,9 +69,15 @@ class CelebData extends ChangeNotifier {
     }
   }
 
-  // 선택된 인덱스 업데이트
+  // 선택된 인덱스 업데이트 (토글 지원)
   void updateSelectedIndex(int index) {
     _selectedIndex = index;
+    notifyListeners();
+  }
+
+  // 선택 해제
+  void clearSelection() {
+    _selectedIndex = -1;
     notifyListeners();
   }
 }
