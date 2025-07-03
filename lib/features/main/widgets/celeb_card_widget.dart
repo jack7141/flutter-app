@@ -3,6 +3,7 @@ import 'package:celeb_voice/config/app_config.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
+import 'package:celeb_voice/features/subscription/services/subscription_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -21,12 +22,62 @@ class CelebCard extends ConsumerWidget {
   final List<CelebModel> celebs;
   final double pageViewHeightFactor;
 
-  void _onTapCelebCard(int celebIndex, BuildContext context) {
+  void _onTapCelebCard(int celebIndex, BuildContext context) async {
     final selectedCeleb = celebs[celebIndex];
-    print("🔍 CelebCard - 셀럽 카드 클릭: ${selectedCeleb.name}");
+    print("🔍 셀럽 카드 클릭: ${selectedCeleb.name}");
 
-    // Extra로 전달
-    context.push('/welcome', extra: selectedCeleb);
+    _showLoadingDialog(context);
+
+    final subscriptionService = SubscriptionService();
+
+    try {
+      final subscriptionStatus = await subscriptionService
+          .getSubscriptionStatus();
+
+      // Check if the dialog is still mounted before popping
+      if (context.mounted && Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+
+      if (subscriptionStatus.hasAnySubscription) {
+        if (subscriptionStatus.subscribedCelebIds.contains(selectedCeleb.id)) {
+          print("✅ ${selectedCeleb.name} 구독자 → 메시지 생성으로 이동");
+          if (context.mounted) {
+            context.push('/generateMessage', extra: selectedCeleb);
+          }
+        } else {
+          print("⚠️ ${selectedCeleb.name} 미구독 → 구독 안내로 이동");
+          if (context.mounted) {
+            context.push('/subscriptionRequired', extra: selectedCeleb);
+          }
+        }
+      } else {
+        print("❌ 신규 사용자 → Welcome부터 시작");
+        if (context.mounted) {
+          context.push('/welcome', extra: selectedCeleb);
+        }
+      }
+    } catch (e) {
+      print("❌ 구독 상태 확인 중 오류: $e");
+      // Ensure dialog is dismissed even on error
+      if (context.mounted && Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+      // Handle error appropriately
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('오류가 발생했습니다. 다시 시도해주세요.')));
+      }
+    }
+  }
+
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(child: CircularProgressIndicator()),
+    );
   }
 
   @override
@@ -79,7 +130,19 @@ class CelebCard extends ConsumerWidget {
                                 horizontal: Sizes.size20,
                                 vertical: 20,
                               ),
-                              child: FormButton(text: '구독하기'),
+                              child: FutureBuilder<bool>(
+                                future: _checkSubscriptionStatus(celebs[celebIndex].id),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return FormButton(text: '확인 중...');
+                                  }
+                                  
+                                  final isSubscribed = snapshot.data ?? false;
+                                  return FormButton(
+                                    text: isSubscribed ? '메세지 들으러가기' : '구독하기',
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ),
@@ -320,5 +383,20 @@ class CelebCard extends ConsumerWidget {
         );
       },
     );
+  }
+
+  Future<bool> _checkSubscriptionStatus(String celebId) async {
+    try {
+      final subscriptionService = SubscriptionService();
+      final subscriptionStatus = await subscriptionService.getSubscriptionStatus();
+      return subscriptionStatus.subscribedCelebIds.contains(celebId);
+    } catch (e) {
+      print("❌ 구독 상태 확인 실패: $e");
+      return false; // 오류 시 기본값으로 미구독 처리
+    }
+  }
+}
+
+        subscriptionStatus.subscribedCelebIds.contains(celebId);
   }
 }
