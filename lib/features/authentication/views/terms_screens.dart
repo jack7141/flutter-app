@@ -243,7 +243,7 @@ class _TermsScreenState extends State<TermsScreen> {
           onTap: _canProceed
               ? () {
                   // 뒤로가기 불가능하게 이동
-                  context.pushReplacement('/welcome');
+                  context.pushReplacement('/home');
                 }
               : null,
           child: Row(

@@ -4,6 +4,7 @@ import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class CelebCard extends StatelessWidget {
   const CelebCard({
@@ -18,6 +19,11 @@ class CelebCard extends StatelessWidget {
   final double screenWidth;
   final List<CelebModel> celebs;
   final double pageViewHeightFactor;
+
+  void _onTapCelebCard(int celebIndex, BuildContext context) {
+    print("🔍 셀럽 카드 클릭: ${celebs[celebIndex].name}");
+    context.push('/welcome');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +67,7 @@ class CelebCard extends StatelessWidget {
                         _buildCelebInfo(celebIndex),
                         // 구독하기 버튼
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () => _onTapCelebCard(celebIndex, context),
                           child: Align(
                             alignment: Alignment.bottomCenter,
                             child: Padding(

@@ -46,7 +46,7 @@ class CelebRepo {
         }
 
         try {
-          final results = data['results'] as List;
+          final results = data['data'] as List;
           if (AppConfig.enableDebugLogs) {
             print("📋 results 배열: $results");
           }
