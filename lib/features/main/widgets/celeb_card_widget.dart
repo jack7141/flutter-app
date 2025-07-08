@@ -131,12 +131,15 @@ class CelebCard extends ConsumerWidget {
                                 vertical: 20,
                               ),
                               child: FutureBuilder<bool>(
-                                future: _checkSubscriptionStatus(celebs[celebIndex].id),
+                                future: _checkSubscriptionStatus(
+                                  celebs[celebIndex].id,
+                                ),
                                 builder: (context, snapshot) {
-                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
                                     return FormButton(text: '확인 중...');
                                   }
-                                  
+
                                   final isSubscribed = snapshot.data ?? false;
                                   return FormButton(
                                     text: isSubscribed ? '메세지 들으러가기' : '구독하기',
@@ -388,15 +391,12 @@ class CelebCard extends ConsumerWidget {
   Future<bool> _checkSubscriptionStatus(String celebId) async {
     try {
       final subscriptionService = SubscriptionService();
-      final subscriptionStatus = await subscriptionService.getSubscriptionStatus();
+      final subscriptionStatus = await subscriptionService
+          .getSubscriptionStatus();
       return subscriptionStatus.subscribedCelebIds.contains(celebId);
     } catch (e) {
       print("❌ 구독 상태 확인 실패: $e");
       return false; // 오류 시 기본값으로 미구독 처리
     }
-  }
-}
-
-        subscriptionStatus.subscribedCelebIds.contains(celebId);
   }
 }
