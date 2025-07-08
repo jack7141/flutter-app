@@ -26,58 +26,79 @@ class CelebCard extends ConsumerWidget {
     final selectedCeleb = celebs[celebIndex];
     print("🔍 셀럽 카드 클릭: ${selectedCeleb.name}");
 
-    _showLoadingDialog(context);
-
-    final subscriptionService = SubscriptionService();
-
-    try {
-      final subscriptionStatus = await subscriptionService
-          .getSubscriptionStatus();
-
-      // Check if the dialog is still mounted before popping
-      if (context.mounted && Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
-      }
-
-      if (subscriptionStatus.hasAnySubscription) {
-        if (subscriptionStatus.subscribedCelebIds.contains(selectedCeleb.id)) {
-          print("✅ ${selectedCeleb.name} 구독자 → 메시지 생성으로 이동");
-          if (context.mounted) {
-            context.push('/generateMessage', extra: selectedCeleb);
-          }
-        } else {
-          print("⚠️ ${selectedCeleb.name} 미구독 → 구독 안내로 이동");
-          if (context.mounted) {
-            context.push('/subscriptionRequired', extra: selectedCeleb);
-          }
-        }
-      } else {
-        print("❌ 신규 사용자 → Welcome부터 시작");
-        if (context.mounted) {
-          context.push('/welcome', extra: selectedCeleb);
-        }
-      }
-    } catch (e) {
-      print("❌ 구독 상태 확인 중 오류: $e");
-      // Ensure dialog is dismissed even on error
-      if (context.mounted && Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
-      }
-      // Handle error appropriately
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('오류가 발생했습니다. 다시 시도해주세요.')));
-      }
-    }
-  }
-
-  void _showLoadingDialog(BuildContext context) {
+    // 로딩 다이얼로그 표시
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Center(child: CircularProgressIndicator()),
+      builder: (dialogContext) => Center(child: CircularProgressIndicator()),
     );
+
+    try {
+      final subscriptionService = SubscriptionService();
+
+      // 먼저 현재 구독 상태 확인
+      final subscriptionStatus = await subscriptionService
+          .getSubscriptionStatus();
+
+      if (subscriptionStatus.subscribedCelebIds.contains(selectedCeleb.id)) {
+        // 이미 구독된 경우 → 메시지 생성으로 이동
+        print("✅ 이미 ${selectedCeleb.name} 구독자 → 메시지 생성으로 이동");
+
+        // 로딩 다이얼로그 닫기
+        if (context.mounted && context.canPop()) {
+          context.pop();
+        }
+
+        if (context.mounted) {
+          context.push('/generateMessage', extra: selectedCeleb);
+        }
+      } else {
+        // 미구독 상태 → 구독 API 호출
+        print("📞 ${selectedCeleb.name} 구독 API 호출");
+        final result = await subscriptionService.subscribeToCeleb(
+          selectedCeleb.id,
+        );
+
+        print("📥 구독 API 응답: $result");
+
+        final isOnboarded = result['isOnboarded'] ?? true;
+
+        // 로딩 다이얼로그 닫기
+        if (context.mounted && context.canPop()) {
+          context.pop();
+        }
+
+        // 약간의 지연을 주어 다이얼로그가 완전히 닫히도록 함
+        await Future.delayed(Duration(milliseconds: 100));
+
+        if (!isOnboarded) {
+          print("🎉 첫 구독 → Welcome 온보딩 시작");
+          print("🔄 Welcome 페이지로 이동 시도...");
+
+          if (context.mounted) {
+            context.push('/welcome', extra: selectedCeleb);
+          }
+        } else {
+          print("✅ 구독 완료 → 메시지 생성으로 이동");
+          if (context.mounted) {
+            context.push('/generateMessage', extra: selectedCeleb);
+          }
+        }
+      }
+    } catch (e) {
+      print("❌ 구독 처리 중 오류: $e");
+
+      // 에러 시에도 로딩 다이얼로그 닫기
+      if (context.mounted && context.canPop()) {
+        context.pop();
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('구독 처리 중 오류가 발생했습니다. 다시 시도해주세요.')),
+        );
+      }
+    }
   }
 
   @override
@@ -393,10 +414,17 @@ class CelebCard extends ConsumerWidget {
       final subscriptionService = SubscriptionService();
       final subscriptionStatus = await subscriptionService
           .getSubscriptionStatus();
+
+      print("🔍 구독 상태 확인 - 셀럽 ID: $celebId");
+      print("📋 구독한 셀럽들: ${subscriptionStatus.subscribedCelebIds}");
+      print(
+        "✅ 구독 여부: ${subscriptionStatus.subscribedCelebIds.contains(celebId)}",
+      );
+
       return subscriptionStatus.subscribedCelebIds.contains(celebId);
     } catch (e) {
       print("❌ 구독 상태 확인 실패: $e");
-      return false; // 오류 시 기본값으로 미구독 처리
+      return false;
     }
   }
 }

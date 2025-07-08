@@ -1,3 +1,4 @@
+import 'package:celeb_voice/features/authentication/repos/authentication_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,6 +22,11 @@ class SubscriptionService {
 
   final Dio _dio = Dio();
   final FlutterSecureStorage _storage = FlutterSecureStorage();
+  final AuthenticationRepo _authRepo = AuthenticationRepo();
+
+  // 캐시 관련 필드들 추가
+  SubscriptionStatus? _cachedStatus;
+  DateTime? _lastFetchTime;
 
   Future<SubscriptionStatus> getSubscriptionStatus() async {
     try {
@@ -56,7 +62,12 @@ class SubscriptionService {
       }
 
       if (response.statusCode == 200) {
-        final subscribedCelebIds = List<String>.from(response.data ?? []);
+        // null 값들을 필터링하고 String 타입만 유지
+        final rawData = List.from(response.data ?? []);
+        final subscribedCelebIds = rawData
+            .where((item) => item != null && item is String)
+            .cast<String>()
+            .toList();
 
         final subscriptionStatus = SubscriptionStatus(
           hasAnySubscription: subscribedCelebIds.isNotEmpty,
@@ -151,5 +162,42 @@ class SubscriptionService {
         print("💥 구독 상태 업데이트 에러: $e");
       }
     }
+  }
+
+  Future<Map<String, dynamic>> subscribeToCeleb(String celebId) async {
+    try {
+      // AuthenticationRepo의 메서드 사용 (기존 코드와 일치하도록)
+      String? accessToken = await _storage.read(key: AppConfig.accessTokenKey);
+      String? tokenType = await _storage.read(key: AppConfig.tokenTypeKey);
+
+      if (accessToken == null) {
+        throw Exception('액세스 토큰이 없습니다');
+      }
+
+      final response = await _dio.post(
+        'http://localhost:8000/api/v1/celeb/$celebId/subscribe',
+        options: Options(
+          headers: {
+            ...AppConfig.defaultHeaders,
+            'Authorization': '${tokenType ?? 'Bearer'} $accessToken',
+          },
+        ),
+      );
+
+      print('✅ 구독 API 응답: ${response.data}');
+
+      // 캐시 무효화 (구독 상태가 변경되었으므로)
+      _clearCache();
+
+      return response.data;
+    } catch (e) {
+      print('❌ 구독 API 요청 실패: $e');
+      rethrow;
+    }
+  }
+
+  void _clearCache() {
+    _cachedStatus = null;
+    _lastFetchTime = null;
   }
 }

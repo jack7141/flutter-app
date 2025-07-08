@@ -1,7 +1,6 @@
 import 'package:celeb_voice/common/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
-import 'package:celeb_voice/features/main/home_screen.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
 import 'package:flutter/material.dart';
@@ -14,8 +13,14 @@ class AttitudeScreen extends StatelessWidget {
   final CelebModel? celeb; // 셀럽 정보 추가
   const AttitudeScreen({super.key, this.celeb});
 
-  void _onNextTap(BuildContext context) {
-    context.replaceNamed(HomeScreen.routeName);
+  void _onNextTap(BuildContext context) async {
+    // 바로 구독 페이지로 이동
+    if (celeb != null) {
+      context.push('/subscriptionRequired', extra: celeb);
+    } else {
+      // celeb 정보가 없는 경우 홈으로 이동
+      context.go('/');
+    }
   }
 
   @override
