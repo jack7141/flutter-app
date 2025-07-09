@@ -32,12 +32,23 @@ class _BirthdayScreenState extends ConsumerState<BirthdayScreen> {
     super.initState();
     print("🏠 BirthdayScreen initState 호출됨");
 
-    // Provider에서 기존 데이터 복원
-    final userInfo = ref.read(userInfoProvider);
-    if (userInfo.birthday != null) {
-      _selectedDate = userInfo.birthday;
-      _isLunar = userInfo.isLunar ?? false;
-      print("🔄 기존 생일 데이터 복원: $_selectedDate (음력: $_isLunar)");
+    // initState에서는 ref.read 사용하지 않고, 첫 번째 build에서 복원
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Provider에서 기존 데이터 복원 (한 번만 실행)
+    if (_selectedDate == null) {
+      final userInfo = ref.read(userInfoProvider);
+      if (userInfo.birthday != null) {
+        setState(() {
+          _selectedDate = userInfo.birthday;
+          _isLunar = userInfo.isLunar ?? false;
+        });
+        print("🔄 기존 생일 데이터 복원: $_selectedDate (음력: $_isLunar)");
+      }
     }
   }
 
@@ -47,6 +58,7 @@ class _BirthdayScreenState extends ConsumerState<BirthdayScreen> {
     print("🔍 음력여부: $_isLunar");
     print("🔍 선택된 시간: $_selectedTime");
     print("🔍 시간모름: $_timeUnknown");
+    print("🔍 AM/PM: $_selectedAmPm");
 
     if (_selectedDate != null) {
       // 생일 정보 저장
@@ -54,13 +66,30 @@ class _BirthdayScreenState extends ConsumerState<BirthdayScreen> {
           .read(userInfoProvider.notifier)
           .updateBirthday(_selectedDate!, _isLunar);
 
-      // 출생시간 저장
+      // 출생시간 저장 (정확한 형태로)
       String birthTime;
       if (_timeUnknown) {
         birthTime = "시간모름";
       } else if (_selectedTime != null) {
+        // 12시간 형식으로 저장 (AM/PM 포함)
+        int displayHour = _selectedTime!.hour;
+        String amPm = "AM";
+
+        if (displayHour == 0) {
+          displayHour = 12;
+          amPm = "AM";
+        } else if (displayHour == 12) {
+          displayHour = 12;
+          amPm = "PM";
+        } else if (displayHour > 12) {
+          displayHour = displayHour - 12;
+          amPm = "PM";
+        } else {
+          amPm = "AM";
+        }
+
         birthTime =
-            "$_selectedAmPm ${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}";
+            "$amPm ${displayHour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}";
       } else {
         birthTime = "미입력";
       }
@@ -68,6 +97,7 @@ class _BirthdayScreenState extends ConsumerState<BirthdayScreen> {
       ref.read(userInfoProvider.notifier).updateBirthTime(birthTime);
 
       print("✅ 생일 정보 저장 완료 - Job 화면으로 이동");
+      print("💾 저장된 출생시간: $birthTime");
 
       if (widget.celeb != null) {
         print("🎭 셀럽 정보와 함께 이동: ${widget.celeb!.name}");
@@ -119,7 +149,10 @@ class _BirthdayScreenState extends ConsumerState<BirthdayScreen> {
   }
 
   Future<void> _selectTime() async {
-    if (_timeUnknown) return;
+    if (_timeUnknown) {
+      print("⚠️ 시간모름이 선택되어 있어 시간 선택 불가");
+      return;
+    }
 
     print("🕐 시간 선택 버튼 클릭됨!");
 
@@ -145,7 +178,9 @@ class _BirthdayScreenState extends ConsumerState<BirthdayScreen> {
       setState(() {
         _selectedTime = picked;
       });
-      print("✅ 시간 선택됨: $picked");
+      print("✅ 시간 선택됨: ${picked.hour}:${picked.minute}");
+    } else {
+      print("❌ 시간 선택 취소됨");
     }
   }
 
@@ -191,6 +226,7 @@ class _BirthdayScreenState extends ConsumerState<BirthdayScreen> {
           _timeUnknown = !_timeUnknown;
           if (_timeUnknown) {
             _selectedTime = null;
+            print("🕐 시간모름 선택 - 기존 시간 초기화");
           }
         });
       },

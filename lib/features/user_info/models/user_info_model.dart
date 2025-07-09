@@ -53,10 +53,57 @@ class UserInfoModel {
     print("🔍 toJson() 호출됨");
     print("   selectedJobId: $selectedJobId");
     print("   selectedInterestIds: $selectedInterestIds");
+    print("   birthday: $birthday");
+    print("   birthTime: $birthTime");
 
-    // birthday가 있으면 추가
+    // birthday가 있으면 시간까지 포함해서 추가
     if (birthday != null) {
-      data['birthday'] = birthday!.toIso8601String();
+      DateTime finalBirthday = birthday!;
+
+      // birthTime이 있고 "시간모름"이나 "미입력"이 아니면 시간 정보 파싱
+      if (birthTime != null &&
+          birthTime != "시간모름" &&
+          birthTime != "미입력" &&
+          birthTime!.isNotEmpty) {
+        try {
+          // "AM 09:30" 또는 "PM 14:30" 형태 파싱
+          final parts = birthTime!.split(' ');
+          if (parts.length == 2) {
+            final amPm = parts[0];
+            final timeParts = parts[1].split(':');
+            if (timeParts.length == 2) {
+              int hour = int.parse(timeParts[0]);
+              int minute = int.parse(timeParts[1]);
+
+              // PM이고 12시가 아니면 12시간 추가
+              if (amPm == "PM" && hour != 12) {
+                hour += 12;
+              }
+              // AM이고 12시면 0시로 변경
+              else if (amPm == "AM" && hour == 12) {
+                hour = 0;
+              }
+
+              // 날짜에 시간 정보 추가
+              finalBirthday = DateTime(
+                birthday!.year,
+                birthday!.month,
+                birthday!.day,
+                hour,
+                minute,
+              );
+
+              print("   ✅ 시간 정보 포함된 생일: $finalBirthday");
+            }
+          }
+        } catch (e) {
+          print("   ⚠️ 시간 파싱 실패: $e, 원본 날짜 사용");
+        }
+      } else {
+        print("   ℹ️ 시간 정보 없음, 날짜만 사용");
+      }
+
+      data['birthday'] = finalBirthday.toIso8601String();
       print("   birthday 추가: ${data['birthday']}");
     }
 
@@ -82,16 +129,16 @@ class UserInfoModel {
       print("   ❌ hobbies 필드 누락 - selectedInterestIds: $selectedInterestIds");
     }
 
-    // introduce는 기타 정보들로 구성
+    // is_lunar 추가 (음력 여부)
+    if (isLunar != null) {
+      data['is_lunar'] = isLunar;
+      print("   is_lunar 추가: ${data['is_lunar']}");
+    }
+
+    // introduce는 말투 정보만 포함 (시간 정보는 birthday에 포함되므로 제외)
     List<String> introduceParts = [];
     if (selectedAttitude != null) {
       introduceParts.add('말투: $selectedAttitude');
-    }
-    if (birthTime != null) {
-      introduceParts.add('출생시간: $birthTime');
-    }
-    if (isLunar != null) {
-      introduceParts.add('음력여부: ${isLunar! ? '음력' : '양력'}');
     }
 
     if (introduceParts.isNotEmpty) {
