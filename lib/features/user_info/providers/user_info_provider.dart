@@ -8,14 +8,40 @@ class UserInfoNotifier extends StateNotifier<UserInfoModel> {
     print("🏗️ UserInfoNotifier 생성됨");
   }
 
-  // 관심사 업데이트
-  void updateInterest(String interest, int interestId) {
-    print("📝 [BEFORE] 관심사 업데이트 - 현재: ${state.selectedInterest}");
+  // 관심사 업데이트 (최대 2개) - 안전한 리스트 처리
+  void updateInterests(String interest, int interestId) {
+    print("📝 [BEFORE] 관심사 업데이트 - 현재: ${state.selectedInterests}");
+
+    // 안전한 리스트 복사
+    List<String> newInterests = List<String>.from(state.selectedInterests);
+    List<int> newInterestIds = List<int>.from(state.selectedInterestIds);
+
+    print("📝 복사된 리스트 - interests: $newInterests, ids: $newInterestIds");
+
+    // 이미 선택된 관심사인지 확인
+    if (newInterestIds.contains(interestId)) {
+      // 이미 선택됨 -> 제거
+      int index = newInterestIds.indexOf(interestId);
+      newInterests.removeAt(index);
+      newInterestIds.removeAt(index);
+      print("📝 관심사 제거: $interest");
+    } else {
+      // 새로 선택
+      if (newInterests.length >= 2) {
+        print("⚠️ 최대 2개까지만 선택 가능합니다");
+        return;
+      }
+      newInterests.add(interest);
+      newInterestIds.add(interestId);
+      print("📝 관심사 추가: $interest");
+    }
+
     state = state.copyWith(
-      selectedInterest: interest,
-      selectedInterestId: interestId,
+      selectedInterests: newInterests,
+      selectedInterestIds: newInterestIds,
     );
-    print("✅ [AFTER] 관심사 업데이트 완료: $interest (ID: $interestId)");
+
+    print("✅ [AFTER] 관심사 업데이트 완료: $newInterests (IDs: $newInterestIds)");
     _printCurrentState();
   }
 
@@ -45,16 +71,9 @@ class UserInfoNotifier extends StateNotifier<UserInfoModel> {
 
   // 직업 업데이트
   void updateJob(String job, int jobId) {
-    print(
-      "📝 [BEFORE] 직업 업데이트 - 현재: ${state.selectedJob} (ID: ${state.selectedJobId})",
-    );
-    print("📝 [INPUT] 새로운 직업: $job (ID: $jobId)");
-
+    print("📝 [BEFORE] 직업 업데이트 - 현재: ${state.selectedJob}");
     state = state.copyWith(selectedJob: job, selectedJobId: jobId);
-
-    print(
-      "✅ [AFTER] 직업 업데이트 완료: ${state.selectedJob} (ID: ${state.selectedJobId})",
-    );
+    print("✅ [AFTER] 직업 업데이트 완료: $job (ID: $jobId)");
     _printCurrentState();
   }
 
@@ -78,7 +97,7 @@ class UserInfoNotifier extends StateNotifier<UserInfoModel> {
   void _printCurrentState() {
     print("📋 === 현재 사용자 정보 상태 ===");
     print(
-      "   관심사: ${state.selectedInterest} (ID: ${state.selectedInterestId})",
+      "   관심사: ${state.selectedInterests} (IDs: ${state.selectedInterestIds})",
     );
     print("   MBTI: ${state.selectedMbti}");
     print("   생일: ${state.birthday}");

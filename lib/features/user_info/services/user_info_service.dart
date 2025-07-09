@@ -16,7 +16,16 @@ class UserInfoService {
       final jsonData = userInfo.toJson();
       print("📋 저장할 데이터: $jsonData");
 
-      // Job 필드 특별 확인
+      // hobbies 필드 특별 확인
+      if (jsonData.containsKey('hobbies')) {
+        print(
+          "✅ hobbies 필드 존재: ${jsonData['hobbies']} (타입: ${jsonData['hobbies'].runtimeType})",
+        );
+      } else {
+        print("❌ hobbies 필드 누락!");
+      }
+
+      // job 필드 확인
       if (jsonData.containsKey('job')) {
         print(
           "✅ job 필드 존재: ${jsonData['job']} (타입: ${jsonData['job'].runtimeType})",
@@ -57,9 +66,15 @@ class UserInfoService {
       print("📥 API 응답 상태: ${response.statusCode}");
       print("📥 API 응답 데이터: ${response.data}");
 
-      // 응답에서 job 필드 확인
+      // 응답에서 hobbies 필드 확인 (스코프 문제 해결)
       if (response.data != null && response.data is Map) {
         final responseData = response.data as Map<String, dynamic>;
+        if (responseData.containsKey('hobbies')) {
+          print("📥 응답의 hobbies 필드: ${responseData['hobbies']}");
+        } else {
+          print("📥 응답에 hobbies 필드 없음");
+        }
+
         if (responseData.containsKey('job')) {
           print("📥 응답의 job 필드: ${responseData['job']}");
         } else {

@@ -1,6 +1,6 @@
 class UserInfoModel {
-  final String? selectedInterest;
-  final int? selectedInterestId;
+  final List<String> selectedInterests;
+  final List<int> selectedInterestIds;
   final String? selectedMbti;
   final DateTime? birthday;
   final bool? isLunar;
@@ -10,8 +10,8 @@ class UserInfoModel {
   final String? selectedAttitude;
 
   UserInfoModel({
-    this.selectedInterest,
-    this.selectedInterestId,
+    List<String>? selectedInterests,
+    List<int>? selectedInterestIds,
     this.selectedMbti,
     this.birthday,
     this.isLunar,
@@ -19,11 +19,12 @@ class UserInfoModel {
     this.selectedJob,
     this.selectedJobId,
     this.selectedAttitude,
-  });
+  }) : selectedInterests = selectedInterests ?? [],
+       selectedInterestIds = selectedInterestIds ?? [];
 
   UserInfoModel copyWith({
-    String? selectedInterest,
-    int? selectedInterestId,
+    List<String>? selectedInterests,
+    List<int>? selectedInterestIds,
     String? selectedMbti,
     DateTime? birthday,
     bool? isLunar,
@@ -33,8 +34,8 @@ class UserInfoModel {
     String? selectedAttitude,
   }) {
     return UserInfoModel(
-      selectedInterest: selectedInterest ?? this.selectedInterest,
-      selectedInterestId: selectedInterestId ?? this.selectedInterestId,
+      selectedInterests: selectedInterests ?? this.selectedInterests,
+      selectedInterestIds: selectedInterestIds ?? this.selectedInterestIds,
       selectedMbti: selectedMbti ?? this.selectedMbti,
       birthday: birthday ?? this.birthday,
       isLunar: isLunar ?? this.isLunar,
@@ -45,19 +46,13 @@ class UserInfoModel {
     );
   }
 
-  // API 스펙에 맞게 수정
+  // API 스펙에 맞게 수정 - hobbies 배열로 변경
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
 
     print("🔍 toJson() 호출됨");
     print("   selectedJobId: $selectedJobId");
-    print("   selectedInterestId: $selectedInterestId");
-
-    // nickname은 일단 빈 문자열로 (필요시 추가)
-    // data['nickname'] = '';
-
-    // gender는 일단 제외 (필요시 추가)
-    // data['gender'] = 'M';
+    print("   selectedInterestIds: $selectedInterestIds");
 
     // birthday가 있으면 추가
     if (birthday != null) {
@@ -71,7 +66,7 @@ class UserInfoModel {
       print("   mbti 추가: ${data['mbti']}");
     }
 
-    // job (소문자 j로 변경)
+    // job (소문자 j)
     if (selectedJobId != null && selectedJobId! > 0) {
       data['job'] = selectedJobId;
       print("   ✅ job 필드 추가: ${data['job']}");
@@ -79,12 +74,12 @@ class UserInfoModel {
       print("   ❌ job 필드 누락 - selectedJobId: $selectedJobId");
     }
 
-    // hobby (소문자)
-    if (selectedInterestId != null && selectedInterestId! > 0) {
-      data['hobby'] = selectedInterestId;
-      print("   ✅ hobby 필드 추가: ${data['hobby']}");
+    // hobbies 배열 (최대 2개)
+    if (selectedInterestIds.isNotEmpty) {
+      data['hobbies'] = selectedInterestIds;
+      print("   ✅ hobbies 필드 추가: ${data['hobbies']}");
     } else {
-      print("   ❌ hobby 필드 누락 - selectedInterestId: $selectedInterestId");
+      print("   ❌ hobbies 필드 누락 - selectedInterestIds: $selectedInterestIds");
     }
 
     // introduce는 기타 정보들로 구성
@@ -110,6 +105,6 @@ class UserInfoModel {
 
   @override
   String toString() {
-    return 'UserInfoModel(interest: $selectedInterest, mbti: $selectedMbti, birthday: $birthday, isLunar: $isLunar, birthTime: $birthTime, job: $selectedJob, attitude: $selectedAttitude)';
+    return 'UserInfoModel(interests: $selectedInterests, mbti: $selectedMbti, birthday: $birthday, isLunar: $isLunar, birthTime: $birthTime, job: $selectedJob, attitude: $selectedAttitude)';
   }
 }
