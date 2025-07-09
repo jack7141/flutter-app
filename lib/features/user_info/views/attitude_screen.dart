@@ -2,29 +2,113 @@ import 'package:celeb_voice/common/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
+import 'package:celeb_voice/features/user_info/providers/user_info_provider.dart';
+import 'package:celeb_voice/features/user_info/services/user_info_service.dart';
 import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-// 말투 선택 화면
-class AttitudeScreen extends StatelessWidget {
+class AttitudeScreen extends ConsumerWidget {
   static const String routeName = "attitude";
+  final CelebModel? celeb;
 
-  final CelebModel? celeb; // 셀럽 정보 추가
   const AttitudeScreen({super.key, this.celeb});
 
-  void _onNextTap(BuildContext context) async {
-    // 바로 구독 페이지로 이동
-    if (celeb != null) {
-      context.push('/subscriptionRequired', extra: celeb);
-    } else {
-      // celeb 정보가 없는 경우 홈으로 이동
-      context.go('/');
+  void _onAttitudeSelected(
+    String attitude,
+    WidgetRef ref,
+    BuildContext context,
+  ) async {
+    print("🎯 AttitudeScreen - 말투 선택됨: $attitude");
+
+    // 말투 상태 업데이트
+    ref.read(userInfoProvider.notifier).updateAttitude(attitude);
+
+    // 최종 상태 출력
+    print("📋 === 최종 사용자 정보 ===");
+    ref.read(userInfoProvider.notifier).printCurrentState();
+
+    // 로딩 다이얼로그 표시
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('사용자 정보를 저장하고 있습니다...', style: TextStyle(color: Colors.white)),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      // 사용자 정보 저장
+      final userInfo = ref.read(userInfoProvider);
+
+      print("💾 사용자 정보 저장 시작");
+      print("📋 최종 상태 확인:");
+      print("   selectedJob: '${userInfo.selectedJob}'");
+      print("   selectedJobId: ${userInfo.selectedJobId}");
+      print("   selectedInterests: '${userInfo.selectedInterests}'");
+      print("   selectedInterestIds: ${userInfo.selectedInterestIds}");
+      print("   selectedMbti: '${userInfo.selectedMbti}'");
+      print("   birthday: ${userInfo.birthday}");
+      print("   selectedAttitude: '${userInfo.selectedAttitude}'");
+
+      // null 체크 수정
+      if (userInfo.selectedJobId == null) {
+        print("⚠️ selectedJobId가 null입니다!");
+      }
+      if (userInfo.selectedInterestIds.isEmpty) {
+        print("⚠️ selectedInterestIds가 비어있습니다!");
+      }
+
+      final jsonData = userInfo.toJson();
+      print("📤 전송할 JSON 데이터: $jsonData");
+
+      final userInfoService = UserInfoService();
+      await userInfoService.saveUserInfo(userInfo);
+      print("✅ 사용자 정보 저장 완료");
+
+      // 상태 초기화
+      ref.read(userInfoProvider.notifier).reset();
+
+      if (context.mounted) {
+        context.pop(); // 로딩 다이얼로그 닫기
+
+        if (celeb != null) {
+          print("🎭 셀럽 정보와 함께 구독 페이지로 이동: ${celeb!.name}");
+          context.push('/home', extra: celeb);
+        } else {
+          print("🏠 홈으로 이동");
+          context.go('/home');
+        }
+      }
+    } catch (e) {
+      print('❌ 사용자 정보 저장 실패: $e');
+      if (context.mounted) {
+        context.pop(); // 로딩 다이얼로그 닫기
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('정보 저장 중 오류가 발생했습니다. 다시 시도해주세요.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userInfo = ref.watch(userInfoProvider);
+
+    print("🏗️ AttitudeScreen build 호출됨");
+    print("🔍 현재 상태 - 선택된 말투: ${userInfo.selectedAttitude}");
+
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       appBar: const CommonAppBar(),
@@ -44,114 +128,53 @@ class AttitudeScreen extends StatelessWidget {
               ),
               Gaps.v20,
               GestureDetector(
-                onTap: () => _onNextTap(context),
-                child: FractionallySizedBox(
-                  widthFactor: 1,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    padding: const EdgeInsets.symmetric(vertical: Sizes.size16),
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(Sizes.size64),
-                      border: Border.all(
-                        color: const Color(0xff211772), // 원하시는 테두리 색상
-                        width: 2.0, // 테두리 두께 (원하는 값으로 조절)
-                      ),
-                    ),
-                    child: AnimatedDefaultTextStyle(
-                      duration: const Duration(milliseconds: 300),
-                      style: TextStyle(
-                        fontSize: Sizes.size18,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                      ),
-                      child: Text(
-                        '반말로 편하게 해주세요!',
-                        style: TextStyle(
-                          fontSize: Sizes.size16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xff211772),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ),
+                onTap: () {
+                  print("👆 반말 버튼 탭됨");
+                  _onAttitudeSelected('반말', ref, context);
+                },
+                child: _buildAttitudeButton('반말로 편하게 해주세요!'),
               ),
               Gaps.v20,
               GestureDetector(
-                onTap: () => _onNextTap(context),
-                child: FractionallySizedBox(
-                  widthFactor: 1,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    padding: const EdgeInsets.symmetric(vertical: Sizes.size16),
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(Sizes.size64),
-                      border: Border.all(
-                        color: const Color(0xff211772), // 원하시는 테두리 색상
-                        width: 2.0, // 테두리 두께 (원하는 값으로 조절)
-                      ),
-                    ),
-                    child: AnimatedDefaultTextStyle(
-                      duration: const Duration(milliseconds: 300),
-                      style: TextStyle(
-                        fontSize: Sizes.size18,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                      ),
-                      child: Text(
-                        '지금처럼 존댓말이 좋아요!',
-                        style: TextStyle(
-                          fontSize: Sizes.size16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xff211772),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ),
+                onTap: () {
+                  print("👆 존댓말 버튼 탭됨");
+                  _onAttitudeSelected('존댓말', ref, context);
+                },
+                child: _buildAttitudeButton('지금처럼 존댓말이 좋아요!'),
               ),
               Gaps.v20,
               GestureDetector(
-                onTap: () => _onNextTap(context),
-                child: FractionallySizedBox(
-                  widthFactor: 1,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    padding: const EdgeInsets.symmetric(vertical: Sizes.size16),
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(Sizes.size64),
-                      border: Border.all(
-                        color: const Color(0xff211772), // 원하시는 테두리 색상
-                        width: 2.0, // 테두리 두께 (원하는 값으로 조절)
-                      ),
-                    ),
-                    child: AnimatedDefaultTextStyle(
-                      duration: const Duration(milliseconds: 300),
-                      style: TextStyle(
-                        fontSize: Sizes.size18,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                      ),
-                      child: Text(
-                        '상관없어요, 편하신대로 해주세요',
-                        style: TextStyle(
-                          fontSize: Sizes.size16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xff211772),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ),
+                onTap: () {
+                  print("👆 상관없음 버튼 탭됨");
+                  _onAttitudeSelected('상관없음', ref, context);
+                },
+                child: _buildAttitudeButton('상관없어요, 편하신대로 해주세요'),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAttitudeButton(String text) {
+    return FractionallySizedBox(
+      widthFactor: 1,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: Sizes.size16),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(Sizes.size64),
+          border: Border.all(color: const Color(0xff211772), width: 2.0),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: Sizes.size16,
+            fontWeight: FontWeight.bold,
+            color: Color(0xff211772),
+          ),
+          textAlign: TextAlign.center,
         ),
       ),
     );

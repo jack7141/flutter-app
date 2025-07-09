@@ -3,38 +3,81 @@ import 'package:celeb_voice/common/widgets/form_button.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
+import 'package:celeb_voice/features/user_info/providers/user_info_provider.dart';
 import 'package:celeb_voice/features/user_info/views/job_screen.dart';
 import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class BirthdayScreen extends StatefulWidget {
+class BirthdayScreen extends ConsumerStatefulWidget {
   static const String routeName = "birthday";
+  final CelebModel? celeb;
 
-  final CelebModel? celeb; // 셀럽 정보 추가
   const BirthdayScreen({super.key, this.celeb});
 
   @override
-  State<BirthdayScreen> createState() => _BirthdayScreenState();
+  ConsumerState<BirthdayScreen> createState() => _BirthdayScreenState();
 }
 
-class _BirthdayScreenState extends State<BirthdayScreen> {
+class _BirthdayScreenState extends ConsumerState<BirthdayScreen> {
   DateTime? _selectedDate;
-  bool _isLunar = false; // 양력(false) / 음력(true) 상태
+  bool _isLunar = false;
   TimeOfDay? _selectedTime;
   String _selectedAmPm = "AM";
   bool _timeUnknown = false;
 
+  @override
+  void initState() {
+    super.initState();
+    print("🏠 BirthdayScreen initState 호출됨");
+
+    // Provider에서 기존 데이터 복원
+    final userInfo = ref.read(userInfoProvider);
+    if (userInfo.birthday != null) {
+      _selectedDate = userInfo.birthday;
+      _isLunar = userInfo.isLunar ?? false;
+      print("🔄 기존 생일 데이터 복원: $_selectedDate (음력: $_isLunar)");
+    }
+  }
+
   void _onNextTap(BuildContext context) {
+    print("🔍 BirthdayScreen - 다음 버튼 클릭");
+    print("🔍 선택된 날짜: $_selectedDate");
+    print("🔍 음력여부: $_isLunar");
+    print("🔍 선택된 시간: $_selectedTime");
+    print("🔍 시간모름: $_timeUnknown");
+
     if (_selectedDate != null) {
-      // 셀럽 정보를 다음 화면에 전달
-      if (widget.celeb != null) {
-        context.push('/attitude', extra: widget.celeb);
+      // 생일 정보 저장
+      ref
+          .read(userInfoProvider.notifier)
+          .updateBirthday(_selectedDate!, _isLunar);
+
+      // 출생시간 저장
+      String birthTime;
+      if (_timeUnknown) {
+        birthTime = "시간모름";
+      } else if (_selectedTime != null) {
+        birthTime =
+            "$_selectedAmPm ${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}";
       } else {
+        birthTime = "미입력";
+      }
+
+      ref.read(userInfoProvider.notifier).updateBirthTime(birthTime);
+
+      print("✅ 생일 정보 저장 완료 - Job 화면으로 이동");
+
+      if (widget.celeb != null) {
+        print("🎭 셀럽 정보와 함께 이동: ${widget.celeb!.name}");
+        context.push('/job', extra: widget.celeb);
+      } else {
+        print("🎭 셀럽 정보 없이 이동");
         context.pushNamed(JobScreen.routeName);
       }
     } else {
-      // 날짜를 선택하지 않았을 때 알림
+      print("❌ 생일 미선택 - 스낵바 표시");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('생일을 선택해주세요'),
@@ -44,9 +87,8 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
     }
   }
 
-  // 날짜 선택기 표시
   Future<void> _selectDate() async {
-    print("날짜 선택 버튼 클릭됨!");
+    print("📅 날짜 선택 버튼 클릭됨!");
 
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -72,13 +114,14 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
       setState(() {
         _selectedDate = picked;
       });
-      print("날짜 선택됨: $picked");
+      print("✅ 날짜 선택됨: $picked");
     }
   }
 
-  // 시간 선택기 표시
   Future<void> _selectTime() async {
-    if (_timeUnknown) return; // 시간모름이 체크되어 있으면 선택 불가
+    if (_timeUnknown) return;
+
+    print("🕐 시간 선택 버튼 클릭됨!");
 
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -102,13 +145,14 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
       setState(() {
         _selectedTime = picked;
       });
+      print("✅ 시간 선택됨: $picked");
     }
   }
 
-  // 양력/음력 선택 버튼 위젯
   Widget _buildCalendarTypeButton(String text, bool isSelected) {
     return GestureDetector(
       onTap: () {
+        print("📅 달력 타입 변경: $text");
         setState(() {
           _isLunar = text == "음력";
         });
@@ -139,10 +183,10 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
     );
   }
 
-  // 시간모름 버튼 위젯 (양력/음력과 같은 디자인)
   Widget _buildTimeUnknownButton() {
     return GestureDetector(
       onTap: () {
+        print("🕐 시간모름 버튼 클릭: ${!_timeUnknown}");
         setState(() {
           _timeUnknown = !_timeUnknown;
           if (_timeUnknown) {
@@ -179,6 +223,8 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print("🏗️ BirthdayScreen build 호출됨");
+
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       appBar: const CommonAppBar(),
@@ -198,11 +244,8 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                 ),
               ),
               Gaps.v20,
-
-              // 날짜 선택 및 양력/음력 선택을 같은 Row에 배치
               Row(
                 children: [
-                  // 날짜 선택 부분
                   Expanded(
                     child: GestureDetector(
                       onTap: _selectDate,
@@ -240,7 +283,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                                     ? FontWeight.w600
                                     : FontWeight.normal,
                               ),
-                            ), // 양력/음력 선택 버튼들
+                            ),
                             Row(
                               children: [
                                 _buildCalendarTypeButton("양력", !_isLunar),
@@ -256,18 +299,15 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                 ],
               ),
               Gaps.v24,
-
-              // 태어난 시간 입력 영역 - LayoutBuilder 사용
               LayoutBuilder(
                 builder: (context, constraints) {
                   final parentWidth = constraints.maxWidth;
-                  final amPmWidth = parentWidth * 0.25; // 25%
-                  final gapWidth = parentWidth * 0.03; // 3%
-                  final timeWidth = parentWidth * 0.72; // 72%
+                  final amPmWidth = parentWidth * 0.25;
+                  final gapWidth = parentWidth * 0.03;
+                  final timeWidth = parentWidth * 0.72;
 
                   return Row(
                     children: [
-                      // AM/PM 드롭다운
                       Container(
                         width: amPmWidth,
                         height: 56,
@@ -300,6 +340,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                             onChanged: _timeUnknown
                                 ? null
                                 : (String? newValue) {
+                                    print("🕐 AM/PM 변경: $newValue");
                                     setState(() {
                                       _selectedAmPm = newValue!;
                                     });
@@ -307,11 +348,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                           ),
                         ),
                       ),
-
-                      // 간격
                       SizedBox(width: gapWidth),
-
-                      // 시간 선택 + 시간모름 버튼
                       SizedBox(
                         width: timeWidth,
                         child: GestureDetector(
@@ -357,7 +394,6 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                                         : FontWeight.normal,
                                   ),
                                 ),
-                                // 시간모름 버튼 (양력/음력과 같은 디자인)
                                 _buildTimeUnknownButton(),
                               ],
                             ),
@@ -368,14 +404,11 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                   );
                 },
               ),
-
               Gaps.v24,
-              // 다음 버튼
               GestureDetector(
                 onTap: () => _onNextTap(context),
                 child: FormButton(text: '제 생일이에요'),
               ),
-              Gaps.v20,
             ],
           ),
         ),
