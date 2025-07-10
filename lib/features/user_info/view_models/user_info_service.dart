@@ -7,95 +7,77 @@ import '../models/user_info_model.dart';
 
 class UserInfoService {
   final Dio _dio = Dio();
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   Future<void> saveUserInfo(UserInfoModel userInfo) async {
     try {
-      print("📤 사용자 정보 저장 시작");
-
       final jsonData = userInfo.toJson();
-      print("📋 저장할 데이터: $jsonData");
+      _logSaveAttempt(jsonData);
 
-      // hobbies 필드 특별 확인
-      if (jsonData.containsKey('hobbies')) {
-        print(
-          "✅ hobbies 필드 존재: ${jsonData['hobbies']} (타입: ${jsonData['hobbies'].runtimeType})",
-        );
-      } else {
-        print("❌ hobbies 필드 누락!");
-      }
-
-      // job 필드 확인
-      if (jsonData.containsKey('job')) {
-        print(
-          "✅ job 필드 존재: ${jsonData['job']} (타입: ${jsonData['job'].runtimeType})",
-        );
-      } else {
-        print("❌ job 필드 누락!");
-      }
-
-      // 빈 데이터면 저장하지 않음
       if (jsonData.isEmpty) {
-        print("⚠️ 저장할 데이터가 없습니다");
-        return;
+        throw Exception('저장할 데이터가 없습니다');
       }
 
-      // 토큰 가져오기
-      String? accessToken = await _storage.read(key: AppConfig.accessTokenKey);
-      String? tokenType = await _storage.read(key: AppConfig.tokenTypeKey);
+      final token = await _getAuthToken();
+      final response = await _sendRequest(jsonData, token);
 
-      if (accessToken == null) {
-        throw Exception('액세스 토큰이 없습니다');
-      }
-
-      print("🔗 API 호출: PATCH http://localhost:8000/api/v1/users/profile/");
-      print("📤 전송 헤더: Authorization: ${tokenType ?? 'Bearer'} $accessToken");
-      print("📤 전송 데이터: $jsonData");
-
-      final response = await _dio.patch(
-        'http://localhost:8000/api/v1/users/profile/',
-        data: jsonData,
-        options: Options(
-          headers: {
-            ...AppConfig.defaultHeaders,
-            'Authorization': '${tokenType ?? 'Bearer'} $accessToken',
-          },
-        ),
-      );
-
-      print("📥 API 응답 상태: ${response.statusCode}");
-      print("📥 API 응답 데이터: ${response.data}");
-
-      // 응답에서 hobbies 필드 확인 (스코프 문제 해결)
-      if (response.data != null && response.data is Map) {
-        final responseData = response.data as Map<String, dynamic>;
-        if (responseData.containsKey('hobbies')) {
-          print("📥 응답의 hobbies 필드: ${responseData['hobbies']}");
-        } else {
-          print("📥 응답에 hobbies 필드 없음");
-        }
-
-        if (responseData.containsKey('job')) {
-          print("📥 응답의 job 필드: ${responseData['job']}");
-        } else {
-          print("📥 응답에 job 필드 없음");
-        }
-      }
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        print('✅ 사용자 정보 저장 성공');
-      } else {
-        throw Exception('서버 응답 오류: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      print('❌ API 호출 실패 (DioException)');
-      print('   상태 코드: ${e.response?.statusCode}');
-      print('   응답 데이터: ${e.response?.data}');
-      print('   에러 메시지: ${e.message}');
-      rethrow;
+      _logSaveResult(response);
     } catch (e) {
-      print('❌ 사용자 정보 저장 실패: $e');
+      _logError(e);
       rethrow;
+    }
+  }
+
+  Future<String> _getAuthToken() async {
+    final accessToken = await _storage.read(key: AppConfig.accessTokenKey);
+    final tokenType = await _storage.read(key: AppConfig.tokenTypeKey);
+
+    if (accessToken == null) {
+      throw Exception('액세스 토큰이 없습니다');
+    }
+
+    return '${tokenType ?? 'Bearer'} $accessToken';
+  }
+
+  Future<Response> _sendRequest(
+    Map<String, dynamic> data,
+    String authToken,
+  ) async {
+    return await _dio.patch(
+      'http://localhost:8000/api/v1/users/profile/',
+      data: data,
+      options: Options(
+        headers: {...AppConfig.defaultHeaders, 'Authorization': authToken},
+      ),
+    );
+  }
+
+  void _logSaveAttempt(Map<String, dynamic> data) {
+    print("📤 사용자 정보 저장 시작");
+    print("📋 저장할 데이터: $data");
+
+    // 중요 필드만 체크
+    final hasHobbies = data.containsKey('hobbies');
+    final hasJob = data.containsKey('job');
+    print("✅ 필수 필드 확인 - hobbies: $hasHobbies, job: $hasJob");
+  }
+
+  void _logSaveResult(Response response) {
+    print("📥 API 응답: ${response.statusCode}");
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      print('✅ 사용자 정보 저장 성공');
+    } else {
+      throw Exception('서버 응답 오류: ${response.statusCode}');
+    }
+  }
+
+  void _logError(dynamic error) {
+    if (error is DioException) {
+      print('❌ API 호출 실패: ${error.response?.statusCode}');
+      print('   응답: ${error.response?.data}');
+    } else {
+      print('❌ 저장 실패: $error');
     }
   }
 }
