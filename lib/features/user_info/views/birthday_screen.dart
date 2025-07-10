@@ -3,7 +3,7 @@ import 'package:celeb_voice/common/widgets/form_button.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
-import 'package:celeb_voice/features/user_info/providers/user_info_provider.dart';
+import 'package:celeb_voice/features/user_info/view_models/user_info_view_model.dart';
 import 'package:celeb_voice/features/user_info/views/job_screen.dart';
 import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
 import 'package:flutter/material.dart';

@@ -2,8 +2,7 @@ import 'package:celeb_voice/common/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
-import 'package:celeb_voice/features/user_info/providers/user_info_provider.dart';
-import 'package:celeb_voice/features/user_info/services/user_info_service.dart';
+import 'package:celeb_voice/features/user_info/view_models/user_info_view_model.dart';
 import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,10 +24,6 @@ class AttitudeScreen extends ConsumerWidget {
     // 말투 상태 업데이트
     ref.read(userInfoProvider.notifier).updateAttitude(attitude);
 
-    // 최종 상태 출력
-    print("📋 === 최종 사용자 정보 ===");
-    ref.read(userInfoProvider.notifier).printCurrentState();
-
     // 로딩 다이얼로그 표시
     showDialog(
       context: context,
@@ -46,36 +41,9 @@ class AttitudeScreen extends ConsumerWidget {
     );
 
     try {
-      // 사용자 정보 저장
-      final userInfo = ref.read(userInfoProvider);
-
-      print("💾 사용자 정보 저장 시작");
-      print("📋 최종 상태 확인:");
-      print("   selectedJob: '${userInfo.selectedJob}'");
-      print("   selectedJobId: ${userInfo.selectedJobId}");
-      print("   selectedInterests: '${userInfo.selectedInterests}'");
-      print("   selectedInterestIds: ${userInfo.selectedInterestIds}");
-      print("   selectedMbti: '${userInfo.selectedMbti}'");
-      print("   birthday: ${userInfo.birthday}");
-      print("   selectedAttitude: '${userInfo.selectedAttitude}'");
-
-      // null 체크 수정
-      if (userInfo.selectedJobId == null) {
-        print("⚠️ selectedJobId가 null입니다!");
-      }
-      if (userInfo.selectedInterestIds.isEmpty) {
-        print("⚠️ selectedInterestIds가 비어있습니다!");
-      }
-
-      final jsonData = userInfo.toJson();
-      print("📤 전송할 JSON 데이터: $jsonData");
-
-      final userInfoService = UserInfoService();
-      await userInfoService.saveUserInfo(userInfo);
+      // 🆕 ViewModel을 통한 저장 (비즈니스 로직 포함)
+      await ref.read(userInfoProvider.notifier).saveUserInfo();
       print("✅ 사용자 정보 저장 완료");
-
-      // 상태 초기화
-      ref.read(userInfoProvider.notifier).reset();
 
       if (context.mounted) {
         context.pop(); // 로딩 다이얼로그 닫기

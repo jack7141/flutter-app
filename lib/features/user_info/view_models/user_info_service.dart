@@ -1,4 +1,4 @@
-// lib/features/user_info/services/user_info_service.dart
+// lib/features/user_info/view_models/user_info_service.dart
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 

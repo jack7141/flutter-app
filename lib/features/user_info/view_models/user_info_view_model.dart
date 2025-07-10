@@ -1,11 +1,16 @@
-// lib/features/user_info/providers/user_info_provider.dart
+// lib/features/user_info/view_models/user_info_view_model.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/user_info_model.dart';
+import 'user_info_service.dart';
 
-class UserInfoNotifier extends StateNotifier<UserInfoModel> {
-  UserInfoNotifier() : super(UserInfoModel()) {
-    print("🏗️ UserInfoNotifier 생성됨");
+class UserInfoViewModel extends StateNotifier<UserInfoModel> {
+  final UserInfoService _userInfoService;
+
+  UserInfoViewModel({UserInfoService? userInfoService})
+    : _userInfoService = userInfoService ?? UserInfoService(),
+      super(UserInfoModel()) {
+    print("🏗️ UserInfoViewModel 생성됨");
   }
 
   // 관심사 업데이트 (최대 2개) - 안전한 리스트 처리
@@ -85,6 +90,80 @@ class UserInfoNotifier extends StateNotifier<UserInfoModel> {
     _printCurrentState();
   }
 
+  // 🆕 비즈니스 로직: 사용자 정보 저장
+  Future<void> saveUserInfo() async {
+    try {
+      print("💾 사용자 정보 저장 시작 (ViewModel)");
+
+      // 데이터 검증
+      if (!_validateUserInfo()) {
+        throw Exception('필수 정보가 누락되었습니다');
+      }
+
+      // 서비스를 통해 저장
+      await _userInfoService.saveUserInfo(state);
+      print("✅ 사용자 정보 저장 완료 (ViewModel)");
+
+      // 저장 후 상태 초기화
+      reset();
+    } catch (e) {
+      print("❌ 사용자 정보 저장 실패 (ViewModel): $e");
+      rethrow;
+    }
+  }
+
+  // 🆕 데이터 검증 로직
+  bool _validateUserInfo() {
+    print("🔍 사용자 정보 검증 시작");
+
+    final issues = <String>[];
+
+    if (state.selectedInterestIds.isEmpty) {
+      issues.add("관심사가 선택되지 않았습니다");
+    }
+
+    if (state.selectedMbti == null || state.selectedMbti!.isEmpty) {
+      issues.add("MBTI가 선택되지 않았습니다");
+    }
+
+    if (state.birthday == null) {
+      issues.add("생일이 선택되지 않았습니다");
+    }
+
+    if (state.selectedJobId == null) {
+      issues.add("직업이 선택되지 않았습니다");
+    }
+
+    if (state.selectedAttitude == null || state.selectedAttitude!.isEmpty) {
+      issues.add("말투가 선택되지 않았습니다");
+    }
+
+    if (issues.isNotEmpty) {
+      print("❌ 검증 실패:");
+      for (final issue in issues) {
+        print("   - $issue");
+      }
+      return false;
+    }
+
+    print("✅ 검증 성공");
+    return true;
+  }
+
+  // 🆕 사용자 정보 완성도 확인
+  double getCompletionPercentage() {
+    int completed = 0;
+    int total = 5; // 관심사, MBTI, 생일, 직업, 말투
+
+    if (state.selectedInterests.isNotEmpty) completed++;
+    if (state.selectedMbti != null) completed++;
+    if (state.birthday != null) completed++;
+    if (state.selectedJob != null) completed++;
+    if (state.selectedAttitude != null) completed++;
+
+    return completed / total;
+  }
+
   // 상태 초기화
   void reset() {
     print("🔄 사용자 정보 초기화 시작");
@@ -105,6 +184,7 @@ class UserInfoNotifier extends StateNotifier<UserInfoModel> {
     print("   출생시간: ${state.birthTime}");
     print("   직업: ${state.selectedJob} (ID: ${state.selectedJobId})");
     print("   말투: ${state.selectedAttitude}");
+    print("   완성도: ${(getCompletionPercentage() * 100).toStringAsFixed(1)}%");
     print("📋 ===============================");
   }
 
@@ -115,9 +195,8 @@ class UserInfoNotifier extends StateNotifier<UserInfoModel> {
 }
 
 // Provider 인스턴스
-final userInfoProvider = StateNotifierProvider<UserInfoNotifier, UserInfoModel>(
-  (ref) {
-    print("🏭 userInfoProvider 생성됨");
-    return UserInfoNotifier();
-  },
-);
+final userInfoProvider =
+    StateNotifierProvider<UserInfoViewModel, UserInfoModel>((ref) {
+      print("🏭 userInfoProvider 생성됨");
+      return UserInfoViewModel();
+    });
