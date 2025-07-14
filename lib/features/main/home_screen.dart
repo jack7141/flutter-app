@@ -18,15 +18,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late CelebData _celebData;
-  final ValueNotifier<int> _currentCelebIndex = ValueNotifier<int>(
-    0,
-  ); // 현재 페이지 인덱스 추적
+  final ValueNotifier<int> _currentCelebIndex = ValueNotifier<int>(0);
 
   @override
   void initState() {
     super.initState();
     _celebData = CelebData();
-    // loadCelebs() 줄 제거
+    _celebData.loadInitialCelebs(); // 데이터 로딩 메서드 호출
+    _celebData.addListener(() {
+      if (mounted) setState(() {}); // 상태 변경 시 UI 업데이트
+    });
   }
 
   @override
@@ -61,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
           physics: AlwaysScrollableScrollPhysics(), // pull-to-refresh가 작동하도록
           child: Column(
             children: [
-              // 셀럽 카드 목록 전체 화면 높이 78%
+              // 셀럽 카드 목록 전체 화면 높이 50%
               if (_celebData.isLoading)
                 SizedBox(
                   height: screenHeight * 0.5,
@@ -74,16 +75,25 @@ class _HomeScreenState extends State<HomeScreen> {
                   celebs: _celebData.celebs,
                   pageViewHeightFactor: 0.5,
                   onPageChanged: (index) {
-                    _currentCelebIndex.value =
-                        index % _celebData.celebs.length; // 페이지 변경 시 인덱스 업데이트
+                    _currentCelebIndex.value = index % _celebData.celebs.length;
                   },
                 )
               else
-                Center(
-                  child: Text(
-                    '연예인 정보를 불러올 수 없습니다.',
-                    style: TextStyle(fontSize: 16),
-                  ),
+                Column(
+                  children: [
+                    Text('연예인 정보를 불러올 수 없습니다.', style: TextStyle(fontSize: 16)),
+                    // 디버깅용 정보 추가
+                    Text('Loading: ${_celebData.isLoading}'),
+                    Text('Celebs count: ${_celebData.celebs.length}'),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _celebData.loadInitialCelebs();
+                        });
+                      },
+                      child: Text('다시 시도'),
+                    ),
+                  ],
                 ),
               // 데일리 메세지
               Container(
