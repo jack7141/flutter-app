@@ -12,18 +12,16 @@ class CelebCard extends StatelessWidget {
   final double screenWidth;
   final List<CelebModel> celebs;
   final double pageViewHeightFactor;
+  final Function(int)? onPageChanged; // 페이지 변경 콜백 추가
+
   const CelebCard({
     super.key,
     required this.screenHeight,
     required this.screenWidth,
     required this.celebs,
-    this.pageViewHeightFactor = 0.78,
+    required this.pageViewHeightFactor,
+    this.onPageChanged, // 선택적 매개변수
   });
-
-  final double screenHeight;
-  final double screenWidth;
-  final List<CelebModel> celebs;
-  final double pageViewHeightFactor;
 
   void _onTapCelebCard(int celebIndex, BuildContext context) async {
     final selectedCeleb = celebs[celebIndex];
@@ -105,7 +103,7 @@ class CelebCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 30),
       child: SizedBox(
