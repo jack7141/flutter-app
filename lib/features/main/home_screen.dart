@@ -160,9 +160,31 @@ class _HomeScreenState extends State<HomeScreen> {
                     Gaps.v16,
                     Container(
                       padding: EdgeInsets.symmetric(
-                        vertical: screenHeight * 0.1,
+                        vertical: screenHeight * 0.05,
                       ),
                       decoration: BoxDecoration(color: Colors.white),
+                      child: Column(
+                        children: [
+                          Center(
+                            child: Image.asset(
+                              'assets/images/present_icon.png',
+                              fit: BoxFit.contain,
+                              height: 32,
+                              width: 32,
+                            ),
+                          ),
+                          Gaps.v16,
+                          Text(
+                            '친구에게 셀럽의 목소리로\n특별한 메시지를 선물해보세요!',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff868e96),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
