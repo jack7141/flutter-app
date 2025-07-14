@@ -5,10 +5,13 @@ import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:celeb_voice/features/subscription/services/subscription_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class CelebCard extends ConsumerWidget {
+class CelebCard extends StatelessWidget {
+  final double screenHeight;
+  final double screenWidth;
+  final List<CelebModel> celebs;
+  final double pageViewHeightFactor;
   const CelebCard({
     super.key,
     required this.screenHeight,
@@ -112,7 +115,8 @@ class CelebCard extends ConsumerWidget {
             viewportFraction: 0.85,
             initialPage: 10000, // 큰 숫자로 시작해서 양방향 무한 스크롤
           ),
-          clipBehavior: Clip.none, // ← 이거 추가해보세요!
+          onPageChanged: onPageChanged, // 페이지 변경 콜백 연결
+          clipBehavior: Clip.none,
           itemBuilder: (context, index) {
             final celebIndex = index % celebs.length; // 실제 데이터 인덱스
             return Padding(
@@ -171,38 +175,6 @@ class CelebCard extends ConsumerWidget {
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                  // 메세지 배너 카드 박스
-                  Gaps.v24,
-                  Container(
-                    width: screenWidth * 0.8,
-                    decoration: BoxDecoration(
-                      color: Color(0xff9e9ef4).withOpacity(0.4),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: Sizes.size16,
-                        vertical: Sizes.size20,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${celebs[celebIndex].name}님에게서 메세지가 도착했어요.',
-                            style: TextStyle(
-                              color: Color(0xff211772),
-                              fontWeight: FontWeight.w400,
-                              fontSize: Sizes.size16,
-                            ),
-                          ),
-                          Gaps.v8,
-                          _buildMessageBanner(celebIndex, '민지야 어제 하루 잘 보냈어?'),
-                          Gaps.v10,
-                          _buildMessageBanner(celebIndex, '오늘은 뭐해? 보고싶다.'),
-                        ],
-                      ),
                     ),
                   ),
                 ],
