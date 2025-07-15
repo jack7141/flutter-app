@@ -90,7 +90,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: () => _celebData.refreshCelebs(),
+        onRefresh: () async {
+          await _celebData.refreshCelebs();
+          await _loadSubscriptionStatus(); // 구독 상태도 함께 새로고침
+        },
         color: Color(0xff9e9ef4),
         child: SingleChildScrollView(
           physics: AlwaysScrollableScrollPhysics(), // pull-to-refresh가 작동하도록
@@ -129,110 +132,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-              // 데일리 메세지
-              Container(
-                alignment: Alignment.topLeft,
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '데일리 메세지',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Gaps.v16,
-                    if (_celebData.celebs.isNotEmpty)
-                      ValueListenableBuilder<int>(
-                        valueListenable: _currentCelebIndex,
-                        builder: (context, currentIndex, child) {
-                          return _buildMessageBanner(
-                            currentIndex,
-                            '민지야 어제 하루 잘 보냈어?',
-                          );
-                        },
-                      ),
-                  ],
-                ),
-              ),
-              // 데일리 메시지 구독하기
-              MainEventWidget(
-                title: '데일리 메시지 구독하기',
-                description: '오직 나만을 위한 셀럽의 이야기',
-                icon: Icons.favorite_border,
-              ),
-              Gaps.v16,
-              Container(
-                alignment: Alignment.topLeft,
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '나만의 메시지',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // 나만의 메시지 만들기
-              MainEventWidget(
-                title: '나만의 메시지 만들기',
-                description: '셀럽에게 듣고 싶은 말이 있나요?',
-                icon: Icons.add,
-              ),
-              Gaps.v16,
-              // 친구에게 메시지 보내기
-              Container(
-                alignment: Alignment.topLeft,
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '친구에게 메시지 보내기',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Gaps.v16,
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        vertical: screenHeight * 0.05,
-                      ),
-                      decoration: BoxDecoration(color: Colors.white),
-                      child: Column(
-                        children: [
-                          Center(
-                            child: Image.asset(
-                              'assets/images/present_icon.png',
-                              fit: BoxFit.contain,
-                              height: 32,
-                              width: 32,
-                            ),
-                          ),
-                          Gaps.v16,
-                          Text(
-                            '친구에게 셀럽의 목소리로\n특별한 메시지를 선물해보세요!',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xff868e96),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              // 구독 상태에 따른 메뉴 분기
+              if (_hasSubscription)
+                _buildSubscriberMenu(screenHeight, screenWidth)
+              else
+                _buildNonSubscriberMenu(screenHeight, screenWidth),
             ],
           ),
         ),
@@ -294,6 +198,172 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildNonSubscriberMenu(double screenHeight, double screenWidth) {
+    // 데일리 메세지 - 비구독자만 보이게
+    return Column(
+      children: [
+        Container(
+          alignment: Alignment.topLeft,
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '데일리 메세지',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Gaps.v16,
+              if (_celebData.celebs.isNotEmpty)
+                ValueListenableBuilder<int>(
+                  valueListenable: _currentCelebIndex,
+                  builder: (context, currentIndex, child) {
+                    return _buildMessageBanner(
+                      currentIndex,
+                      '민지야 어제 하루 잘 보냈어?',
+                    );
+                  },
+                ),
+            ],
+          ),
+        ),
+        // 데일리 메시지 구독하기
+        MainEventWidget(
+          title: '데일리 메시지 구독하기',
+          description: '오직 나만을 위한 셀럽의 이야기',
+          icon: Icons.favorite_border,
+        ),
+        Gaps.v16,
+        Container(
+          alignment: Alignment.topLeft,
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '나만의 메시지',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+        // 나만의 메시지 만들기
+        MainEventWidget(
+          title: '나만의 메시지 만들기',
+          description: '셀럽에게 듣고 싶은 말이 있나요?',
+          icon: Icons.add,
+        ),
+        Gaps.v16,
+        // 친구에게 메시지 보내기
+        Container(
+          alignment: Alignment.topLeft,
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '친구에게 메시지 보내기',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Gaps.v16,
+              Container(
+                padding: EdgeInsets.symmetric(vertical: screenHeight * 0.05),
+                decoration: BoxDecoration(color: Colors.white),
+                child: Column(
+                  children: [
+                    Center(
+                      child: Image.asset(
+                        'assets/images/present_icon.png',
+                        fit: BoxFit.contain,
+                        height: 32,
+                        width: 32,
+                      ),
+                    ),
+                    Gaps.v16,
+                    Text(
+                      '친구에게 셀럽의 목소리로\n특별한 메시지를 선물해보세요!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xff868e96),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubscriberMenu(double screenHeight, double screenWidth) {
+    return Column(
+      children: [
+        Container(
+          width: screenWidth * 0.8,
+          height: screenHeight * 0.1,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(Sizes.size16),
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/daily_message.png',
+                    fit: BoxFit.contain,
+                    height: 36,
+                    width: 36,
+                  ),
+                  Gaps.v5,
+                  Text('데일리 메시지', style: TextStyle(fontSize: 12)),
+                ],
+              ),
+              Gaps.h24,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/my_message.png',
+                    fit: BoxFit.contain,
+                    height: 36,
+                    width: 36,
+                  ),
+                  Gaps.v5,
+                  Text('나만의 메시지', style: TextStyle(fontSize: 12)),
+                ],
+              ),
+              Gaps.h24,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/present.png',
+                    fit: BoxFit.contain,
+                    height: 36,
+                    width: 36,
+                  ),
+                  Gaps.v5,
+                  Text('선물하기', style: TextStyle(fontSize: 12)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
