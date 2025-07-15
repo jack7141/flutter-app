@@ -380,7 +380,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     'YouTube',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  Icon(Icons.arrow_forward_ios, size: 16),
                 ],
               ),
               Gaps.v12,
@@ -396,7 +395,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildYouTubeVideos(double screenWidth) {
     if (_celebData.celebs.isEmpty) {
       return SizedBox(
-        height: 100,
+        height: 200,
         child: Center(child: Text('동영상을 불러오는 중...')),
       );
     }
@@ -411,99 +410,130 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return SizedBox(
-                height: 100,
+                height: 200,
                 child: Center(child: CircularProgressIndicator()),
               );
             }
 
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return SizedBox(
-                height: 100,
+                height: 200,
                 child: Center(child: Text('동영상을 불러올 수 없습니다.')),
               );
             }
 
             final videos = snapshot.data!;
-            final imageSize = (screenWidth - 80) / 3;
+            // YouTube 비율 (16:9) 적용
+            final videoWidth = screenWidth * 0.8;
+            final videoHeight = videoWidth * (9 / 16);
 
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: videos.map((video) {
-                return GestureDetector(
-                  onTap: () => _playYouTubeVideo(video.videoId),
-                  child: Container(
-                    width: imageSize,
-                    height: imageSize,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Stack(
-                        children: [
-                          Image.network(
-                            video.thumbnailUrl,
-                            fit: BoxFit.cover,
-                            width: imageSize,
-                            height: imageSize,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Container(
-                                width: imageSize,
-                                height: imageSize,
-                                color: Colors.grey[300],
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    value:
-                                        loadingProgress.expectedTotalBytes !=
-                                            null
-                                        ? loadingProgress
-                                                  .cumulativeBytesLoaded /
-                                              loadingProgress
-                                                  .expectedTotalBytes!
-                                        : null,
+            return SizedBox(
+              height: videoHeight + 60, // 제목 공간 추가
+              child: PageView.builder(
+                controller: PageController(viewportFraction: 0.85),
+                itemCount: videos.length,
+                itemBuilder: (context, index) {
+                  final video = videos[index];
+                  return Container(
+                    margin: EdgeInsets.symmetric(horizontal: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GestureDetector(
+                          onTap: () => _playYouTubeVideo(video.videoId),
+                          child: Container(
+                            width: videoWidth,
+                            height: videoHeight,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Stack(
+                                children: [
+                                  Image.network(
+                                    video.thumbnailUrl,
+                                    fit: BoxFit.cover,
+                                    width: videoWidth,
+                                    height: videoHeight,
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Container(
+                                        width: videoWidth,
+                                        height: videoHeight,
+                                        color: Colors.grey[300],
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                            value:
+                                                loadingProgress
+                                                        .expectedTotalBytes !=
+                                                    null
+                                                ? loadingProgress
+                                                          .cumulativeBytesLoaded /
+                                                      loadingProgress
+                                                          .expectedTotalBytes!
+                                                : null,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        width: videoWidth,
+                                        height: videoHeight,
+                                        color: Colors.grey[300],
+                                        child: Icon(
+                                          Icons.play_circle_outline,
+                                          size: 60,
+                                        ),
+                                      );
+                                    },
                                   ),
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                width: imageSize,
-                                height: imageSize,
-                                color: Colors.grey[300],
-                                child: Icon(
-                                  Icons.play_circle_outline,
-                                  size: 40,
-                                ),
-                              );
-                            },
-                          ),
-                          // 재생 버튼 오버레이
-                          Positioned.fill(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.3),
-                              ),
-                              child: Icon(
-                                Icons.play_circle_outline,
-                                color: Colors.white,
-                                size: 30,
+                                  // 재생 버튼 오버레이
+                                  Positioned.fill(
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.3),
+                                      ),
+                                      child: Icon(
+                                        Icons.play_circle_outline,
+                                        color: Colors.white,
+                                        size: 50,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                        Gaps.v8,
+                        // 동영상 제목
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(
+                            video.title,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                );
-              }).toList(),
+                  );
+                },
+              ),
             );
           },
         );
