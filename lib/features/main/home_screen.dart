@@ -3,6 +3,7 @@
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/views_models/celeb_data.dart';
+import 'package:celeb_voice/features/subscription/services/subscription_service.dart';
 import 'package:flutter/material.dart';
 
 import '../../../config/app_config.dart';
@@ -20,14 +21,47 @@ class _HomeScreenState extends State<HomeScreen> {
   late CelebData _celebData;
   final ValueNotifier<int> _currentCelebIndex = ValueNotifier<int>(0);
 
+  // 구독 상태 관리 변수 수정
+  bool _hasSubscription = false; // 구독한 셀럽이 있는지 여부
+  bool _isLoadingSubscription = false; // 로딩 상태
+
   @override
   void initState() {
     super.initState();
     _celebData = CelebData();
-    _celebData.loadInitialCelebs(); // 데이터 로딩 메서드 호출
+    _celebData.loadInitialCelebs();
     _celebData.addListener(() {
-      if (mounted) setState(() {}); // 상태 변경 시 UI 업데이트
+      if (mounted) setState(() {});
     });
+    _loadSubscriptionStatus();
+  }
+
+  // 구독 상태 조회 메서드 수정
+  Future<void> _loadSubscriptionStatus() async {
+    setState(() {
+      _isLoadingSubscription = true;
+    });
+
+    try {
+      final subscriptionService = SubscriptionService();
+      final subscriptionStatus = await subscriptionService
+          .getSubscriptionStatus();
+
+      setState(() {
+        _hasSubscription = subscriptionStatus
+            .subscribedCelebIds
+            .isNotEmpty; // 배열이 비어있지 않으면 true
+        _isLoadingSubscription = false;
+      });
+
+      print("📋 구독 상태: ${_hasSubscription ? '구독 중' : '미구독'}");
+    } catch (e) {
+      print("❌ 구독 상태 로드 실패: $e");
+      setState(() {
+        _hasSubscription = false; // 에러 시 미구독으로 처리
+        _isLoadingSubscription = false;
+      });
+    }
   }
 
   @override
