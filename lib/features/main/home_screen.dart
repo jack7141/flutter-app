@@ -6,6 +6,7 @@ import 'package:celeb_voice/features/main/views_models/celeb_data.dart';
 import 'package:celeb_voice/features/subscription/services/subscription_service.dart';
 import 'package:celeb_voice/services/youtube_service.dart'; // import 추가
 import 'package:flutter/material.dart';
+import 'package:html_unescape/html_unescape.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../../config/app_config.dart';
@@ -434,8 +435,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 itemCount: videos.length,
                 itemBuilder: (context, index) {
                   final video = videos[index];
-                  return Container(
-                    margin: EdgeInsets.symmetric(horizontal: 8),
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      right: index == videos.length - 1 ? 0 : 16,
+                    ), // 마지막 아이템만 padding 없음
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -518,15 +521,23 @@ class _HomeScreenState extends State<HomeScreen> {
                         // 동영상 제목
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 8),
-                          child: Text(
-                            video.title,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                          child: Builder(
+                            builder: (context) {
+                              var unescape = HtmlUnescape();
+                              final decodedTitle = unescape.convert(
+                                video.title,
+                              );
+                              return Text(
+                                decodedTitle,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              );
+                            },
                           ),
                         ),
                       ],
