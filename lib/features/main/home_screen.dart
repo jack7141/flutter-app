@@ -4,7 +4,9 @@ import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/views_models/celeb_data.dart';
 import 'package:celeb_voice/features/subscription/services/subscription_service.dart';
+import 'package:celeb_voice/services/youtube_service.dart'; // import 추가
 import 'package:flutter/material.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../../config/app_config.dart';
 import 'widgets/celeb_card_widget.dart';
@@ -363,8 +365,180 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
+        Gaps.v16,
+        // YouTube 연동 섹션
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          alignment: Alignment.topLeft,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'YouTube',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  Icon(Icons.arrow_forward_ios, size: 16),
+                ],
+              ),
+              Gaps.v12,
+              // YouTube 썸네일 3개 표시
+              _buildYouTubeVideos(screenWidth),
+            ],
+          ),
+        ),
       ],
     );
+  }
+
+  Widget _buildYouTubeVideos(double screenWidth) {
+    if (_celebData.celebs.isEmpty) {
+      return SizedBox(
+        height: 100,
+        child: Center(child: Text('동영상을 불러오는 중...')),
+      );
+    }
+
+    return ValueListenableBuilder<int>(
+      valueListenable: _currentCelebIndex,
+      builder: (context, currentIndex, child) {
+        final currentCeleb = _celebData.celebs[currentIndex];
+
+        return FutureBuilder<List<YouTubeVideo>>(
+          future: YouTubeService.getCelebVideos(currentCeleb.name),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return SizedBox(
+                height: 100,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return SizedBox(
+                height: 100,
+                child: Center(child: Text('동영상을 불러올 수 없습니다.')),
+              );
+            }
+
+            final videos = snapshot.data!;
+            final imageSize = (screenWidth - 80) / 3;
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: videos.map((video) {
+                return GestureDetector(
+                  onTap: () => _playYouTubeVideo(video.videoId),
+                  child: Container(
+                    width: imageSize,
+                    height: imageSize,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Stack(
+                        children: [
+                          Image.network(
+                            video.thumbnailUrl,
+                            fit: BoxFit.cover,
+                            width: imageSize,
+                            height: imageSize,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Container(
+                                width: imageSize,
+                                height: imageSize,
+                                color: Colors.grey[300],
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    value:
+                                        loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                  .cumulativeBytesLoaded /
+                                              loadingProgress
+                                                  .expectedTotalBytes!
+                                        : null,
+                                  ),
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: imageSize,
+                                height: imageSize,
+                                color: Colors.grey[300],
+                                child: Icon(
+                                  Icons.play_circle_outline,
+                                  size: 40,
+                                ),
+                              );
+                            },
+                          ),
+                          // 재생 버튼 오버레이
+                          Positioned.fill(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.3),
+                              ),
+                              child: Icon(
+                                Icons.play_circle_outline,
+                                color: Colors.white,
+                                size: 30,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // YouTube 동영상 재생 메서드
+  void _playYouTubeVideo(String videoId) {
+    final YoutubePlayerController controller = YoutubePlayerController(
+      initialVideoId: videoId,
+      flags: YoutubePlayerFlags(
+        autoPlay: true,
+        mute: false,
+        enableCaption: false,
+      ),
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: SizedBox(
+          height: 300,
+          child: YoutubePlayer(
+            controller: controller,
+            showVideoProgressIndicator: true,
+            onReady: () {
+              print('플레이어 준비됨');
+            },
+          ),
+        ),
+      ),
+    ).then((_) {
+      controller.dispose(); // 다이얼로그 닫힐 때 컨트롤러 해제
+    });
   }
 }
 
