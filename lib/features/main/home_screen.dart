@@ -527,6 +527,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               final decodedTitle = unescape.convert(
                                 video.title,
                               );
+
                               return Text(
                                 decodedTitle,
                                 style: TextStyle(
@@ -534,7 +535,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   fontWeight: FontWeight.w600,
                                   color: Colors.black87,
                                 ),
-                                maxLines: 2,
+                                maxLines: 1, // 2에서 1로 변경
                                 overflow: TextOverflow.ellipsis,
                               );
                             },
