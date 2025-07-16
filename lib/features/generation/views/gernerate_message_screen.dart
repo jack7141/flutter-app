@@ -3,15 +3,17 @@ import 'package:celeb_voice/common/widgets/form_button.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/generation/views/preview_tts_screen.dart';
+import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class GernerateMessageScreen extends StatefulWidget {
-  static const String routeName = "gernerateMessage";
-  static const String routePath = "/gernerateMessage";
+  final CelebModel? celeb;
+  static const String routeName = "generateMessage";
+  static const String routePath = "/generateMessage";
 
-  const GernerateMessageScreen({super.key});
+  const GernerateMessageScreen({super.key, required this.celeb});
 
   @override
   State<GernerateMessageScreen> createState() => _GernerateMessageScreenState();
@@ -24,6 +26,8 @@ class _GernerateMessageScreenState extends State<GernerateMessageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final celeb = widget.celeb;
+
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       appBar: const CommonAppBar(),

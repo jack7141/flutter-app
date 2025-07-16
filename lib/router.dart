@@ -124,14 +124,20 @@ final router = GoRouter(
           builder: (context, state) => const VoiceStorageScreen(),
         ),
         GoRoute(
-          path: "/gernerateMessage",
+          path: "/generateMessage",
           name: GernerateMessageScreen.routeName,
-          builder: (context, state) => const GernerateMessageScreen(),
+          builder: (context, state) {
+            final celeb = state.extra as CelebModel?;
+            return GernerateMessageScreen(celeb: celeb);
+          },
         ),
         GoRoute(
           path: "/previewTts",
           name: PreviewTtsScreen.routeName,
-          builder: (context, state) => const PreviewTtsScreen(),
+          builder: (context, state) {
+            final celeb = state.extra as CelebModel?;
+            return PreviewTtsScreen(celeb: celeb);
+          },
         ),
       ],
     ),

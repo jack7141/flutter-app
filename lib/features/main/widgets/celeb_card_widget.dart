@@ -51,7 +51,7 @@ class CelebCard extends StatelessWidget {
         }
 
         if (context.mounted) {
-          context.push('/generateMessage', extra: selectedCeleb);
+          context.push('/previewTts', extra: selectedCeleb);
         }
       } else {
         // 미구독 상태 → 구독 API 호출
