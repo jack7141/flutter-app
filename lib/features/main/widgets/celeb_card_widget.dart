@@ -105,7 +105,7 @@ class CelebCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 30),
+      padding: EdgeInsets.symmetric(vertical: 20),
       child: SizedBox(
         height: screenHeight * pageViewHeightFactor, // 전체화면에서 78% 높이
         child: PageView.builder(

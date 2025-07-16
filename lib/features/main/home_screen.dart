@@ -4,6 +4,7 @@ import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/views_models/celeb_data.dart';
 import 'package:celeb_voice/features/subscription/services/subscription_service.dart';
+import 'package:celeb_voice/services/instagram_service.dart'; // 이 줄 추가
 import 'package:celeb_voice/services/youtube_service.dart'; // import 추가
 import 'package:flutter/material.dart';
 import 'package:html_unescape/html_unescape.dart';
@@ -366,6 +367,21 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          alignment: Alignment.topLeft,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Instagram',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Gaps.v12,
+              _buildInstagramImages(screenWidth),
+            ],
+          ),
+        ),
         Gaps.v16,
         // YouTube 연동 섹션
         Container(
@@ -389,6 +405,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
+        Gaps.v16,
       ],
     );
   }
@@ -581,6 +598,95 @@ class _HomeScreenState extends State<HomeScreen> {
     ).then((_) {
       controller.dispose(); // 다이얼로그 닫힐 때 컨트롤러 해제
     });
+  }
+
+  // Instagram 이미지 표시 메서드
+  Widget _buildInstagramImages(double screenWidth) {
+    if (_celebData.celebs.isEmpty) {
+      return SizedBox(
+        height: 120,
+        child: Center(child: Text('이미지를 불러오는 중...')),
+      );
+    }
+
+    return ValueListenableBuilder<int>(
+      valueListenable: _currentCelebIndex,
+      builder: (context, currentIndex, child) {
+        final currentCeleb = _celebData.celebs[currentIndex];
+
+        return FutureBuilder<List<InstagramImage>>(
+          future: InstagramService.getCelebInstagramImages(currentCeleb.name),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return SizedBox(
+                height: 120,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return SizedBox(
+                height: 120,
+                child: Center(child: Text('이미지를 불러올 수 없습니다.')),
+              );
+            }
+
+            final images = snapshot.data!;
+            final imageSize =
+                (screenWidth - 64) / 3; // Container padding(32) + 이미지 간격(32) 고려
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.start, // 왼쪽 정렬
+              children: images.take(3).map((image) {
+                // 최대 3개만 표시
+                final index = images.indexOf(image);
+                return Container(
+                  width: imageSize,
+                  height: imageSize,
+                  margin: EdgeInsets.only(
+                    right: index == 2 ? 0 : 16, // 마지막 이미지는 오른쪽 여백 없음
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      image.imageUrl,
+                      fit: BoxFit.cover, // cover로 변경해서 정사각형으로 채우기
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          color: Colors.grey[300],
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[300],
+                          child: Icon(
+                            Icons.image,
+                            size: 40,
+                            color: Colors.grey[600],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          },
+        );
+      },
+    );
   }
 }
 
