@@ -1,4 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/features/generation/models/daily_message_model.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +50,7 @@ class _PreviewTtsScreenState extends State<PreviewTtsScreen> {
   }
 
   // TTS 재생/일시정지 함수
-  Future<void> _togglePlayPause(String messageTitle) async {
+  Future<void> _togglePlayPause(String messageTitle, String ttsFileName) async {
     try {
       if (_isPlaying && _currentPlayingTitle == messageTitle) {
         print('일시정지 시도');
@@ -68,7 +69,7 @@ class _PreviewTtsScreenState extends State<PreviewTtsScreen> {
         print('로컬 asset 파일 재생 시도');
 
         // 로컬 asset 파일 재생
-        await _audioPlayer.play(AssetSource('tts/test.mp3'));
+        await _audioPlayer.play(AssetSource('tts/$ttsFileName'));
 
         print('로컬 asset 파일 재생 시작');
 
@@ -96,42 +97,33 @@ class _PreviewTtsScreenState extends State<PreviewTtsScreen> {
     DailyMessageModel(
       date: "2025년 07월 16일 수요일",
       title: "민지야, 누구나 누군가의 위로가 되어줄 수 있어.",
-      content: "내 목소리로 조금이나마 행복했으면 좋겠다. 네가 웃으면 나도 좋아",
+      content:
+          "안녕하세요, 아이유 이지은입니다. 이렇게 또 여러분과 소통할 수 있는 기회를 얻게 되어 정말로 감사한 마음이에요.",
+      ttsFileName: "test0.mp3",
     ),
     DailyMessageModel(
       date: "2025년 07월 15일 화요일",
       title: "오늘도 힘내자!",
-      content: "어제보다 나은 오늘을 위해 함께 노력해보자. 너는 할 수 있어!",
+      content: "오늘도 제가 전하는 노래와 이야기가 여러분의 마음에 작은 기쁨과 위로가 되었으면 좋겠습니다.",
+      ttsFileName: "test1.mp3",
     ),
     DailyMessageModel(
       date: "2025년 07월 14일 월요일",
-      title: "새로운 한 주의 시작",
-      content: "월요일이지만 기분 좋게 시작해보자. 응원할게!",
+      title: "오늘도 힘내자!",
+      content: "자! 다들 정신 안차립니까? 해가 중천인데, 아직도 누워서 뭐하고 있는거죠? 좋게말할떄 당장,,",
+      ttsFileName: "test2.mp3",
     ),
     DailyMessageModel(
       date: "2025년 07월 13일 일요일",
       title: "새로운 한 주의 시작",
-      content: "월요일이지만 기분 좋게 시작해보자. 응원할게!",
+      content: "데뷔 초부터 지금까지 변함없이 저를 응원해 주시는 팬분들 덕분에 여기까지 올 수 있었다고 생각합니다.",
+      ttsFileName: "test3.mp3",
     ),
     DailyMessageModel(
       date: "2025년 07월 12일 토요일",
       title: "새로운 한 주의 시작",
-      content: "월요일이지만 기분 좋게 시작해보자. 응원할게!",
-    ),
-    DailyMessageModel(
-      date: "2025년 07월 11일 금요일",
-      title: "새로운 한 주의 시작",
-      content: "월요일이지만 기분 좋게 시작해보자. 응원할게!",
-    ),
-    DailyMessageModel(
-      date: "2025년 07월 10일 목요일",
-      title: "새로운 한 주의 시작",
-      content: "월요일이지만 기분 좋게 시작해보자. 응원할게!",
-    ),
-    DailyMessageModel(
-      date: "2025년 07월 09일 수요일",
-      title: "새로운 한 주의 시작",
-      content: "월요일이지만 기분 좋게 시작해보자. 응원할게!",
+      content: "앞으로도 더 좋은 음악과 다양한 모습을 보여드리기 위해 노력할 테니, 계속해서 따뜻한 관심과 사랑 부탁드릴게요.",
+      ttsFileName: "test4.mp3",
     ),
   ];
 
@@ -153,7 +145,7 @@ class _PreviewTtsScreenState extends State<PreviewTtsScreen> {
                   ? Icon(Icons.person, color: Colors.white, size: 20)
                   : null,
             ),
-            SizedBox(width: 12),
+            Gaps.h12,
             Text(
               celeb?.name ?? "",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -266,7 +258,8 @@ class _PreviewTtsScreenState extends State<PreviewTtsScreen> {
                 bottom: 13,
                 right: 13,
                 child: InkWell(
-                  onTap: () => _togglePlayPause(message.title),
+                  onTap: () =>
+                      _togglePlayPause(message.title, message.ttsFileName),
                   borderRadius: BorderRadius.circular(15),
                   child: Container(
                     padding: EdgeInsets.all(5),
