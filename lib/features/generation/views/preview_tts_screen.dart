@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:celeb_voice/features/generation/models/daily_message_model.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,81 @@ class PreviewTtsScreen extends StatefulWidget {
 }
 
 class _PreviewTtsScreenState extends State<PreviewTtsScreen> {
+  late AudioPlayer _audioPlayer;
+  bool _isPlaying = false;
+  String? _currentPlayingTitle;
+
+  @override
+  void initState() {
+    super.initState();
+    _audioPlayer = AudioPlayer();
+
+    print('오디오 플레이어 초기화 완료');
+
+    // 재생 완료 시 상태 초기화
+    _audioPlayer.onPlayerComplete.listen((event) {
+      print('오디오 재생 완료');
+      setState(() {
+        _isPlaying = false;
+        _currentPlayingTitle = null;
+      });
+    });
+
+    // 오디오 상태 변화 감지
+    _audioPlayer.onPlayerStateChanged.listen((state) {
+      print('오디오 상태 변화: $state');
+    });
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  // TTS 재생/일시정지 함수
+  Future<void> _togglePlayPause(String messageTitle) async {
+    try {
+      if (_isPlaying && _currentPlayingTitle == messageTitle) {
+        print('일시정지 시도');
+        await _audioPlayer.pause();
+        setState(() {
+          _isPlaying = false;
+        });
+        print('오디오 일시정지 완료');
+      } else {
+        if (_isPlaying) {
+          print('다른 오디오 정지 시도');
+          await _audioPlayer.stop();
+          print('다른 오디오 정지 완료');
+        }
+
+        print('로컬 asset 파일 재생 시도');
+
+        // 로컬 asset 파일 재생
+        await _audioPlayer.play(AssetSource('tts/test.mp3'));
+
+        print('로컬 asset 파일 재생 시작');
+
+        setState(() {
+          _isPlaying = true;
+          _currentPlayingTitle = messageTitle;
+        });
+        print('상태 업데이트 완료');
+      }
+    } catch (e) {
+      print('오디오 재생 실패: $e');
+      print('에러 타입: ${e.runtimeType}');
+      setState(() {
+        _isPlaying = false;
+        _currentPlayingTitle = null;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('오디오 재생에 실패했습니다: $e')));
+    }
+  }
+
   // 날짜별 메세지 리스트
   final List<DailyMessageModel> _dailyMessages = [
     DailyMessageModel(
@@ -105,6 +181,9 @@ class _PreviewTtsScreenState extends State<PreviewTtsScreen> {
 
   // 날짜별 메세지 카드 빌드 메서드
   Widget _buildDailyMessageCard(DailyMessageModel message) {
+    final isCurrentlyPlaying =
+        _isPlaying && _currentPlayingTitle == message.title;
+
     return Column(
       children: [
         // 날짜 박스
@@ -182,21 +261,17 @@ class _PreviewTtsScreenState extends State<PreviewTtsScreen> {
                   ],
                 ),
               ),
-              // 재생 버튼을 우측 하단에 오버레이
+              // 재생/일시정지 버튼
               Positioned(
                 bottom: 13,
                 right: 13,
                 child: InkWell(
-                  onTap: () {
-                    // 재생 버튼 클릭 시 동작
-                    print('재생 버튼 클릭: ${message.title}');
-                    // 여기에 TTS 재생 로직 추가
-                  },
-                  borderRadius: BorderRadius.circular(15), // 클릭 효과 영역
+                  onTap: () => _togglePlayPause(message.title),
+                  borderRadius: BorderRadius.circular(15),
                   child: Container(
                     padding: EdgeInsets.all(5),
                     child: Icon(
-                      Icons.play_arrow,
+                      isCurrentlyPlaying ? Icons.pause : Icons.play_arrow,
                       color: Color(0xff9e9ef4),
                       size: 30,
                       shadows: [

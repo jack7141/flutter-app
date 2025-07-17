@@ -84,10 +84,10 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
+    - assets/tts/
     - assets/images/
     - assets/images/celebs/
     - assets/images/message/
-    - assets/tts/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
