@@ -27,6 +27,7 @@ class _GernerateMessageScreenState extends State<GernerateMessageScreen> {
   @override
   Widget build(BuildContext context) {
     final celeb = widget.celeb;
+    print("🔍 celeb: $celeb");
 
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
@@ -65,7 +66,7 @@ class _GernerateMessageScreenState extends State<GernerateMessageScreen> {
                   children: [
                     Container(
                       margin: const EdgeInsets.all(2.0),
-                      child: CelebAvatar(),
+                      child: CelebAvatar(currentCeleb: celeb), // celeb 정보 전달
                     ),
                     Gaps.v12,
                     Container(

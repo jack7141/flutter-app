@@ -2,7 +2,7 @@ import 'package:celeb_voice/common/main_navigation_screen.dart';
 import 'package:celeb_voice/features/authentication/views/login_screen.dart';
 import 'package:celeb_voice/features/authentication/views/nickname_screen.dart';
 import 'package:celeb_voice/features/authentication/views/terms_screens.dart';
-import 'package:celeb_voice/features/generation/views/gernerate_message_screen.dart';
+import 'package:celeb_voice/features/generation/views/generate_my_message_screen.dart';
 import 'package:celeb_voice/features/generation/views/preview_tts_screen.dart';
 import 'package:celeb_voice/features/main/home_screen.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';

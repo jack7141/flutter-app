@@ -2,11 +2,13 @@
 
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
+import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:celeb_voice/features/main/views_models/celeb_data.dart';
 import 'package:celeb_voice/features/subscription/services/subscription_service.dart';
 import 'package:celeb_voice/services/instagram_service.dart'; // 이 줄 추가
 import 'package:celeb_voice/services/youtube_service.dart'; // import 추가
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -28,9 +30,32 @@ class _HomeScreenState extends State<HomeScreen> {
   // 구독 상태 관리
   bool _hasSubscription = false;
   bool _isLoadingSubscription = false;
+  List<String> _subscribedCelebIds = []; // 구독한 셀럽 ID 목록 추가
 
   // AppBar 탭 상태 관리 추가
   int _selectedTabIndex = 0; // 0: 내 셀럽, 1: 모든 셀럽
+
+  // 현재 필터링된 셀럽 목록을 가져오는 getter 추가
+  List<CelebModel> get _filteredCelebs {
+    if (!_hasSubscription || _selectedTabIndex == 1) {
+      // 미구독자이거나 "모든 셀럽" 탭
+      return _celebData.celebs;
+    } else {
+      // "내 셀럽" 탭 - 구독한 셀럽만 필터링
+      return _celebData.celebs
+          .where((celeb) => _subscribedCelebIds.contains(celeb.id))
+          .toList();
+    }
+  }
+
+  // 현재 선택된 셀럽을 가져오는 getter 추가
+  CelebModel? get _currentCeleb {
+    final filteredCelebs = _filteredCelebs;
+    if (filteredCelebs.isEmpty) return null;
+
+    final currentIndex = _currentCelebIndex.value % filteredCelebs.length;
+    return filteredCelebs[currentIndex];
+  }
 
   @override
   void initState() {
@@ -55,6 +80,8 @@ class _HomeScreenState extends State<HomeScreen> {
           .getSubscriptionStatus();
 
       setState(() {
+        _subscribedCelebIds =
+            subscriptionStatus.subscribedCelebIds; // 구독한 셀럽 ID 목록 저장
         _hasSubscription = subscriptionStatus
             .subscribedCelebIds
             .isNotEmpty; // 배열이 비어있지 않으면 true
@@ -62,10 +89,12 @@ class _HomeScreenState extends State<HomeScreen> {
       });
 
       print("📋 구독 상태: ${_hasSubscription ? '구독 중' : '미구독'}");
+      print("📋 구독한 셀럽 IDs: $_subscribedCelebIds");
     } catch (e) {
       print("❌ 구독 상태 로드 실패: $e");
       setState(() {
         _hasSubscription = false; // 에러 시 미구독으로 처리
+        _subscribedCelebIds = []; // 에러 시 빈 목록으로 초기화
         _isLoadingSubscription = false;
       });
     }
@@ -106,10 +135,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 CelebCard(
                   screenHeight: screenHeight,
                   screenWidth: screenWidth,
-                  celebs: _celebData.celebs,
+                  celebs: _filteredCelebs, // 필터링된 셀럽 목록 전달
                   pageViewHeightFactor: 0.5,
                   onPageChanged: (index) {
-                    _currentCelebIndex.value = index % _celebData.celebs.length;
+                    _currentCelebIndex.value = index % _filteredCelebs.length;
                   },
                 )
               else
@@ -354,10 +383,22 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         // 나만의 메시지 만들기
-        MainEventWidget(
-          title: '나만의 메시지 만들기',
-          description: '셀럽에게 듣고 싶은 말이 있나요?',
-          icon: Icons.add,
+        GestureDetector(
+          onTap: () {
+            final currentCeleb = _currentCeleb;
+            if (currentCeleb != null) {
+              context.push('/generateMessage', extra: currentCeleb);
+            } else {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('셀럽 정보를 불러올 수 없습니다.')));
+            }
+          },
+          child: MainEventWidget(
+            title: '나만의 메시지 만들기',
+            description: '셀럽에게 듣고 싶은 말이 있나요?',
+            icon: Icons.add,
+          ),
         ),
         Gaps.v16,
         // 친구에게 메시지 보내기
@@ -420,34 +461,50 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/images/daily_message.png',
-                    fit: BoxFit.contain,
-                    height: 36,
-                    width: 36,
-                  ),
-                  Gaps.v5,
-                  Text('데일리 메시지', style: TextStyle(fontSize: 12)),
-                ],
+              GestureDetector(
+                onTap: () {
+                  final currentCeleb = _currentCeleb;
+                  if (currentCeleb != null) {
+                    context.push('/previewTts', extra: currentCeleb);
+                  }
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/daily_message.png',
+                      fit: BoxFit.contain,
+                      height: 36,
+                      width: 36,
+                    ),
+                    Gaps.v5,
+                    Text('데일리 메시지', style: TextStyle(fontSize: 12)),
+                  ],
+                ),
               ),
               Gaps.h24,
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/images/my_message.png',
-                    fit: BoxFit.contain,
-                    height: 36,
-                    width: 36,
-                  ),
-                  Gaps.v5,
-                  Text('나만의 메시지', style: TextStyle(fontSize: 12)),
-                ],
+              GestureDetector(
+                onTap: () {
+                  final currentCeleb = _currentCeleb;
+                  if (currentCeleb != null) {
+                    context.push('/generateMessage', extra: currentCeleb);
+                  }
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/my_message.png',
+                      fit: BoxFit.contain,
+                      height: 36,
+                      width: 36,
+                    ),
+                    Gaps.v5,
+                    Text('나만의 메시지', style: TextStyle(fontSize: 12)),
+                  ],
+                ),
               ),
               Gaps.h24,
               Column(
