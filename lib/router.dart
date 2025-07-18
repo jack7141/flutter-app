@@ -3,6 +3,7 @@ import 'package:celeb_voice/features/authentication/views/login_screen.dart';
 import 'package:celeb_voice/features/authentication/views/nickname_screen.dart';
 import 'package:celeb_voice/features/authentication/views/terms_screens.dart';
 import 'package:celeb_voice/features/generation/views/generate_my_message_screen.dart';
+import 'package:celeb_voice/features/generation/views/my_message_tts_screen.dart';
 import 'package:celeb_voice/features/generation/views/preview_tts_screen.dart';
 import 'package:celeb_voice/features/main/home_screen.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
@@ -34,6 +35,7 @@ CelebModel? _parseCelebFromQuery(GoRouterState state) {
       id: celebId,
       name: celebName,
       imagePath: celebImage,
+      detailImagePath: 'sample_detail_image_path', // 추가
       tags: [],
       description: '',
       status: '',
@@ -138,6 +140,14 @@ final router = GoRouter(
           builder: (context, state) {
             final celeb = state.extra as CelebModel?;
             return PreviewTtsScreen(celeb: celeb);
+          },
+        ),
+        GoRoute(
+          path: "/myMessageTts",
+          name: MyMessageTtsScreen.routeName,
+          builder: (context, state) {
+            final celeb = state.extra as CelebModel?;
+            return MyMessageTtsScreen(celeb: celeb);
           },
         ),
       ],

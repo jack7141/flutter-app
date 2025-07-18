@@ -2,7 +2,6 @@ import 'package:celeb_voice/common/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/common/widgets/form_button.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
-import 'package:celeb_voice/features/generation/views/preview_tts_screen.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +20,7 @@ class GernerateMessageScreen extends StatefulWidget {
 
 class _GernerateMessageScreenState extends State<GernerateMessageScreen> {
   void _onNextTap(BuildContext context) {
-    context.pushNamed(PreviewTtsScreen.routeName);
+    context.push('/myMessageTts', extra: widget.celeb);
   }
 
   @override
