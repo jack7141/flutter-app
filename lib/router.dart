@@ -1,5 +1,6 @@
 import 'package:celeb_voice/common/main_navigation_screen.dart';
 import 'package:celeb_voice/features/authentication/views/login_screen.dart';
+import 'package:celeb_voice/features/authentication/views/nickname_screen.dart';
 import 'package:celeb_voice/features/authentication/views/terms_screens.dart';
 import 'package:celeb_voice/features/generation/views/gernerate_message_screen.dart';
 import 'package:celeb_voice/features/generation/views/preview_tts_screen.dart';
@@ -150,6 +151,11 @@ final router = GoRouter(
       path: "/terms",
       name: TermsScreen.routeName,
       builder: (context, state) => const TermsScreen(),
+    ),
+    GoRoute(
+      path: "/nickname",
+      name: NicknameScreen.routeName,
+      builder: (context, state) => const NicknameScreen(),
     ),
   ],
 );

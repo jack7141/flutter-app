@@ -82,25 +82,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: Color(AppConfig.backgroundColorValue),
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Color(0xffeff0f4),
-        centerTitle: false,
-        title: Image.asset(
-          'assets/images/header_logo.png',
-          height: 32,
-          width: 180,
-          fit: BoxFit.contain,
-        ),
-      ),
+      appBar: _buildAppBar(), // AppBar를 조건부로 생성
       body: RefreshIndicator(
         onRefresh: () async {
           await _celebData.refreshCelebs();
-          await _loadSubscriptionStatus(); // 구독 상태도 함께 새로고침
+          await _loadSubscriptionStatus();
         },
         color: Color(0xff9e9ef4),
         child: SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(), // pull-to-refresh가 작동하도록
+          physics: AlwaysScrollableScrollPhysics(),
           child: Column(
             children: [
               // 셀럽 카드 목록 전체 화면 높이 50%
@@ -123,7 +113,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 Column(
                   children: [
                     Text('연예인 정보를 불러올 수 없습니다.', style: TextStyle(fontSize: 16)),
-                    // 디버깅용 정보 추가
                     Text('Loading: ${_celebData.isLoading}'),
                     Text('Celebs count: ${_celebData.celebs.length}'),
                     ElevatedButton(
@@ -146,6 +135,83 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  // 구독 상태에 따른 AppBar 생성
+  PreferredSizeWidget _buildAppBar() {
+    if (_hasSubscription) {
+      // 구독자용 AppBar
+      return AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: Color(0xffeff0f4), // 구독자는 보라색 배경
+        centerTitle: false,
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/images/header_logo.png',
+              height: 28,
+              width: 160,
+              fit: BoxFit.contain,
+            ),
+            Spacer(),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.star, color: Colors.white, size: 16),
+                  SizedBox(width: 4),
+                  Text(
+                    'Premium',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      // 미구독자용 AppBar
+      return AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: Color(0xffeff0f4), // 미구독자는 기본 배경
+        centerTitle: false,
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/images/header_logo.png',
+              height: 32,
+              width: 180,
+              fit: BoxFit.contain,
+            ),
+            Spacer(),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Color(0xff9e9ef4),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '무료 체험',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   Widget _buildMessageBanner(int celebIndex, String message) {
