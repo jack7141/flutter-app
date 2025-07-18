@@ -25,9 +25,12 @@ class _HomeScreenState extends State<HomeScreen> {
   late CelebData _celebData;
   final ValueNotifier<int> _currentCelebIndex = ValueNotifier<int>(0);
 
-  // 구독 상태 관리 변수 수정
-  bool _hasSubscription = false; // 구독한 셀럽이 있는지 여부
-  bool _isLoadingSubscription = false; // 로딩 상태
+  // 구독 상태 관리
+  bool _hasSubscription = false;
+  bool _isLoadingSubscription = false;
+
+  // AppBar 탭 상태 관리 추가
+  int _selectedTabIndex = 0; // 0: 내 셀럽, 1: 모든 셀럽
 
   @override
   void initState() {
@@ -143,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // 구독자용 AppBar
       return AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Color(0xffEFF0F4), // 구독자는 보라색 배경
+        backgroundColor: Color(0xffEFF0F4),
         centerTitle: false,
         title: Row(
           children: [
@@ -155,28 +158,68 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Spacer(),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
                 children: [
-                  Text(
-                    '내 셀럽',
-                    style: TextStyle(
-                      color: Color(0xff868E96),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedTabIndex = 0;
+                      });
+                    },
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ), // 두 버튼 패딩 동일
+                      decoration: BoxDecoration(
+                        color: _selectedTabIndex == 0
+                            ? Color(0xff9e9ef4)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(20), // 외부보다 약간 작게
+                      ),
+                      child: Text(
+                        '내 셀럽',
+                        style: TextStyle(
+                          color: _selectedTabIndex == 0
+                              ? Colors.white
+                              : Color(0xff868E96),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
-                  Gaps.h16,
-                  Text(
-                    '모든 셀럽',
-                    style: TextStyle(
-                      color: Color(0xff868E96),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedTabIndex = 1;
+                      });
+                    },
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ), // 동일한 패딩
+                      decoration: BoxDecoration(
+                        color: _selectedTabIndex == 1
+                            ? Color(0xff9e9ef4)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(20), // 동일한 테두리
+                      ),
+                      child: Text(
+                        '모든 셀럽',
+                        style: TextStyle(
+                          color: _selectedTabIndex == 1
+                              ? Colors.white
+                              : Color(0xff868E96),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -186,10 +229,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     } else {
-      // 미구독자용 AppBar
+      // 미구독자용 AppBar (변경 없음)
       return AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Color(0xffEFF0F4), // 미구독자는 기본 배경
+        backgroundColor: Color(0xffEFF0F4),
         centerTitle: false,
         title: Row(
           children: [
