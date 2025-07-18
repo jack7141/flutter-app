@@ -251,14 +251,6 @@ class _PreviewTtsScreenState extends State<PreviewTtsScreen> {
                         color: Color(0xff463e8d),
                       ),
                     ),
-                    Text(
-                      message.content,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black87,
-                      ),
-                    ),
                   ],
                 ),
               ),

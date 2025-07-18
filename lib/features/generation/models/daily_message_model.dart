@@ -15,9 +15,7 @@ class DailyMessageModel {
   factory DailyMessageModel.fromApiResponse(Map<String, dynamic> response) {
     return DailyMessageModel(
       date: _formatDate(response['postedAt']),
-      title: response['generatedText'].length > 50
-          ? response['generatedText'].substring(0, 50) + '...'
-          : response['generatedText'],
+      title: response['generatedText'],
       content: response['generatedText'],
       audioUrl: response['audioFile'],
     );
