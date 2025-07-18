@@ -69,9 +69,6 @@ class _NicknameScreenState extends State<NicknameScreen> {
         print('✅ 닉네임 업데이트 성공');
 
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('닉네임이 저장되었습니다.')));
           context.pushReplacement('/home');
         }
       } else {

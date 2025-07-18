@@ -43,8 +43,7 @@ class _MyMessageTtsScreenState extends State<MyMessageTtsScreen> {
       if (mounted) {
         setState(() {
           _isPlaying = state == PlayerState.playing;
-          _isLoading =
-              state == PlayerState.playing && _currentPosition == Duration.zero;
+          // 로딩 상태 로직 제거
         });
       }
     });
@@ -95,12 +94,10 @@ class _MyMessageTtsScreenState extends State<MyMessageTtsScreen> {
           _isLoading = true;
         });
 
-        // 임시 TTS URL (실제로는 API에서 받아온 URL 사용)
-        const String ttsUrl =
-            'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav';
+        // 로컬 assets 파일 사용
+        await _audioPlayer.play(AssetSource('tts/test1.mp3'));
 
-        await _audioPlayer.play(UrlSource(ttsUrl));
-
+        // 재생 시작 후 로딩 상태 해제
         setState(() {
           _isLoading = false;
         });
