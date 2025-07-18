@@ -2,6 +2,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/features/generation/models/daily_message_model.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
+import 'package:celeb_voice/services/daily_message_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -20,6 +21,10 @@ class _PreviewTtsScreenState extends State<PreviewTtsScreen> {
   late AudioPlayer _audioPlayer;
   bool _isPlaying = false;
   String? _currentPlayingTitle;
+
+  // API 데이터 관리 변수로 변경
+  List<DailyMessageModel> _dailyMessages = []; // 빈 리스트로 초기화
+  bool _isLoading = true; // 로딩 상태 추가
 
   @override
   void initState() {
@@ -41,6 +46,37 @@ class _PreviewTtsScreenState extends State<PreviewTtsScreen> {
     _audioPlayer.onPlayerStateChanged.listen((state) {
       print('오디오 상태 변화: $state');
     });
+
+    // API 데이터 로드 추가
+    _loadDailyMessages();
+  }
+
+  // API 데이터 로드 메서드 수정
+  Future<void> _loadDailyMessages() async {
+    final celeb = widget.celeb;
+    if (celeb == null) return;
+
+    try {
+      final responses = await DailyMessageService.getDailyMessages(celeb.id);
+      setState(() {
+        _dailyMessages = responses
+            .map(
+              (response) => DailyMessageModel.fromApiResponse({
+                'generatedText': response.generatedText,
+                'audioFile': response.audioFile,
+                'postedAt': response.postedAt,
+              }),
+            )
+            .toList();
+        _isLoading = false;
+      });
+      print('✅ API 데이터 로드 완료: ${_dailyMessages.length}개');
+    } catch (e) {
+      print('❌ 데이터 로드 실패: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -49,8 +85,8 @@ class _PreviewTtsScreenState extends State<PreviewTtsScreen> {
     super.dispose();
   }
 
-  // TTS 재생/일시정지 함수
-  Future<void> _togglePlayPause(String messageTitle, String ttsFileName) async {
+  // TTS 재생/일시정지 함수 (네트워크 URL로 변경)
+  Future<void> _togglePlayPause(String messageTitle, String audioUrl) async {
     try {
       if (_isPlaying && _currentPlayingTitle == messageTitle) {
         print('일시정지 시도');
@@ -66,12 +102,12 @@ class _PreviewTtsScreenState extends State<PreviewTtsScreen> {
           print('다른 오디오 정지 완료');
         }
 
-        print('로컬 asset 파일 재생 시도');
+        print('네트워크 오디오 재생 시도: $audioUrl');
 
-        // 로컬 asset 파일 재생
-        await _audioPlayer.play(AssetSource('tts/$ttsFileName'));
+        // 네트워크 오디오 재생
+        await _audioPlayer.play(UrlSource(audioUrl));
 
-        print('로컬 asset 파일 재생 시작');
+        print('네트워크 오디오 재생 시작');
 
         setState(() {
           _isPlaying = true;
@@ -92,40 +128,7 @@ class _PreviewTtsScreenState extends State<PreviewTtsScreen> {
     }
   }
 
-  // 날짜별 메세지 리스트
-  final List<DailyMessageModel> _dailyMessages = [
-    DailyMessageModel(
-      date: "2025년 07월 16일 수요일",
-      title: "민지야, 누구나 누군가의 위로가 되어줄 수 있어.",
-      content:
-          "안녕하세요, 아이유 이지은입니다. 이렇게 또 여러분과 소통할 수 있는 기회를 얻게 되어 정말로 감사한 마음이에요.",
-      ttsFileName: "test0.mp3",
-    ),
-    DailyMessageModel(
-      date: "2025년 07월 15일 화요일",
-      title: "오늘도 힘내자!",
-      content: "오늘도 제가 전하는 노래와 이야기가 여러분의 마음에 작은 기쁨과 위로가 되었으면 좋겠습니다.",
-      ttsFileName: "test1.mp3",
-    ),
-    DailyMessageModel(
-      date: "2025년 07월 14일 월요일",
-      title: "오늘도 힘내자!",
-      content: "자! 다들 정신 안차립니까? 해가 중천인데, 아직도 누워서 뭐하고 있는거죠? 좋게말할떄 당장,,",
-      ttsFileName: "test2.mp3",
-    ),
-    DailyMessageModel(
-      date: "2025년 07월 13일 일요일",
-      title: "새로운 한 주의 시작",
-      content: "데뷔 초부터 지금까지 변함없이 저를 응원해 주시는 팬분들 덕분에 여기까지 올 수 있었다고 생각합니다.",
-      ttsFileName: "test3.mp3",
-    ),
-    DailyMessageModel(
-      date: "2025년 07월 12일 토요일",
-      title: "새로운 한 주의 시작",
-      content: "앞으로도 더 좋은 음악과 다양한 모습을 보여드리기 위해 노력할 테니, 계속해서 따뜻한 관심과 사랑 부탁드릴게요.",
-      ttsFileName: "test4.mp3",
-    ),
-  ];
+  // 더미 데이터 제거 (이제 API에서 가져옴)
 
   @override
   Widget build(BuildContext context) {
@@ -160,14 +163,20 @@ class _PreviewTtsScreenState extends State<PreviewTtsScreen> {
           icon: const Icon(Icons.arrow_back),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // 동적으로 날짜별 메세지 렌더링
-            ..._dailyMessages.map((message) => _buildDailyMessageCard(message)),
-          ],
-        ),
-      ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator()) // 로딩 상태 표시
+          : _dailyMessages.isEmpty
+          ? Center(child: Text('메시지를 불러올 수 없습니다.')) // 데이터 없을 때
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  // 동적으로 날짜별 메세지 렌더링
+                  ..._dailyMessages.map(
+                    (message) => _buildDailyMessageCard(message),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 
@@ -259,7 +268,7 @@ class _PreviewTtsScreenState extends State<PreviewTtsScreen> {
                 right: 13,
                 child: InkWell(
                   onTap: () =>
-                      _togglePlayPause(message.title, message.ttsFileName),
+                      _togglePlayPause(message.title, message.audioUrl),
                   borderRadius: BorderRadius.circular(15),
                   child: Container(
                     padding: EdgeInsets.all(5),
