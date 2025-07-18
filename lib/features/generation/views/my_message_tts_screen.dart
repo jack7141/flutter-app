@@ -135,6 +135,7 @@ class _MyMessageTtsScreenState extends State<MyMessageTtsScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            // Detail 이미지 영역 (화면의 대부분 차지)
             Expanded(
               flex: 8,
               child: Container(
@@ -184,6 +185,52 @@ class _MyMessageTtsScreenState extends State<MyMessageTtsScreen> {
                             ),
                           ),
                         ),
+
+                        // Progress Bar - 사진 하단에 오버레이
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  Colors.black.withOpacity(0.5),
+                                  Colors.transparent,
+                                ],
+                                stops: [0.0, 1.0],
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // 진행률 바
+                                Container(
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(1.5),
+                                    color: Colors.white.withOpacity(0.3),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(1.5),
+                                    child: LinearProgressIndicator(
+                                      value: _totalDuration.inMilliseconds > 0
+                                          ? _currentPosition.inMilliseconds /
+                                                _totalDuration.inMilliseconds
+                                          : 0.0,
+                                      backgroundColor: Color(0xff868e96),
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Color(0xff463e8d),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -191,32 +238,16 @@ class _MyMessageTtsScreenState extends State<MyMessageTtsScreen> {
               ),
             ),
 
-            // Progress Bar
+            // 저장 버튼
             Container(
               width: screenWidth,
-              padding: EdgeInsets.symmetric(horizontal: Sizes.size20),
-              child: Column(
-                children: [
-                  // 진행률 바
-                  LinearProgressIndicator(
-                    value: _totalDuration.inMilliseconds > 0
-                        ? _currentPosition.inMilliseconds /
-                              _totalDuration.inMilliseconds
-                        : 0.0,
-                    backgroundColor: Colors.grey[300],
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Color(0xff9e9ef4),
-                    ),
-                    minHeight: 4,
-                  ),
-                  Gaps.v8,
-                  GestureDetector(
-                    onTap: _isLoading ? null : _onSaveTap,
-                    child: FormButton(text: _isLoading ? '저장 중...' : '저장하기'),
-                  ),
-                ],
+              padding: EdgeInsets.all(Sizes.size20),
+              child: GestureDetector(
+                onTap: _isLoading ? null : _onSaveTap,
+                child: FormButton(text: _isLoading ? '저장 중...' : '저장하기'),
               ),
             ),
+
             Gaps.v16,
           ],
         ),
