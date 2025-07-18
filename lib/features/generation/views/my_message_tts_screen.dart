@@ -163,9 +163,6 @@ class _MyMessageTtsScreenState extends State<MyMessageTtsScreen> {
                         // 재생 버튼 오버레이
                         Positioned.fill(
                           child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.3),
-                            ),
                             child: Center(
                               child: SizedBox(
                                 width: 80,
@@ -178,7 +175,7 @@ class _MyMessageTtsScreenState extends State<MyMessageTtsScreen> {
                                         _isPlaying
                                             ? Icons.pause
                                             : Icons.play_arrow,
-                                        size: 40,
+                                        size: 60,
                                         color: Colors.white,
                                       ),
                               ),
@@ -303,14 +300,6 @@ class _MyMessageTtsScreenState extends State<MyMessageTtsScreen> {
             },
           )
         : _buildFallbackImage();
-  }
-
-  // 시간 포맷팅 함수
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
-    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-    return '$twoDigitMinutes:$twoDigitSeconds';
   }
 
   // 폴백 이미지 위젯
