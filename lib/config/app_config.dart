@@ -26,7 +26,7 @@ class AppConfig {
 
   // Colors
   static const int primaryColorValue = 0xff9e9ef4;
-  static const int backgroundColorValue = 0xffeff0f4;
+  static const int backgroundColorValue = 0xffEFF0F4;
   static const int messageCardColorValue = 0xFF6C5CE7;
   static const int lightBackgroundColorValue = 0xFFF8F9FA;
 

@@ -143,32 +143,39 @@ class _HomeScreenState extends State<HomeScreen> {
       // 구독자용 AppBar
       return AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Color(0xffeff0f4), // 구독자는 보라색 배경
+        backgroundColor: Color(0xffEFF0F4), // 구독자는 보라색 배경
         centerTitle: false,
         title: Row(
           children: [
             Image.asset(
               'assets/images/header_logo.png',
-              height: 28,
-              width: 160,
+              height: 32,
+              width: 180,
               fit: BoxFit.contain,
             ),
             Spacer(),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.star, color: Colors.white, size: 16),
-                  SizedBox(width: 4),
                   Text(
-                    'Premium',
+                    '내 셀럽',
                     style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
+                      color: Color(0xff868E96),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Gaps.h16,
+                  Text(
+                    '모든 셀럽',
+                    style: TextStyle(
+                      color: Color(0xff868E96),
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -182,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // 미구독자용 AppBar
       return AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Color(0xffeff0f4), // 미구독자는 기본 배경
+        backgroundColor: Color(0xffEFF0F4), // 미구독자는 기본 배경
         centerTitle: false,
         title: Row(
           children: [
@@ -191,22 +198,6 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 32,
               width: 180,
               fit: BoxFit.contain,
-            ),
-            Spacer(),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Color(0xff9e9ef4),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                '무료 체험',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
             ),
           ],
         ),
