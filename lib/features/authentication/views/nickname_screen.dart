@@ -1,9 +1,14 @@
+import 'dart:convert';
+
 import 'package:celeb_voice/common/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/common/widgets/form_button.dart';
+import 'package:celeb_voice/config/app_config.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 
 class NicknameScreen extends StatefulWidget {
   static const String routeName = "nickname";
@@ -17,9 +22,76 @@ class NicknameScreen extends StatefulWidget {
 
 class _NicknameScreenState extends State<NicknameScreen> {
   final TextEditingController _nicknameController = TextEditingController();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  bool _isLoading = false;
 
-  void _onSaveTap() {
-    context.pushReplacement('/home');
+  Future<void> _onSaveTap() async {
+    final nickname = _nicknameController.text.trim();
+
+    if (nickname.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('닉네임을 입력해주세요.')));
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // AppConfig에서 정의한 키로 토큰 가져오기
+      final token = await _secureStorage.read(key: AppConfig.accessTokenKey);
+
+      print('🔑 찾은 토큰: $token');
+
+      if (token == null) {
+        throw Exception('인증 토큰이 없습니다.');
+      }
+
+      // PATCH 요청으로 닉네임 업데이트
+      final response = await http.patch(
+        Uri.parse('http://127.0.0.1:8000/api/v1/users/profile/'),
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({'nickname': nickname}),
+      );
+
+      print('📤 닉네임 업데이트 요청: $nickname');
+      print('🔑 Authorization: Bearer $token');
+      print('📡 응답 상태코드: ${response.statusCode}');
+      print('📡 응답 본문: ${response.body}');
+
+      if (response.statusCode == 200) {
+        print('✅ 닉네임 업데이트 성공');
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('닉네임이 저장되었습니다.')));
+          context.pushReplacement('/home');
+        }
+      } else {
+        throw Exception('닉네임 업데이트 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ 닉네임 업데이트 에러: $e');
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('닉네임 저장에 실패했습니다. 다시 시도해주세요.')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -46,6 +118,8 @@ class _NicknameScreenState extends State<NicknameScreen> {
             ),
             Gaps.v20,
             TextField(
+              controller: _nicknameController,
+              enabled: !_isLoading,
               decoration: InputDecoration(
                 hintText: '이름을 입력해주세요.',
                 border: OutlineInputBorder(),
@@ -59,8 +133,8 @@ class _NicknameScreenState extends State<NicknameScreen> {
             ),
             Gaps.v20,
             GestureDetector(
-              onTap: _onSaveTap,
-              child: FormButton(text: '저장하기'),
+              onTap: _isLoading ? null : _onSaveTap,
+              child: FormButton(text: _isLoading ? '저장 중...' : '저장하기'),
             ),
           ],
         ),
