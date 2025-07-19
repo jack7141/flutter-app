@@ -64,7 +64,7 @@ class LoginScreen extends ConsumerWidget {
                                 .googleSignIn();
                           },
                     child: AuthButton(
-                      icon: FontAwesomeIcons.google,
+                      imagePath: "assets/images/google.png",
                       text: "Google로 시작하기",
                       isLoading: authState.isLoading,
                       backgroundColor: Colors.white,
@@ -89,7 +89,7 @@ class LoginScreen extends ConsumerWidget {
               ),
               Gaps.v16,
               const AuthButton(
-                icon: FontAwesomeIcons.solidCalendar,
+                imagePath: "assets/images/Naver.png",
                 text: "네이버로 시작하기",
                 backgroundColor: Color(0xFF03CF5D),
                 textColor: Colors.white,

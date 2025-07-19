@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class AuthButton extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
+  final String? imagePath; // 이미지 경로 추가
   final String text;
   final bool isLoading;
   final Color? backgroundColor;
@@ -13,13 +14,35 @@ class AuthButton extends StatelessWidget {
 
   const AuthButton({
     super.key,
-    required this.icon,
+    this.icon,
+    this.imagePath,
     required this.text,
     this.isLoading = false,
     this.backgroundColor,
     this.borderColor,
     this.textColor,
-  });
+  }) : assert(
+         icon != null || imagePath != null,
+         'Either icon or imagePath must be provided',
+       );
+
+  Widget _buildIcon() {
+    if (imagePath != null) {
+      return SizedBox(
+        width: 20,
+        height: 20,
+        child: Image.asset(
+          imagePath!,
+          width: 20,
+          height: 20,
+          fit: BoxFit.contain,
+        ),
+      );
+    } else if (icon != null) {
+      return FaIcon(icon, color: textColor);
+    }
+    return SizedBox.shrink();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +89,7 @@ class AuthButton extends StatelessWidget {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  FaIcon(icon, color: textColor),
+                  _buildIcon(),
                   Gaps.h10,
                   Expanded(
                     child: Text(
