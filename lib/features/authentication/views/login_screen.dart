@@ -65,18 +65,35 @@ class LoginScreen extends ConsumerWidget {
                           },
                     child: AuthButton(
                       icon: FontAwesomeIcons.google,
-                      text: "Continue with Google",
+                      text: "Google로 시작하기",
                       isLoading: authState.isLoading,
+                      backgroundColor: Colors.white,
                     ),
                   );
                 },
               ),
               // 다른 SNS 버튼들도 이런 식으로 추가할 수 있습니다.
-              // Gaps.v16,
-              // const AuthButton(
-              //   icon: FontAwesomeIcons.apple,
-              //   text: "Continue with Apple",
-              // ),
+              Gaps.v16,
+              const AuthButton(
+                icon: FontAwesomeIcons.apple,
+                text: "Apple로 시작하기",
+                backgroundColor: Colors.black,
+                textColor: Colors.white,
+              ),
+              Gaps.v16,
+              const AuthButton(
+                icon: FontAwesomeIcons.solidComment,
+                text: "카카오로 시작하기",
+                backgroundColor: Colors.yellow,
+                textColor: Colors.black,
+              ),
+              Gaps.v16,
+              const AuthButton(
+                icon: FontAwesomeIcons.solidCalendar,
+                text: "네이버로 시작하기",
+                backgroundColor: Color(0xFF03CF5D),
+                textColor: Colors.white,
+              ),
             ],
           ),
         ),

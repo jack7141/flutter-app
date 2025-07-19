@@ -7,12 +7,18 @@ class AuthButton extends StatelessWidget {
   final IconData icon;
   final String text;
   final bool isLoading;
+  final Color? backgroundColor;
+  final Color? borderColor;
+  final Color? textColor;
 
   const AuthButton({
     super.key,
     required this.icon,
     required this.text,
     this.isLoading = false,
+    this.backgroundColor,
+    this.borderColor,
+    this.textColor,
   });
 
   @override
@@ -20,14 +26,18 @@ class AuthButton extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(Sizes.size14),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300, width: Sizes.size1),
-        borderRadius: BorderRadius.circular(Sizes.size5),
+        color: backgroundColor,
+        border: Border.all(
+          color: borderColor ?? Colors.grey.shade300,
+          width: Sizes.size1,
+        ),
+        borderRadius: BorderRadius.circular(50),
       ),
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 150),
         child: isLoading
             ? Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   SizedBox(
                     width: Sizes.size20,
@@ -35,33 +45,39 @@ class AuthButton extends StatelessWidget {
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.grey.shade600,
+                        textColor ?? Colors.grey.shade600,
                       ),
                     ),
                   ),
                   Gaps.h10,
-                  Text(
-                    text,
-                    style: const TextStyle(
-                      fontSize: Sizes.size16,
-                      fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Text(
+                      text,
+                      style: TextStyle(
+                        fontSize: Sizes.size16,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
                   ),
                 ],
               )
             : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  FaIcon(icon),
+                  FaIcon(icon, color: textColor),
                   Gaps.h10,
-                  Text(
-                    text,
-                    style: const TextStyle(
-                      fontSize: Sizes.size16,
-                      fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Text(
+                      text,
+                      style: TextStyle(
+                        fontSize: Sizes.size16,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
