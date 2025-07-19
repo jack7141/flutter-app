@@ -47,9 +47,12 @@ class LoginScreen extends ConsumerWidget {
             children: [
               Gaps.v80,
               Text(
-                'Log in',
-                style: GoogleFonts.abrilFatface(fontSize: Sizes.size40),
+                'CELEB VOICE',
                 textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: Sizes.size40,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Gaps.v40,
               Consumer(
@@ -101,5 +104,3 @@ class LoginScreen extends ConsumerWidget {
     );
   }
 }
-
-// 재사용 가능한 공용 인증 버튼 위젯
