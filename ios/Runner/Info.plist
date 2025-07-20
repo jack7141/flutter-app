@@ -30,6 +30,13 @@
 					<string>com.googleusercontent.apps.978445308352-38mk2cllk8pe8r6nj7jg51bp02dh67b2</string>
 				</array>
 			</dict>
+			<dict>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<!-- kakao login -->
+					<string>e1b50342b8edb35b7eb4e09d6b1fa33f</string>
+				</array>
+			</dict>
 		</array>
 		<key>CFBundleVersion</key>
 		<string>$(FLUTTER_BUILD_NUMBER)</string>
