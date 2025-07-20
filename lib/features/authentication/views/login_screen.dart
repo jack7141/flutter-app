@@ -84,11 +84,24 @@ class LoginScreen extends ConsumerWidget {
                 textColor: Colors.white,
               ),
               Gaps.v16,
-              const AuthButton(
-                icon: FontAwesomeIcons.solidComment,
-                text: "카카오로 시작하기",
-                backgroundColor: Colors.yellow,
-                textColor: Colors.black,
+              Consumer(
+                builder: (context, ref, child) {
+                  final authState = ref.watch(socialAuthProvider);
+                  return GestureDetector(
+                    onTap: authState.isLoading
+                        ? null
+                        : () {
+                            ref.read(socialAuthProvider.notifier).kakaoSignIn();
+                          },
+                    child: AuthButton(
+                      icon: FontAwesomeIcons.solidComment,
+                      text: "카카오로 시작하기",
+                      isLoading: authState.isLoading,
+                      backgroundColor: Color(0xFFFFE600), // 카카오 노란색
+                      textColor: Colors.black,
+                    ),
+                  );
+                },
               ),
               Gaps.v16,
               const AuthButton(
