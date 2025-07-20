@@ -44,7 +44,7 @@ class UserInfoService {
     String authToken,
   ) async {
     return await _dio.patch(
-      'http://localhost:8000/api/v1/users/profile/',
+      '${AppConfig.baseUrl}/api/v1/users/profile/',
       data: data,
       options: Options(
         headers: {...AppConfig.defaultHeaders, 'Authorization': authToken},

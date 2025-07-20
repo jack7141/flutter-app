@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../../config/app_config.dart';
+
 class JobRepo {
   final Dio dio = Dio();
   final storage = FlutterSecureStorage();
@@ -10,7 +12,7 @@ class JobRepo {
       String? accessToken = await storage.read(key: 'access_token');
       String? tokenType = await storage.read(key: 'token_type');
       final response = await dio.get(
-        'http://localhost:8000/api/v1/users/job/',
+        '${AppConfig.baseUrl}/api/v1/users/job/',
         options: Options(
           headers: {
             'Authorization': '${tokenType ?? 'Bearer'} $accessToken',

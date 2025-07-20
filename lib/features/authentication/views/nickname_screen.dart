@@ -51,7 +51,7 @@ class _NicknameScreenState extends State<NicknameScreen> {
 
       // PATCH 요청으로 닉네임 업데이트
       final response = await http.patch(
-        Uri.parse('http://127.0.0.1:8000/api/v1/users/profile/'),
+        Uri.parse('${AppConfig.baseUrl}/api/v1/users/profile/'),
         headers: {
           'accept': 'application/json',
           'Authorization': 'Bearer $token',

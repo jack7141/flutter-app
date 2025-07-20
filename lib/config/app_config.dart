@@ -2,11 +2,12 @@ class AppConfig {
   // API Base URLs
   static const String baseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: 'http://127.0.0.1:8000',
+    defaultValue: 'http://192.168.219.101:8000',
   );
 
   // API Endpoints
   static const String socialGoogleEndpoint = '/api/v1/users/social/google';
+  static const String socialKakaoEndpoint = '/api/v1/users/social/kakao';
   static const String usersEndpoint = '/api/v1/users/';
   static const String usersMeEndpoint = '/api/v1/users/me';
   static const String refreshTokenEndpoint = '/api/v1/users/refresh-token';

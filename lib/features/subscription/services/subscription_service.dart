@@ -175,7 +175,7 @@ class SubscriptionService {
       }
 
       final response = await _dio.post(
-        'http://localhost:8000/api/v1/celeb/$celebId/subscribe',
+        '${AppConfig.baseUrl}/api/v1/celeb/$celebId/subscribe',
         options: Options(
           headers: {
             ...AppConfig.defaultHeaders,
