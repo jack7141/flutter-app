@@ -5,8 +5,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class DailyMessageService {
-  static const String _baseUrl =
-      'http://127.0.0.1:8000/api/v1/celeb/message/daily';
+  static String get _baseUrl =>
+      '${AppConfig.baseUrl}/api/v1/celeb/message/daily';
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
   static Future<List<DailyMessageResponse>> getDailyMessages(
