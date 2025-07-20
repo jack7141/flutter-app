@@ -1,5 +1,6 @@
 import 'package:celeb_voice/common/main_navigation_screen.dart';
 import 'package:celeb_voice/features/authentication/views/login_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:celeb_voice/features/authentication/views/nickname_screen.dart';
 import 'package:celeb_voice/features/authentication/views/terms_screens.dart';
 import 'package:celeb_voice/features/generation/views/generate_my_message_screen.dart';
@@ -51,7 +52,21 @@ CelebModel? _parseCelebFromQuery(GoRouterState state) {
 
 final router = GoRouter(
   initialLocation: "/login",
+  onException: (context, state, router) {
+    // 카카오 OAuth 관련 에러는 무시하고 로그인 화면으로 이동
+    if (state.error.toString().contains(
+      'kakaoe1b50342b8edb35b7eb4e09d6b1fa33f',
+    )) {
+      print("🔗 Ignoring Kakao OAuth URL error");
+      router.go('/login');
+      return;
+    }
+    // 다른 에러는 기본 처리
+    router.go('/login');
+  },
   routes: [
+    // 카카오 OAuth 콜백만 처리하고 아무것도 하지 않음
+    GoRoute(path: "/oauth", builder: (context, state) => const SizedBox()),
     ShellRoute(
       builder: (context, state, child) {
         return MainNavigationScreen(child: child);

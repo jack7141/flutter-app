@@ -143,6 +143,81 @@ class AuthenticationRepo {
     }
   }
 
+  // 카카오 사용자 정보를 서버에 전송
+  Future<void> _sendKakaoUserProfileToServer(
+    String accessToken,
+    Map<String, dynamic> kakaoUserInfo,
+  ) async {
+    try {
+      if (AppConfig.enableDebugLogs) {
+        print("👤 카카오 사용자 프로필 서버 전송 시작");
+        print("📤 전송할 카카오 사용자 정보: $kakaoUserInfo");
+      }
+
+      final profileData = <String, dynamic>{
+        "profile": <String, dynamic>{},
+        "user_id": kakaoUserInfo['id']?.toString() ?? "unknown_user_id",
+      };
+
+      // 카카오에서 받은 정보가 있는 경우에만 추가
+      if (kakaoUserInfo['kakaoAccount']?['profile']?['nickname'] != null) {
+        profileData["profile"]["nickname"] =
+            kakaoUserInfo['kakaoAccount']['profile']['nickname'];
+      }
+
+      // 카카오 프로필 이미지가 있는 경우 추가
+      if (kakaoUserInfo['kakaoAccount']?['profile']?['profileImageUrl'] !=
+          null) {
+        profileData["profile"]["images"] = [
+          {
+            "image_url":
+                kakaoUserInfo['kakaoAccount']['profile']['profileImageUrl'],
+            "scale": "AVATAR",
+          },
+        ];
+      }
+
+      // 이메일 정보가 있는 경우 추가
+      if (kakaoUserInfo['kakaoAccount']?['email'] != null) {
+        profileData["profile"]["email"] =
+            kakaoUserInfo['kakaoAccount']['email'];
+      }
+
+      final profileUrl = "${AppConfig.baseUrl}${AppConfig.usersEndpoint}";
+      if (AppConfig.enableDebugLogs) {
+        print("🌐 카카오 프로필 전송 URL: $profileUrl");
+        print("📤 전송할 카카오 프로필 데이터: $profileData");
+      }
+
+      final profileResponse = await _dio.post(
+        profileUrl,
+        data: profileData,
+        options: Options(
+          headers: {
+            ...AppConfig.defaultHeaders,
+            'Authorization': 'Bearer $accessToken',
+          },
+        ),
+      );
+
+      if (AppConfig.enableDebugLogs) {
+        print("📥 카카오 프로필 전송 응답 상태: ${profileResponse.statusCode}");
+        print("✅ 카카오 사용자 프로필 서버 전송 성공!");
+      }
+    } catch (e) {
+      if (AppConfig.enableDebugLogs) {
+        print("💥 카카오 사용자 프로필 서버 전송 에러: $e");
+      }
+      if (e is DioException) {
+        if (AppConfig.enableDebugLogs) {
+          print("🔍 카카오 프로필 전송 DioException 상세:");
+          print("   - Status Code: ${e.response?.statusCode}");
+          print("   - Response Data: ${e.response?.data}");
+        }
+      }
+    }
+  }
+
   // 구글 사용자 정보를 서버에 전송
   Future<void> _sendUserProfileToServer(
     String accessToken,
@@ -303,6 +378,72 @@ class AuthenticationRepo {
         }
       }
       return false;
+    }
+  }
+
+  Future<Map<String, dynamic>?> kakaoSocialLogin(
+    String accessToken, [
+    Map<String, dynamic>? kakaoUserInfo,
+  ]) async {
+    try {
+      if (AppConfig.enableDebugLogs) {
+        print("🚀 Kakao Social Login 시작");
+        print("📤 전송할 accessToken: $accessToken");
+      }
+
+      final url = "${AppConfig.baseUrl}${AppConfig.socialKakaoEndpoint}";
+      if (AppConfig.enableDebugLogs) {
+        print("🌐 요청 URL: $url");
+      }
+
+      final response = await _dio.post(
+        url,
+        data: {"access_token": accessToken},
+        options: Options(headers: AppConfig.defaultHeaders),
+      );
+
+      if (AppConfig.enableDebugLogs) {
+        print("📥 Django Response Status: ${response.statusCode}");
+        print("📥 Django Response Data: ${response.data}");
+      }
+
+      // 성공적인 응답 (200 또는 201)
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (AppConfig.enableDebugLogs) {
+          print("✅ 카카오 로그인 성공!");
+        }
+
+        // 토큰 저장
+        await _saveTokens(data);
+
+        // 카카오 사용자 정보를 서버에 전송 (구글과 동일한 방식)
+        if (kakaoUserInfo != null) {
+          await _sendKakaoUserProfileToServer(
+            data['accessToken'],
+            kakaoUserInfo,
+          );
+        }
+
+        return data;
+      } else {
+        if (AppConfig.enableDebugLogs) {
+          print("❌ 예상하지 못한 상태코드: ${response.statusCode}");
+        }
+        return null;
+      }
+    } catch (e) {
+      if (AppConfig.enableDebugLogs) {
+        print("💥 카카오 로그인 에러: $e");
+      }
+      if (e is DioException) {
+        if (AppConfig.enableDebugLogs) {
+          print("🔍 Kakao DioException 상세:");
+          print("   - Status Code: ${e.response?.statusCode}");
+          print("   - Response Data: ${e.response?.data}");
+        }
+      }
+      rethrow;
     }
   }
 }

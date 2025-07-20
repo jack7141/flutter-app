@@ -31,10 +31,11 @@
 				</array>
 			</dict>
 			<dict>
+				<key>CFBundleURLName</key>
+				<string>kakao</string>
 				<key>CFBundleURLSchemes</key>
 				<array>
-					<!-- kakao login -->
-					<string>e1b50342b8edb35b7eb4e09d6b1fa33f</string>
+					<string>kakaoe1b50342b8edb35b7eb4e09d6b1fa33f</string>
 				</array>
 			</dict>
 		</array>
@@ -65,5 +66,19 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+					<key>LSApplicationQueriesSchemes</key>
+		<array>
+			<string>kakaotalk</string>
+			<string>kakaokompassauth</string>
+			<string>kakaolink</string>
+			<string>kakao-navi</string>
+		</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
 	</dict>
+</dict>
 </plist>
