@@ -38,6 +38,14 @@
 					<string>kakaoe1b50342b8edb35b7eb4e09d6b1fa33f</string>
 				</array>
 			</dict>
+			<dict>
+				<key>CFBundleURLName</key>
+				<string>naver</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>com.example.celebVoice</string>
+				</array>
+			</dict>
 		</array>
 		<key>CFBundleVersion</key>
 		<string>$(FLUTTER_BUILD_NUMBER)</string>
@@ -68,17 +76,47 @@
 		<false/>
 					<key>LSApplicationQueriesSchemes</key>
 		<array>
-			<string>kakaotalk</string>
-			<string>kakaokompassauth</string>
-			<string>kakaolink</string>
-			<string>kakao-navi</string>
+			<string>naversearchapp</string>
+			<string>naversearchthirdlogin</string>
 		</array>
+	<key>naverServiceAppUrlScheme</key>
+	<string>com.example.celebVoice</string>
+
+	<!-- naver client_id -->
+	<key>naverConsumerKey</key>
+	<string>oohNqpOV6pom7AsYsYne</string>
+
+	<!-- naver client_secret -->
+	<key>naverConsumerSecret</key>
+	<string>VYTsuML5sV</string>
+
+	<key>naverServiceAppName</key>
+	<string>celeb_voice</string>
+
+	<!-- http allows configurations -->
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>naver.com</key>
+			<dict>
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<false/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+			<key>naver.net</key>
+			<dict>
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<false/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+		</dict>
 	</dict>
 </dict>
 </plist>
