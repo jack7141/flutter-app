@@ -351,7 +351,9 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 CircleAvatar(
-                  backgroundImage: AssetImage(currentCelebs[0].imagePath),
+                  backgroundImage: NetworkImage(
+                    AppConfig.getImageUrl(currentCelebs[0].imagePath),
+                  ),
                   radius: 18,
                 ),
                 Gaps.h12,
@@ -369,7 +371,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       Text(
-                        '$_userNickname야 어제 하루 잘 보냈어?', // 동적 닉네임 사용
+                        '${_getNickName(_userNickname)} 어제 하루 잘 보냈어?', // 동적 닉네임 사용
                         style: TextStyle(
                           color: Color(0xff868e96),
                           fontSize: Sizes.size14,
@@ -386,7 +388,9 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 CircleAvatar(
-                  backgroundImage: AssetImage(currentCelebs[1].imagePath),
+                  backgroundImage: NetworkImage(
+                    AppConfig.getImageUrl(currentCelebs[1].imagePath),
+                  ),
                   radius: 18,
                 ),
                 Gaps.h12,
@@ -404,7 +408,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       Text(
-                        '$_userNickname야 오늘도 좋은 하루 보내자!', // 동적 닉네임 사용
+                        '${_getNickName(_userNickname)} 오늘도 좋은 하루 보내자!', // 동적 닉네임 사용
                         style: TextStyle(
                           color: Color(0xff868e96),
                           fontSize: Sizes.size14,
@@ -419,6 +423,25 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  // 이미지 타입에 따라 적절한 ImageProvider 반환하는 헬퍼 메서드 추가
+  String _getNickName(String name) {
+    int lastCharCode = name.runes.last;
+
+    // 한글 음절의 유니코드 범위 (가 ~ 힣)를 벗어나면 처리하지 않습니다.
+    if (lastCharCode < 0xAC00 || lastCharCode > 0xD7A3) {
+      return name;
+    }
+
+    // 받침이 있는지 계산합니다.
+    bool hasJongseong = (lastCharCode - 0xAC00) % 28 != 0;
+
+    if (hasJongseong) {
+      return '$name아'; // 받침이 있으면 '아'를 붙입니다.
+    } else {
+      return '$name야'; // 받침이 없으면 '야'를 붙입니다.
+    }
   }
 
   Widget _buildNonSubscriberMenu(double screenHeight, double screenWidth) {
