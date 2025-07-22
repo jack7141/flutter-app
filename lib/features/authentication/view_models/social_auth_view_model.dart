@@ -161,7 +161,16 @@ class SocialAuthViewModel extends AsyncNotifier<void> {
   Future<void> naverSignIn() async {
     print("✅ [1/5] Naver Sign-In process started.");
     state = const AsyncValue.loading();
+
     state = await AsyncValue.guard(() async {
+      // 네이버 로그아웃 (기존 세션 정리)
+      try {
+        await FlutterNaverLogin.logOut();
+        print("🚪 Naver logout completed for fresh login.");
+      } catch (e) {
+        print("⚠️ Naver logout failed (might be already logged out): $e");
+      }
+
       // 네이버 로그인 시도 (1.8.0 버전)
       print("🚀 Starting Naver login...");
       final NaverLoginResult result = await FlutterNaverLogin.logIn();
