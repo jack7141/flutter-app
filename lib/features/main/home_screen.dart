@@ -420,6 +420,27 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ],
+          Gaps.v12,
+          Container(
+            alignment: Alignment.center,
+            width: screenWidth * 0.8,
+            height: screenHeight * 0.05,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(Sizes.size4),
+              border: Border.all(color: Color(0xffc3c7cb)),
+            ),
+            child: Text(
+              '지금 들으러 가기',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: Sizes.size14,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ),
+          Gaps.v12,
         ],
       ),
     );
