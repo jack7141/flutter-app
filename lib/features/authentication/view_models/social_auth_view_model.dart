@@ -19,7 +19,12 @@ class SocialAuthViewModel extends AsyncNotifier<void> {
     state = await AsyncValue.guard(() async {
       final GoogleSignIn googleSignIn = GoogleSignIn(
         scopes: ['email', 'profile'],
+        serverClientId:
+            "978445308352-i3il5vk7n161tsm0556lgfc4ksak2ld8.apps.googleusercontent.com",
       );
+
+      await googleSignIn.signOut(); // 로그아웃
+
       final googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
@@ -32,7 +37,9 @@ class SocialAuthViewModel extends AsyncNotifier<void> {
       );
 
       final googleAuth = await googleUser.authentication;
-      final idToken = googleAuth.idToken;
+      final idToken = googleAuth.idToken; // ✅ 수정: idToken 사용
+      print("idToken: $idToken");
+      print("accessToken: ${googleAuth.accessToken}");
 
       if (idToken == null) {
         print("🚨 Failed to get Google ID token.");

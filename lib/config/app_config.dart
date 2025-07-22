@@ -1,9 +1,19 @@
+import 'dart:io';
+
 class AppConfig {
-  // API Base URLs
-  static const String baseUrl = String.fromEnvironment(
-    'BASE_URL',
-    defaultValue: 'http://192.168.219.101:8000',
-  );
+  // 플랫폼별 baseUrl
+  static String get baseUrl {
+    if (Platform.isAndroid) {
+      // Android 에뮬레이터용
+      return 'http://10.0.2.2:8000';
+    } else if (Platform.isIOS) {
+      // iOS 시뮬레이터용
+      return 'http://127.0.0.1:8000';
+    } else {
+      // 기타 플랫폼 (웹, 데스크탑 등)
+      return 'http://127.0.0.1:8000';
+    }
+  }
 
   // API Endpoints
   static const String socialGoogleEndpoint = '/api/v1/users/social/google';
@@ -50,19 +60,13 @@ class AppConfig {
   };
 
   // Debug Settings
-  static const bool enableDebugLogs = bool.fromEnvironment(
-    'ENABLE_DEBUG_LOGS',
-    defaultValue: true,
-  );
+  static const bool enableDebugLogs = true;
 
-  static String getImageUrl(String s3Url) {
-    if (s3Url.contains('s3.ap-northeast-2.amazonaws.com')) {
-      // S3 URL을 CloudFront URL로 변환
-      return s3Url.replaceAll(
-        'https://celebvoice-storage.s3.ap-northeast-2.amazonaws.com',
-        cloudFrontDomain,
-      );
+  // 이미지 URL 헬퍼
+  static String getImageUrl(String imagePath) {
+    if (imagePath.startsWith('http')) {
+      return imagePath;
     }
-    return s3Url;
+    return '$baseUrl/media/$imagePath';
   }
 }
