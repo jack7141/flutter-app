@@ -277,54 +277,83 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _buildMessageBanner(int celebIndex, String message) {
+  Widget _buildMessageBanner(double screenWidth, double screenHeight) {
     return Container(
+      width: screenWidth * 0.9, // 최대 너비만 제한
       padding: EdgeInsets.symmetric(
-        horizontal: Sizes.size18,
+        horizontal: Sizes.size20,
         vertical: Sizes.size10,
       ),
+      margin: EdgeInsets.symmetric(horizontal: Sizes.size20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(Sizes.size16),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
         children: [
-          Image.asset(
-            'assets/images/message/message_logo.png',
-            fit: BoxFit.contain,
-            height: 36,
-            width: 36,
-          ),
-          Gaps.h12,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  _celebData.celebs[celebIndex].name,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: Sizes.size15,
-                  ),
-                ),
-                Text(
-                  message,
-                  style: TextStyle(color: Colors.black, fontSize: Sizes.size14),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                '2시간전',
-                style: TextStyle(
-                  color: Color(0xff4968a1),
-                  fontSize: Sizes.size11,
+              CircleAvatar(
+                backgroundImage: AssetImage('assets/images/celebs/IU.png'),
+                radius: 18,
+              ),
+              Gaps.h12,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '성한빈',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: Sizes.size15,
+                      ),
+                    ),
+                    Text(
+                      '민지야 어제 하루 잘 보냈어?',
+                      style: TextStyle(
+                        color: Color(0xff868e96),
+                        fontSize: Sizes.size14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Gaps.v12,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                backgroundImage: AssetImage('assets/images/celebs/son.png'),
+                radius: 18,
+              ),
+              Gaps.h12,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '차은우',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: Sizes.size15,
+                      ),
+                    ),
+                    Text(
+                      '민지야 어제 하루 잘 보냈어?',
+                      style: TextStyle(
+                        color: Color(0xff868e96),
+                        fontSize: Sizes.size14,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -348,27 +377,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 '데일리 메세지',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              Gaps.v16,
-              if (_celebData.celebs.isNotEmpty)
-                ValueListenableBuilder<int>(
-                  valueListenable: _currentCelebIndex,
-                  builder: (context, currentIndex, child) {
-                    return _buildMessageBanner(
-                      currentIndex,
-                      '민지야 어제 하루 잘 보냈어?',
-                    );
-                  },
-                ),
+              Gaps.v8,
             ],
           ),
         ),
+        _buildMessageBanner(screenWidth, screenHeight),
+        Gaps.v20,
         // 데일리 메시지 구독하기
-        MainEventWidget(
-          title: '데일리 메시지 구독하기',
-          description: '오직 나만을 위한 셀럽의 이야기',
-          icon: Icons.favorite_border,
-        ),
-        Gaps.v16,
         Container(
           alignment: Alignment.topLeft,
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -395,8 +410,9 @@ class _HomeScreenState extends State<HomeScreen> {
             }
           },
           child: MainEventWidget(
+            screenWidth: screenWidth,
             title: '나만의 메시지 만들기',
-            description: '셀럽에게 듣고 싶은 말이 있나요?',
+            description: '특별하게 듣고 싶은 메시지가 있나요?',
             icon: Icons.add,
           ),
         ),
@@ -851,17 +867,24 @@ class MainEventWidget extends StatelessWidget {
   final String title;
   final String description;
   final IconData icon;
+  final double screenWidth;
 
   const MainEventWidget({
     super.key,
     required this.title,
     required this.description,
     required this.icon,
+    required this.screenWidth,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: screenWidth * 0.9,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(Sizes.size16),
+      ),
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
@@ -886,9 +909,10 @@ class MainEventWidget extends StatelessWidget {
                   color: Color(0xff211772),
                 ),
               ),
+              Gaps.v4,
               Text(
                 description,
-                style: TextStyle(fontSize: 14, color: Color(0xff868e96)),
+                style: TextStyle(fontSize: 12, color: Color(0xff868e96)),
               ),
             ],
           ),
