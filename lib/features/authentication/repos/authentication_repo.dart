@@ -446,6 +446,165 @@ class AuthenticationRepo {
       rethrow;
     }
   }
+
+  Future<void> naverSocialLogin(
+    String accessToken,
+    Map<String, dynamic> userInfo,
+  ) async {
+    try {
+      print("👤 네이버 사용자 정보 서버 전송 시작");
+      print("📤 전송할 네이버 사용자 정보: $userInfo");
+
+      final dio = Dio();
+      const String baseUrl = "http://127.0.0.1:8000"; // 또는 AppConfig.baseUrl 사용
+
+      // 네이버 소셜 로그인 API 호출
+      final Response naverResponse = await dio.post(
+        '$baseUrl/api/v1/users/social/naver', // 네이버용 엔드포인트
+        data: {'access_token': accessToken, 'user_info': userInfo},
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+          validateStatus: (status) => status! < 500,
+        ),
+      );
+
+      if (AppConfig.enableDebugLogs) {
+        print("🌐 네이버 소셜 로그인 URL: $baseUrl/api/v1/users/social/naver");
+        print(
+          "📤 전송할 네이버 로그인 데이터: ${{'access_token': accessToken, 'user_info': userInfo}}",
+        );
+        print("📥 네이버 소셜 로그인 응답 상태: ${naverResponse.statusCode}");
+      }
+
+      if (naverResponse.statusCode == 200 || naverResponse.statusCode == 201) {
+        // 토큰 저장
+        await _saveTokens(naverResponse.data);
+
+        if (AppConfig.enableDebugLogs) {
+          print("✅ 네이버 소셜 로그인 성공!");
+        }
+
+        // 네이버 사용자 프로필 전송 (필요한 경우)
+        await _sendNaverUserProfile(userInfo);
+      } else {
+        throw Exception("네이버 소셜 로그인 실패: ${naverResponse.statusCode}");
+      }
+    } catch (e) {
+      if (AppConfig.enableDebugLogs) {
+        print("💥 네이버 소셜 로그인 에러: $e");
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> _sendNaverUserProfile(Map<String, dynamic> userInfo) async {
+    try {
+      print("👤 네이버 사용자 프로필 서버 전송 시작");
+      print("📤 받은 네이버 사용자 정보: $userInfo");
+
+      final dio = Dio();
+      final storage = FlutterSecureStorage();
+
+      print("🔑 토큰 읽기 시작...");
+      final token = await storage.read(key: AppConfig.accessTokenKey);
+
+      if (token == null) {
+        print("❌ 토큰이 null입니다!");
+        throw Exception("인증 토큰이 없습니다.");
+      }
+
+      print("🔑 토큰 확인: ${token.substring(0, 10)}...");
+
+      // 생일 데이터 변환
+      String? formattedBirthday;
+      if (userInfo['birthday'] != null && userInfo['birthyear'] != null) {
+        try {
+          final birthday = userInfo['birthday'] as String; // MM-DD 형식 예상
+          final birthyear = userInfo['birthyear'] as String; // YYYY 형식 예상
+
+          print("🎂 원본 생일 데이터: birthday=$birthday, birthyear=$birthyear");
+
+          // MM-DD 형식을 YYYY-MM-DD로 변환
+          if (birthday.contains('-') && birthday.length >= 5) {
+            formattedBirthday = '$birthyear-$birthday';
+            print("🎂 변환된 생일: $formattedBirthday");
+          } else {
+            print("⚠️ 생일 형식을 인식할 수 없어 제외합니다: $birthday");
+          }
+        } catch (e) {
+          print("⚠️ 생일 데이터 변환 중 에러 발생: $e");
+          print("⚠️ 생일 데이터를 제외하고 진행합니다.");
+        }
+      } else {
+        print("⚠️ 생일 또는 생년 데이터가 없습니다.");
+      }
+
+      final requestData = {
+        'profile': {
+          'nickname': userInfo['nickname'],
+          'images': [
+            if (userInfo['profileImage'] != null)
+              {'image_url': userInfo['profileImage'], 'scale': 'AVATAR'},
+          ],
+          'email': userInfo['email'],
+          'name': userInfo['name'],
+          'mobile': userInfo['mobile'],
+          'gender': userInfo['gender'],
+          'age': userInfo['age'],
+          // 변환된 생일만 포함 (형식이 올바른 경우에만)
+          if (formattedBirthday != null) 'birthday': formattedBirthday,
+          'birthyear': userInfo['birthyear'],
+        },
+        'user_id': userInfo['id'],
+      };
+
+      print("📤 전송할 프로필 데이터: $requestData");
+      print("🌐 요청 URL: ${AppConfig.baseUrl}/api/v1/users/");
+      print("🔑 Authorization 헤더: Bearer ${token.substring(0, 10)}...");
+
+      final Response profileResponse = await dio.post(
+        '${AppConfig.baseUrl}/api/v1/users/',
+        data: requestData,
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          // 409 상태 코드도 성공으로 처리
+          validateStatus: (status) => status != null && status < 500,
+        ),
+      );
+
+      print("📥 프로필 전송 응답 상태: ${profileResponse.statusCode}");
+      print("📥 프로필 전송 응답 데이터: ${profileResponse.data}");
+
+      if (profileResponse.statusCode == 201) {
+        print("✅ 네이버 사용자 프로필 서버 전송 성공! (새 사용자 생성)");
+      } else if (profileResponse.statusCode == 409) {
+        print("✅ 네이버 사용자 프로필 처리 완료! (이미 가입된 사용자)");
+        // 409는 이미 가입된 사용자라는 의미이므로 정상적으로 처리
+      } else {
+        print("⚠️ 예상치 못한 응답 상태: ${profileResponse.statusCode}");
+        print("⚠️ 응답 내용: ${profileResponse.data}");
+      }
+    } catch (e) {
+      print("💥 네이버 사용자 프로필 서버 전송 에러: $e");
+
+      if (e is DioException) {
+        print("🔍 DioException 상세 정보:");
+        print("  - 상태 코드: ${e.response?.statusCode}");
+        print("  - 응답 데이터: ${e.response?.data}");
+
+        // 409는 이미 가입된 사용자이므로 에러가 아님
+        if (e.response?.statusCode == 409) {
+          print("✅ 이미 가입된 사용자입니다. 정상 처리됨.");
+          return; // 에러를 다시 던지지 않고 정상 완료
+        }
+      }
+
+      rethrow;
+    }
+  }
 }
 
 final authRepoProvider = Provider((ref) => AuthenticationRepo());

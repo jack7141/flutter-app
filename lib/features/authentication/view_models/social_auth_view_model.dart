@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:celeb_voice/features/authentication/repos/authentication_repo.dart';
+import 'package:flutter_naver_login/flutter_naver_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -154,6 +155,59 @@ class SocialAuthViewModel extends AsyncNotifier<void> {
 
     if (state.hasError) {
       print("❌ Kakao login error occurred: ${state.error}");
+    }
+  }
+
+  Future<void> naverSignIn() async {
+    print("✅ [1/5] Naver Sign-In process started.");
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      // 네이버 로그인 시도 (1.8.0 버전)
+      print("🚀 Starting Naver login...");
+      final NaverLoginResult result = await FlutterNaverLogin.logIn();
+
+      if (result.status != NaverLoginStatus.loggedIn) {
+        print("🚨 Naver login failed or cancelled: ${result.status}");
+        throw Exception("Naver login cancelled or failed.");
+      }
+
+      print("✅ [2/5] Naver login successful.");
+
+      // 네이버 사용자 정보 가져오기
+      final NaverAccessToken accessToken =
+          await FlutterNaverLogin.currentAccessToken;
+      final NaverAccountResult accountResult =
+          await FlutterNaverLogin.currentAccount();
+
+      print("🔍 Account ID: ${accountResult.id}");
+      print("🔍 Account Email: ${accountResult.email}");
+      print("🔍 Account Name: ${accountResult.name}");
+
+      final naverUserInfo = {
+        'id': accountResult.id,
+        'email': accountResult.email,
+        'name': accountResult.name,
+        'nickname': accountResult.nickname,
+        'profileImage': accountResult.profileImage,
+        'age': accountResult.age,
+        'gender': accountResult.gender,
+        'birthday': accountResult.birthday,
+        'birthyear': accountResult.birthyear,
+        'mobile': accountResult.mobile,
+      };
+
+      print(
+        "✅ [3/5] Naver user info received: ${accountResult.nickname} (${accountResult.email})",
+      );
+
+      print("✅ [4/5] Sending Naver token to our backend...");
+      await _authRepo.naverSocialLogin(accessToken.accessToken, naverUserInfo);
+
+      print("✅ [5/5] Backend communication successful.");
+    });
+
+    if (state.hasError) {
+      print("❌ Naver login error occurred: ${state.error}");
     }
   }
 }

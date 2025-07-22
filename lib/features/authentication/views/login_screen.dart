@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class LoginScreen extends ConsumerWidget {
   static const String routeName = "login";
@@ -104,11 +103,24 @@ class LoginScreen extends ConsumerWidget {
                 },
               ),
               Gaps.v16,
-              const AuthButton(
-                imagePath: "assets/images/Naver.png",
-                text: "네이버로 시작하기",
-                backgroundColor: Color(0xFF03CF5D),
-                textColor: Colors.white,
+              Consumer(
+                builder: (context, ref, child) {
+                  final authState = ref.watch(socialAuthProvider);
+                  return GestureDetector(
+                    onTap: authState.isLoading
+                        ? null
+                        : () {
+                            ref.read(socialAuthProvider.notifier).naverSignIn();
+                          },
+                    child: AuthButton(
+                      imagePath: "assets/images/Naver.png",
+                      text: "네이버로 시작하기",
+                      isLoading: authState.isLoading,
+                      backgroundColor: Color(0xFF03CF5D),
+                      textColor: Colors.white,
+                    ),
+                  );
+                },
               ),
             ],
           ),

@@ -41,7 +41,7 @@ dependencies:
   google_sign_in: ^6.2.1
   flutter_secure_storage: ^9.0.0
   kakao_flutter_sdk: ^1.9.7+3
-  # flutter_naver_login: ^2.1.1
+  flutter_naver_login: ^1.8.0  # 2.1.1에서 1.8.0으로 다운그레이드
   sign_in_with_apple: ^7.0.1
 
   http: ^1.1.0
