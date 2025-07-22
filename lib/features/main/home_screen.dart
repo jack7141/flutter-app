@@ -2,12 +2,15 @@
 
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
+import 'package:celeb_voice/features/authentication/repos/authentication_repo.dart'; // 추가
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:celeb_voice/features/main/views_models/celeb_data.dart';
 import 'package:celeb_voice/features/subscription/services/subscription_service.dart';
+import 'package:celeb_voice/features/user_profile/repos/user_profile_repo.dart'; // 추가
 import 'package:celeb_voice/services/instagram_service.dart'; // 이 줄 추가
 import 'package:celeb_voice/services/youtube_service.dart'; // import 추가
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // 추가
 import 'package:go_router/go_router.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -57,6 +60,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return filteredCelebs[currentIndex];
   }
 
+  String _userNickname = "사용자"; // 기본값
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  late final UserProfileRepo _userProfileRepo; // 추가
+
   @override
   void initState() {
     super.initState();
@@ -65,7 +72,13 @@ class _HomeScreenState extends State<HomeScreen> {
     _celebData.addListener(() {
       if (mounted) setState(() {});
     });
+
+    // UserProfileRepo 초기화
+    final authRepo = AuthenticationRepo();
+    _userProfileRepo = UserProfileRepo(authRepo: authRepo);
+
     _loadSubscriptionStatus();
+    _loadUserNickname(); // 사용자 nickname 로드 추가
   }
 
   // 구독 상태 조회 메서드 수정
@@ -97,6 +110,46 @@ class _HomeScreenState extends State<HomeScreen> {
         _subscribedCelebIds = []; // 에러 시 빈 목록으로 초기화
         _isLoadingSubscription = false;
       });
+    }
+  }
+
+  // 사용자 nickname 로드 메서드 (localStorage 우선, 없으면 API 호출)
+  Future<void> _loadUserNickname() async {
+    try {
+      print('📖 사용자 닉네임 로딩 시작...');
+
+      // 1. 먼저 localStorage에서 확인
+      final localNickname = await _secureStorage.read(key: 'user_nickname');
+      if (localNickname != null && localNickname.isNotEmpty) {
+        setState(() {
+          _userNickname = localNickname;
+        });
+        print('✅ 로컬에서 닉네임 로드 완료: $localNickname');
+        return;
+      }
+
+      print('⚠️ 로컬에 닉네임이 없음, API에서 가져오는 중...');
+
+      // 2. localStorage에 없으면 profile API로 가져오기
+      final userProfile = await _userProfileRepo.getUserProfile();
+      if (userProfile != null) {
+        final nickname = userProfile['profile']?['nickname'];
+        if (nickname != null && nickname.isNotEmpty) {
+          setState(() {
+            _userNickname = nickname;
+          });
+
+          // API에서 가져온 닉네임을 localStorage에 저장 (캐싱)
+          await _secureStorage.write(key: 'user_nickname', value: nickname);
+          print('✅ API에서 닉네임 로드 및 로컬 저장 완료: $nickname');
+          return;
+        }
+      }
+
+      print('⚠️ 닉네임을 가져올 수 없어 기본값 사용: $_userNickname');
+    } catch (e) {
+      print('❌ 닉네임 로드 실패: $e');
+      // 에러 발생시 기본값 유지
     }
   }
 
@@ -278,8 +331,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMessageBanner(double screenWidth, double screenHeight) {
+    // 현재 선택된 셀럽들 (예시로 2명 고정)
+    final currentCelebs = _celebData.celebs.take(2).toList();
+
     return Container(
-      width: screenWidth * 0.9, // 최대 너비만 제한
       padding: EdgeInsets.symmetric(
         horizontal: Sizes.size20,
         vertical: Sizes.size10,
@@ -291,73 +346,76 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Column(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                backgroundImage: AssetImage('assets/images/celebs/IU.png'),
-                radius: 18,
-              ),
-              Gaps.h12,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '성한빈',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: Sizes.size15,
-                      ),
-                    ),
-                    Text(
-                      '민지야 어제 하루 잘 보냈어?',
-                      style: TextStyle(
-                        color: Color(0xff868e96),
-                        fontSize: Sizes.size14,
-                      ),
-                    ),
-                  ],
+          if (currentCelebs.isNotEmpty)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  backgroundImage: AssetImage(currentCelebs[0].imagePath),
+                  radius: 18,
                 ),
-              ),
-            ],
-          ),
-          Gaps.v12,
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                backgroundImage: AssetImage('assets/images/celebs/son.png'),
-                radius: 18,
-              ),
-              Gaps.h12,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '차은우',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: Sizes.size15,
+                Gaps.h12,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        currentCelebs[0].name,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: Sizes.size15,
+                        ),
                       ),
-                    ),
-                    Text(
-                      '민지야 어제 하루 잘 보냈어?',
-                      style: TextStyle(
-                        color: Color(0xff868e96),
-                        fontSize: Sizes.size14,
+                      Text(
+                        '$_userNickname야 어제 하루 잘 보냈어?', // 동적 닉네임 사용
+                        style: TextStyle(
+                          color: Color(0xff868e96),
+                          fontSize: Sizes.size14,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          if (currentCelebs.length > 1) ...[
+            Gaps.v12,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  backgroundImage: AssetImage(currentCelebs[1].imagePath),
+                  radius: 18,
+                ),
+                Gaps.h12,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        currentCelebs[1].name,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: Sizes.size15,
+                        ),
+                      ),
+                      Text(
+                        '$_userNickname야 오늘도 좋은 하루 보내자!', // 동적 닉네임 사용
+                        style: TextStyle(
+                          color: Color(0xff868e96),
+                          fontSize: Sizes.size14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

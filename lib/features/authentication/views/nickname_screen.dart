@@ -40,7 +40,6 @@ class _NicknameScreenState extends State<NicknameScreen> {
     });
 
     try {
-      // AppConfig에서 정의한 키로 토큰 가져오기
       final token = await _secureStorage.read(key: AppConfig.accessTokenKey);
 
       print('🔑 찾은 토큰: $token');
@@ -61,12 +60,14 @@ class _NicknameScreenState extends State<NicknameScreen> {
       );
 
       print('📤 닉네임 업데이트 요청: $nickname');
-      print('🔑 Authorization: Bearer $token');
       print('📡 응답 상태코드: ${response.statusCode}');
-      print('📡 응답 본문: ${response.body}');
 
       if (response.statusCode == 200) {
         print('✅ 닉네임 업데이트 성공');
+
+        // 성공시 localStorage에 닉네임 저장
+        await _secureStorage.write(key: 'user_nickname', value: nickname);
+        print('💾 닉네임 로컬 저장 완료: $nickname');
 
         if (context.mounted) {
           context.pushReplacement('/home');
