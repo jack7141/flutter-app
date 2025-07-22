@@ -2,14 +2,19 @@ import 'package:celeb_voice/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
+import 'package:naver_login_sdk/naver_login_sdk.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 카카오 SDK 초기화 (실제 네이티브 앱 키로 교체 필요)
-  KakaoSdk.init(
-    nativeAppKey: 'e1b50342b8edb35b7eb4e09d6b1fa33f', // TODO: 실제 네이티브 앱 키로 교체
+  // 네이버 로그인 SDK 초기화
+  NaverLoginSDK.initialize(
+    urlScheme: 'com.example.celebVoice', // iOS용
+    clientId: 'oohNqpOV6pom7AsYsYne',
+    clientSecret: 'VYTsuML5sV',
+    clientName: 'flutter-social', // 네이버 개발자센터의 애플리케이션 이름과 일치
   );
+
+  KakaoSdk.init(nativeAppKey: 'e1b50342b8edb35b7eb4e09d6b1fa33f');
 
   runApp(const ProviderScope(child: MyApp()));
 }

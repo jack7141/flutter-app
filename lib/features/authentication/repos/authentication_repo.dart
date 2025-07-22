@@ -456,11 +456,11 @@ class AuthenticationRepo {
       print("📤 전송할 네이버 사용자 정보: $userInfo");
 
       final dio = Dio();
-      const String baseUrl = "http://127.0.0.1:8000"; // 또는 AppConfig.baseUrl 사용
+      // const String baseUrl = "http://127.0.0.1:8000"; // 이 라인을 제거
 
       // 네이버 소셜 로그인 API 호출
       final Response naverResponse = await dio.post(
-        '$baseUrl/api/v1/users/social/naver', // 네이버용 엔드포인트
+        '${AppConfig.baseUrl}/api/v1/users/social/naver', // AppConfig.baseUrl 사용
         data: {'access_token': accessToken, 'user_info': userInfo},
         options: Options(
           headers: {'Content-Type': 'application/json'},
@@ -469,7 +469,9 @@ class AuthenticationRepo {
       );
 
       if (AppConfig.enableDebugLogs) {
-        print("🌐 네이버 소셜 로그인 URL: $baseUrl/api/v1/users/social/naver");
+        print(
+          "🌐 네이버 소셜 로그인 URL: ${AppConfig.baseUrl}/api/v1/users/social/naver",
+        ); // 수정
         print(
           "📤 전송할 네이버 로그인 데이터: ${{'access_token': accessToken, 'user_info': userInfo}}",
         );

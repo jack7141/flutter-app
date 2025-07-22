@@ -2,5 +2,5 @@
 <resources>
     <string name="client_id">oohNqpOV6pom7AsYsYne</string>
     <string name="client_secret">VYTsuML5sV</string>
-    <string name="client_name">celeb_voice</string>
+    <string name="client_name">flutter-social</string>
 </resources> 
