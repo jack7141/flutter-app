@@ -2,6 +2,7 @@ import 'package:celeb_voice/common/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
+import 'package:celeb_voice/features/subscription/services/subscription_service.dart'; // 추가
 import 'package:celeb_voice/features/user_info/view_models/user_info_view_model.dart';
 import 'package:celeb_voice/features/user_info/widgets/celeb_avatar.dart';
 import 'package:flutter/material.dart';
@@ -41,16 +42,32 @@ class AttitudeScreen extends ConsumerWidget {
     );
 
     try {
-      // 🆕 ViewModel을 통한 저장 (비즈니스 로직 포함)
-      await ref.read(userInfoProvider.notifier).saveUserInfo();
+      // �� ViewModel을 통한 저장 (is_onboarded: true 포함)
+      await ref
+          .read(userInfoProvider.notifier)
+          .saveUserInfo(isOnboarded: true); // 파라미터 추가
       print("✅ 사용자 정보 저장 완료");
+
+      // 🆕 선택된 셀럽이 있으면 구독 API 호출
+      if (celeb != null) {
+        print("📞 ${celeb!.name} 구독 API 호출 시작");
+        try {
+          final subscriptionService = SubscriptionService();
+          final result = await subscriptionService.subscribeToCeleb(celeb!.id);
+
+          print("✅ ${celeb!.name} 구독 성공: $result");
+        } catch (subscriptionError) {
+          print("❌ 구독 API 호출 실패: $subscriptionError");
+          // 구독 실패해도 홈으로 이동 (사용자 정보는 이미 저장됨)
+        }
+      }
 
       if (context.mounted) {
         context.pop(); // 로딩 다이얼로그 닫기
 
         if (celeb != null) {
-          print("🎭 셀럽 정보와 함께 구독 페이지로 이동: ${celeb!.name}");
-          context.push('/home', extra: celeb);
+          print("🎭 셀럽 구독 완료 후 홈으로 이동: ${celeb!.name}");
+          context.go('/home'); // context.push → context.go로 변경
         } else {
           print("🏠 홈으로 이동");
           context.go('/home');

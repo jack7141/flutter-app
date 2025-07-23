@@ -27,28 +27,27 @@ class CelebCard extends StatelessWidget {
     final selectedCeleb = celebs[celebIndex];
     print("🔍 셀럽 카드 클릭: ${selectedCeleb.name}");
 
-    // 로딩 다이얼로그 표시
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => Center(child: CircularProgressIndicator()),
-    );
+    // 혹시 떠있는 로딩 다이얼로그 강제로 닫기
+    try {
+      if (context.mounted && Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+        print("🚪 기존 다이얼로그 닫기");
+      }
+    } catch (e) {
+      print("⚠️ 다이얼로그 닫기 실패: $e");
+    }
 
     try {
       final subscriptionService = SubscriptionService();
-
-      // 먼저 현재 구독 상태 확인
       final subscriptionStatus = await subscriptionService
           .getSubscriptionStatus();
+      final isSubscribed = subscriptionStatus.subscribedCelebIds.contains(
+        selectedCeleb.id,
+      );
 
-      if (subscriptionStatus.subscribedCelebIds.contains(selectedCeleb.id)) {
-        // 이미 구독된 경우 → 메시지 생성으로 이동
-        print("✅ 이미 ${selectedCeleb.name} 구독자 → 메시지 생성으로 이동");
-
-        // 로딩 다이얼로그 닫기
-        if (context.mounted && context.canPop()) {
-          context.pop();
-        }
+      if (isSubscribed) {
+        // 이미 구독된 경우 → TTS로 이동
+        print("✅ 이미 ${selectedCeleb.name} 구독자 → TTS로 이동");
 
         if (context.mounted) {
           context.push('/previewTts', extra: selectedCeleb);
