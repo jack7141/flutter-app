@@ -9,9 +9,19 @@ class UserInfoService {
   final Dio _dio = Dio();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  Future<void> saveUserInfo(UserInfoModel userInfo) async {
+  Future<void> saveUserInfo(
+    UserInfoModel userInfo, {
+    bool isOnboarded = false,
+  }) async {
+    // 파라미터 추가
     try {
       final jsonData = userInfo.toJson();
+
+      // is_onboarded 필드 추가
+      if (isOnboarded) {
+        jsonData['is_onboarded'] = true;
+      }
+
       _logSaveAttempt(jsonData);
 
       if (jsonData.isEmpty) {

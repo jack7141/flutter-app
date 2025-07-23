@@ -69,12 +69,13 @@ class UserInfoViewModel extends StateNotifier<UserInfoModel> {
 
   // === 비즈니스 로직 ===
 
-  Future<void> saveUserInfo() async {
+  Future<void> saveUserInfo({bool isOnboarded = false}) async {
+    // 파라미터 추가
     try {
-      print("💾 사용자 정보 저장 시작");
+      print("💾 사용자 정보 저장 시작 (온보딩 완료: $isOnboarded)");
 
       _validateUserInfo();
-      await _service.saveUserInfo(state);
+      await _service.saveUserInfo(state, isOnboarded: isOnboarded); // 파라미터 전달
 
       print("✅ 저장 완료");
       reset();

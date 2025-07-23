@@ -54,50 +54,18 @@ class CelebCard extends StatelessWidget {
           context.push('/previewTts', extra: selectedCeleb);
         }
       } else {
-        // 미구독 상태 → 구독 API 호출
-        print("📞 ${selectedCeleb.name} 구독 API 호출");
-        final result = await subscriptionService.subscribeToCeleb(
-          selectedCeleb.id,
-        );
-
-        print("📥 구독 API 응답: $result");
-
-        final isOnboarded = result['isOnboarded'] ?? true;
-
-        // 로딩 다이얼로그 닫기
-        if (context.mounted && context.canPop()) {
-          context.pop();
-        }
-
-        // 약간의 지연을 주어 다이얼로그가 완전히 닫히도록 함
-        await Future.delayed(Duration(milliseconds: 100));
-
-        if (!isOnboarded) {
-          print("🎉 첫 구독 → Welcome 온보딩 시작");
-          print("🔄 Welcome 페이지로 이동 시도...");
-
-          if (context.mounted) {
-            context.push('/welcome', extra: selectedCeleb);
-          }
-        } else {
-          print("✅ 구독 완료 → 메시지 생성으로 이동");
-          if (context.mounted) {
-            context.push('/generateMessage', extra: selectedCeleb);
-          }
+        // 미구독 상태 → 구독 API 호출하지 않고 바로 온보딩으로
+        print("📝 미구독 셀럽 - 온보딩 시작: ${selectedCeleb.name}");
+        if (context.mounted) {
+          // 구독 API 호출 부분 제거하고 바로 온보딩으로 이동
+          context.push('/welcome', extra: selectedCeleb);
         }
       }
     } catch (e) {
-      print("❌ 구독 처리 중 오류: $e");
-
-      // 에러 시에도 로딩 다이얼로그 닫기
-      if (context.mounted && context.canPop()) {
-        context.pop();
-      }
-
+      print("❌ 구독 상태 확인 실패: $e");
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('구독 처리 중 오류가 발생했습니다. 다시 시도해주세요.')),
-        );
+        // 에러 시에도 온보딩으로 이동 (셀럽 정보 전달)
+        context.push('/welcome', extra: selectedCeleb);
       }
     }
   }
