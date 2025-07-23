@@ -3,7 +3,9 @@ import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/authentication/repos/authentication_repo.dart';
 import 'package:celeb_voice/features/user_profile/repos/user_profile_repo.dart';
+import 'package:celeb_voice/features/user_profile/views/user_settings_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class UserProfileScreen extends StatefulWidget {
   static const String routeName = "userProfile";
@@ -79,6 +81,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     }
   }
 
+  void _navigateToSettings() {
+    context.push(UserSettingsScreen.routeUrl);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,7 +103,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   centerTitle: false,
                   actions: [
                     IconButton(
-                      onPressed: () {},
+                      onPressed: _navigateToSettings,
                       icon: Icon(Icons.settings_outlined),
                     ),
                   ],

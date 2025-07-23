@@ -1,6 +1,5 @@
 import 'package:celeb_voice/common/main_navigation_screen.dart';
 import 'package:celeb_voice/features/authentication/views/login_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:celeb_voice/features/authentication/views/nickname_screen.dart';
 import 'package:celeb_voice/features/authentication/views/terms_screens.dart';
 import 'package:celeb_voice/features/generation/views/generate_my_message_screen.dart';
@@ -15,7 +14,9 @@ import 'package:celeb_voice/features/user_info/views/interest_screen.dart';
 import 'package:celeb_voice/features/user_info/views/job_screen.dart';
 import 'package:celeb_voice/features/user_info/views/mbti_screen.dart';
 import 'package:celeb_voice/features/user_info/views/welcome_screen.dart';
-import 'package:celeb_voice/features/user_profile/user_profile_screen.dart';
+import 'package:celeb_voice/features/user_profile/views/user_profile_screen.dart';
+import 'package:celeb_voice/features/user_profile/views/user_settings_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 // 공통 셀럽 데이터 파싱 함수
@@ -164,6 +165,11 @@ final router = GoRouter(
             final celeb = state.extra as CelebModel?;
             return MyMessageTtsScreen(celeb: celeb);
           },
+        ),
+        GoRoute(
+          path: "/settings",
+          name: UserSettingsScreen.routeName,
+          builder: (context, state) => const UserSettingsScreen(),
         ),
       ],
     ),
