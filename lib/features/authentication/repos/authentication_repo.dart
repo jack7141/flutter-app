@@ -119,6 +119,13 @@ class AuthenticationRepo {
   Future<void> _saveTokens(Map<String, dynamic> data) async {
     if (AppConfig.enableDebugLogs) {
       print("💾 토큰 저장 시작...");
+      print("📥 백엔드에서 받은 전체 데이터: $data");
+
+      // 각 필드별로 상세 출력
+      print("🔍 데이터 상세 분석:");
+      data.forEach((key, value) {
+        print("  - $key: $value (타입: ${value.runtimeType})");
+      });
     }
 
     await storage.write(
@@ -136,6 +143,19 @@ class AuthenticationRepo {
         key: AppConfig.refreshTokenKey,
         value: data['refreshToken'],
       );
+    }
+
+    // user_id도 함께 저장
+    if (data['userId'] != null) {
+      // user_id → userId 변경
+      await storage.write(key: 'user_id', value: data['userId'].toString());
+      if (AppConfig.enableDebugLogs) {
+        print("💾 User ID 저장 완료: ${data['userId']}");
+      }
+    } else {
+      if (AppConfig.enableDebugLogs) {
+        print("⚠️ userId가 응답에 없습니다!");
+      }
     }
 
     if (AppConfig.enableDebugLogs) {
@@ -456,7 +476,6 @@ class AuthenticationRepo {
       print("📤 전송할 네이버 사용자 정보: $userInfo");
 
       final dio = Dio();
-      // const String baseUrl = "http://127.0.0.1:8000"; // 이 라인을 제거
 
       // 네이버 소셜 로그인 API 호출
       final Response naverResponse = await dio.post(
