@@ -103,15 +103,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     ),
                   ],
                 ),
+                // 프로필 섹션 (패딩 있음)
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                    ), // 25 → 16으로 줄임
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Gaps.v20, // 추가
+                        Gaps.v20,
                         // 기존 프로필 섹션
                         Container(
                           padding: EdgeInsets.symmetric(
@@ -161,8 +160,22 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           ),
                         ),
                         Gaps.v10,
-                        Divider(color: Colors.grey.shade300, thickness: 1),
-                        Gaps.v20, // 24 → 20으로 줄임
+                      ],
+                    ),
+                  ),
+                ),
+                // Divider (패딩 없음 - 화면 전체 너비)
+                SliverToBoxAdapter(
+                  child: Divider(color: Colors.grey.shade300, thickness: 1),
+                ),
+                // 메시지 보관함 텍스트 (패딩 있음)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Gaps.v20,
                         Text(
                           "메시지 보관함",
                           style: TextStyle(
@@ -170,11 +183,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        Gaps.v10, // 추가로 여백
+                        Gaps.v10,
                       ],
                     ),
                   ),
                 ),
+                // TabBar (패딩 없음 - 화면 전체 너비)
                 SliverPersistentHeader(
                   delegate: _MessageTabBarDelegate(),
                   pinned: true,
@@ -357,26 +371,21 @@ class _MessageTabBarDelegate extends SliverPersistentHeaderDelegate {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).appBarTheme.backgroundColor,
-        border: Border(
-          bottom: BorderSide(color: Colors.grey.shade300, width: 1),
-        ),
+        // border 부분 제거
       ),
       child: TabBar(
-        indicatorSize: TabBarIndicatorSize.tab, // label → tab으로 변경 (탭 전체 너비)
-        indicatorWeight: 2.0, // indicator 두께도 조금 더 두껍게
+        indicatorSize: TabBarIndicatorSize.tab,
+        indicatorWeight: 2.0,
         indicator: UnderlineTabIndicator(
-          borderSide: BorderSide(
-            color: Color(0xff9e9ef4),
-            width: 3.0, // 두께
-          ),
-          insets: EdgeInsets.symmetric(horizontal: 20.0), // 양쪽 여백 조정으로 길이 조절
+          borderSide: BorderSide(color: Color(0xff9e9ef4), width: 2.0),
+          insets: EdgeInsets.symmetric(horizontal: 0.0),
         ),
         labelColor: Color(0xff463f99),
         unselectedLabelColor: Colors.black,
         labelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
         tabs: [
-          Tab(text: "나만의 메시지"),
-          Tab(text: "친구와의 메시지"),
+          Tab(text: "받은 메시지"),
+          Tab(text: "보낸 메시지"),
         ],
       ),
     );
