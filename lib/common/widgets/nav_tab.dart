@@ -34,7 +34,7 @@ class NavTab extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 FaIcon(
-                  size: isSelected ? 30 : 24,
+                  size: isSelected ? 30 : 28,
                   isSelected ? selectedIcon : icon,
                   color: isSelected ? Color(0xff9e9ef4) : Color(0xffc3c7cb),
                 ),
