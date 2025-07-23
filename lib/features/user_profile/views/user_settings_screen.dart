@@ -1,5 +1,6 @@
 import 'package:celeb_voice/common/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/constants/gaps.dart';
+import 'package:celeb_voice/features/user_profile/widgets/mypage_formbutton.dart';
 import 'package:flutter/material.dart';
 
 class UserSettingsScreen extends StatefulWidget {
@@ -182,6 +183,26 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                       ),
                     ],
                   ),
+                ),
+                Gaps.v16,
+                Divider(color: Colors.grey.shade300, thickness: 1),
+                Gaps.v16,
+                Text(
+                  '앱 설정',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+                Gaps.v12,
+                MyPageFormButton(title: "알림 설정", icon: Icons.arrow_forward_ios),
+                Gaps.v16,
+                Divider(color: Colors.grey.shade300, thickness: 1),
+                Gaps.v20,
+                MyPageFormButton(title: "공지사항", icon: Icons.arrow_forward_ios),
+                Gaps.v20,
+                MyPageFormButton(title: "문의하기", icon: Icons.arrow_forward_ios),
+                Gaps.v20,
+                MyPageFormButton(
+                  title: "서비스 정보 및 약관",
+                  icon: Icons.arrow_forward_ios,
                 ),
               ],
             ),

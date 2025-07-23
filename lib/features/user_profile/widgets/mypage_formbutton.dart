@@ -11,7 +11,7 @@ class MyPageFormButton extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
         ),
         Spacer(),
         Icon(icon, size: 20, color: Color(0xff2c4cea)),
