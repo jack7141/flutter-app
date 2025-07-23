@@ -147,12 +147,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              Gaps.h5,
-                              Icon(
-                                Icons.arrow_forward_ios,
-                                size: 12,
-                                color: Color(0xff868e96),
-                              ),
                               Spacer(),
                               Text(
                                 "4,000",
