@@ -14,6 +14,7 @@ import 'package:celeb_voice/features/user_info/views/interest_screen.dart';
 import 'package:celeb_voice/features/user_info/views/job_screen.dart';
 import 'package:celeb_voice/features/user_info/views/mbti_screen.dart';
 import 'package:celeb_voice/features/user_info/views/welcome_screen.dart';
+import 'package:celeb_voice/features/user_profile/views/update_profile_screen.dart';
 import 'package:celeb_voice/features/user_profile/views/user_profile_screen.dart';
 import 'package:celeb_voice/features/user_profile/views/user_settings_screen.dart';
 import 'package:flutter/material.dart';
@@ -170,6 +171,11 @@ final router = GoRouter(
           path: "/settings",
           name: UserSettingsScreen.routeName,
           builder: (context, state) => const UserSettingsScreen(),
+        ),
+        GoRoute(
+          path: "/update_profile",
+          name: UpdateProfileScreen.routeName,
+          builder: (context, state) => const UpdateProfileScreen(),
         ),
       ],
     ),

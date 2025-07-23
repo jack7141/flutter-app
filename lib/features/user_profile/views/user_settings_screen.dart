@@ -1,7 +1,9 @@
 import 'package:celeb_voice/common/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/constants/gaps.dart';
+import 'package:celeb_voice/features/user_profile/views/update_profile_screen.dart';
 import 'package:celeb_voice/features/user_profile/widgets/mypage_formbutton.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class UserSettingsScreen extends StatefulWidget {
   static const String routeUrl = '/settings';
@@ -15,6 +17,10 @@ class UserSettingsScreen extends StatefulWidget {
 }
 
 class _UserSettingsScreenState extends State<UserSettingsScreen> {
+  void _onUpdateProfile() {
+    context.push(UpdateProfileScreen.routeURL);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +63,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      print("계정 정보 버튼 클릭");
+                      _onUpdateProfile();
                     },
                     child: Container(
                       padding: EdgeInsets.symmetric(
