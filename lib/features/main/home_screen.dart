@@ -527,34 +527,87 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '친구에게 메시지 보내기',
+                '친구에게 메시지 선물하기',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Gaps.v16,
               Container(
-                padding: EdgeInsets.symmetric(vertical: screenHeight * 0.05),
-                decoration: BoxDecoration(color: Colors.white),
-                child: Column(
-                  children: [
-                    Center(
-                      child: Image.asset(
-                        'assets/images/present_icon.png',
-                        fit: BoxFit.contain,
-                        height: 32,
-                        width: 32,
+                padding: EdgeInsets.symmetric(vertical: screenHeight * 0.001),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(Sizes.size16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0), // 8.0 → 16.0으로 약간 증가
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        '다양한 셀럽의 목소리로\n친구와 즐거운 추억을 만들어 보세요!',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
                       ),
-                    ),
-                    Gaps.v16,
-                    Text(
-                      '친구에게 셀럽의 목소리로\n특별한 메시지를 선물해보세요!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xff868e96),
+                      Gaps.v12, // v16 → v12로 줄임
+                      Row(
+                        children: [
+                          Expanded(
+                            // 첫 번째 버튼을 Expanded로 감싸기
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12, // 16 → 12로 줄임
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(
+                                  Sizes.size3,
+                                ),
+                                border: Border.all(color: Color(0xffc3c7cb)),
+                              ),
+                              child: Text(
+                                '보관함 바로가기',
+                                textAlign: TextAlign.center, // 중앙 정렬 추가
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Gaps.h8, // h12 → h8로 줄임
+                          Expanded(
+                            // 두 번째 버튼을 Expanded로 감싸기
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12, // 16 → 12로 줄임
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Color(0xff9e9ef4),
+                                borderRadius: BorderRadius.circular(
+                                  Sizes.size3,
+                                ),
+                              ),
+                              child: Text(
+                                '메시지 선물하기',
+                                textAlign: TextAlign.center, // 중앙 정렬 추가
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
