@@ -46,17 +46,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return Scaffold(
       body: widget.child,
       bottomNavigationBar: Container(
+        height: 100, // 높이 제한 추가
         decoration: BoxDecoration(
           border: Border(
-            top: BorderSide(
-              color: Colors.grey.shade300, // 회색 테두리
-              width: 1.0, // 테두리 두께
-            ),
+            top: BorderSide(color: Colors.grey.shade300, width: 1.0),
           ),
         ),
         child: BottomAppBar(
           color: Colors.white,
-          elevation: 0, // 그림자 제거해서 깔끔하게
+          elevation: 0,
+          padding: EdgeInsets.symmetric(vertical: 5), // 상하 패딩 줄임
           child: Row(
             children: [
               NavTab(
