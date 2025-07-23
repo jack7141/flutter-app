@@ -1,5 +1,6 @@
 import 'package:celeb_voice/config/app_config.dart';
 import 'package:celeb_voice/constants/gaps.dart';
+import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/authentication/repos/authentication_repo.dart';
 import 'package:celeb_voice/features/user_profile/repos/user_profile_repo.dart';
 import 'package:celeb_voice/features/user_profile/widgets/mypage_formbutton.dart';
@@ -53,37 +54,57 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       appBar: AppBar(
         title: Text(
           "마이페이지",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         centerTitle: false,
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.more_vert))],
+        actions: [
+          IconButton(onPressed: () {}, icon: Icon(Icons.settings_outlined)),
+        ],
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(25),
           child: Column(
             children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundImage: _getProfileImage(),
-                    child: _getProfileImage() == null
-                        ? Icon(Icons.person, size: 24, color: Colors.grey)
-                        : null,
-                  ),
-                  Gaps.h12,
-                  Text(
-                    _getDisplayName(),
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                  ),
-                  Spacer(),
-                  Icon(
-                    Icons.border_color_outlined,
-                    size: 24,
-                    color: Colors.grey.withOpacity(0.5),
-                  ),
-                ],
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 25),
+                decoration: BoxDecoration(
+                  color: Color(0xff9e9ef4).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(Sizes.size16),
+                ),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 24,
+                      backgroundImage: _getProfileImage(),
+                      child: _getProfileImage() == null
+                          ? Icon(Icons.person, size: 24, color: Colors.grey)
+                          : null,
+                    ),
+                    Gaps.h12,
+                    Text(
+                      _getDisplayName(),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Gaps.h5,
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 12,
+                      color: Color(0xff868e96),
+                    ),
+                    Spacer(),
+                    Text(
+                      "4,000",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               Gaps.v36,
               MyPageFormButton(title: "계정 설정", icon: Icons.arrow_forward_ios),
