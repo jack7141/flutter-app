@@ -11,6 +11,7 @@ import 'package:celeb_voice/services/instagram_service.dart'; // 이 줄 추가
 import 'package:celeb_voice/services/youtube_service.dart'; // import 추가
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // 추가
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -701,9 +702,19 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Instagram',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Row(
+                children: [
+                  Icon(
+                    FontAwesomeIcons.instagram,
+                    size: 24,
+                    color: Colors.black,
+                  ),
+                  Gaps.h8,
+                  Text(
+                    '@dlwlrma',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
               Gaps.v12,
               _buildInstagramImages(screenWidth),
@@ -721,9 +732,22 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'YouTube',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  Row(
+                    children: [
+                      Icon(
+                        FontAwesomeIcons.youtube,
+                        size: 24,
+                        color: Colors.black,
+                      ),
+                      Gaps.h8,
+                      Text(
+                        '이지금 [IU Official]',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
