@@ -7,7 +7,7 @@ import 'package:celeb_voice/features/generation/views/my_message_tts_screen.dart
 import 'package:celeb_voice/features/generation/views/preview_tts_screen.dart';
 import 'package:celeb_voice/features/main/home_screen.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
-import 'package:celeb_voice/features/storage/views/voice_storage_screen.dart';
+import 'package:celeb_voice/features/storage/views/send_message_screen.dart';
 import 'package:celeb_voice/features/user_info/views/attitude_screen.dart';
 import 'package:celeb_voice/features/user_info/views/birthday_screen.dart';
 import 'package:celeb_voice/features/user_info/views/interest_screen.dart';
@@ -139,9 +139,9 @@ final router = GoRouter(
           },
         ),
         GoRoute(
-          path: "/voiceStorage",
-          name: VoiceStorageScreen.routeName,
-          builder: (context, state) => const VoiceStorageScreen(),
+          path: "/sendMessage",
+          name: SendMessageScreen.routeName,
+          builder: (context, state) => const SendMessageScreen(),
         ),
         GoRoute(
           path: "/generateMessage",
