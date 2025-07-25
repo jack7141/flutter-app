@@ -46,8 +46,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Container(
-              height:
-                  MediaQuery.of(context).size.height * 0.6, // 0.75 → 0.6으로 줄임
+              height: MediaQuery.of(context).size.height * 0.6,
               padding: EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,12 +103,14 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                               SizedBox(height: 12),
                               Container(
                                 padding: EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
+                                  horizontal: 12, // 14 → 12로 줄임
+                                  vertical: 6, // 8 → 6으로 줄임
                                 ),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(
+                                    10,
+                                  ), // 12 → 10으로 줄임
                                   border: Border.all(color: Color(0xffc3c7cb)),
                                 ),
                                 child: TextField(
@@ -120,13 +121,13 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                                     hintText: "예: 민수야, 친구, 언니 등",
                                     hintStyle: TextStyle(
                                       color: Color(0xffc3c7cb),
-                                      fontSize: 14,
+                                      fontSize: 13, // 14 → 13으로 줄임
                                     ),
                                     border: InputBorder.none,
                                     contentPadding: EdgeInsets.zero,
                                   ),
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 13, // 14 → 13으로 줄임
                                     color: Color(0xff463e8d),
                                   ),
                                 ),
@@ -198,7 +199,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
         ),
         SizedBox(height: 12),
         SizedBox(
-          height: 50,
+          height: 35, // 40 → 35로 더 줄임
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: options.length,
@@ -210,30 +211,37 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                 padding: EdgeInsets.only(right: 8),
                 child: GestureDetector(
                   onTap: () => onSelect(option),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 12,
-                      horizontal: 20,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? Color.fromARGB(255, 218, 218, 248)
-                          : Colors.white,
-                      borderRadius: BorderRadius.circular(32),
-                      border: Border.all(
-                        color: isSelected
-                            ? const Color(0xff4d458e)
-                            : Color(0xffc3c7cb),
+                  child: IntrinsicWidth(
+                    // 텍스트 크기에 맞춰 너비 조정
+                    child: Container(
+                      height: 35, // 높이 고정
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 6, // 8 → 6으로 더 줄임
+                        horizontal: 12, // 16 → 12로 더 줄임
                       ),
-                    ),
-                    child: Text(
-                      option,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                      decoration: BoxDecoration(
                         color: isSelected
-                            ? Color(0xff4d458e)
-                            : Color(0xffc3c7cb),
+                            ? Color.fromARGB(255, 218, 218, 248)
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(18), // 20 → 18로 줄임
+                        border: Border.all(
+                          color: isSelected
+                              ? const Color(0xff4d458e)
+                              : Color(0xffc3c7cb),
+                          width: 1,
+                        ),
+                      ),
+                      alignment: Alignment.center, // 텍스트를 정중앙에 정렬
+                      child: Text(
+                        option,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13, // 14 → 13으로 조금 더 줄임
+                          color: isSelected
+                              ? Color(0xff4d458e)
+                              : Color(0xffc3c7cb),
+                        ),
+                        textAlign: TextAlign.center, // 텍스트 중앙 정렬
                       ),
                     ),
                   ),
