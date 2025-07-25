@@ -5,13 +5,40 @@ class YouTubeService {
   // 셀럽별 YouTube 채널 ID 매핑
   static const Map<String, String> _celebChannelIds = {
     '아이유': 'UC3SyT4_WLHzN7JmHQwKQZww',
-    '소농민': 'UCEg25rdRZXg32iwai6N6l0w', // 임시로 같은 채널 사용
-    // 추가 셀럽들...
+    '소농민': 'UCEg25rdRZXg32iwai6N6l0w',
   };
 
+  // 기본 YouTube 비디오 데이터
+  static List<YouTubeVideo> _getDefaultVideos(String celebName) {
+    return [
+      YouTubeVideo(
+        videoId: 'JleoAppaxi0',
+        title: '$celebName - 최신 영상',
+        thumbnailUrl: 'https://i.ytimg.com/vi/JleoAppaxi0/hqdefault.jpg',
+        description: '$celebName의 최신 영상입니다',
+      ),
+      YouTubeVideo(
+        videoId: 'o_nxIQTM_B0',
+        title: '$celebName - 인기 영상',
+        thumbnailUrl: 'https://i.ytimg.com/vi/o_nxIQTM_B0/hqdefault.jpg',
+        description: '$celebName의 인기 영상입니다',
+      ),
+      YouTubeVideo(
+        videoId: '3iM_06QeZi8',
+        title: '$celebName - 추천 영상',
+        thumbnailUrl: 'https://i.ytimg.com/vi/3iM_06QeZi8/hqdefault.jpg',
+        description: '$celebName의 추천 영상입니다',
+      ),
+    ];
+  }
+
   static Future<List<YouTubeVideo>> getCelebVideos(String celebName) async {
+    print("🎬 [DEBUG] YouTube 요청된 셀럽 이름: '$celebName'");
+    print("🎬 [DEBUG] 사용 가능한 키들: ${_celebChannelIds.keys.toList()}");
+
     // API 할당량 초과로 인해 임시로 더미 데이터 사용
     if (celebName == '아이유') {
+      print("🎬 [DEBUG] 아이유 전용 데이터 반환");
       return [
         YouTubeVideo(
           videoId: 'JleoAppaxi0',
@@ -35,6 +62,7 @@ class YouTubeService {
     }
 
     if (celebName == '소농민') {
+      print("🎬 [DEBUG] 소농민 전용 데이터 반환");
       return [
         YouTubeVideo(
           videoId: 'JleoAppaxi0',
@@ -57,49 +85,9 @@ class YouTubeService {
       ];
     }
 
-    // API 호출 부분 임시 비활성화
-    /*
-    final channelId = _celebChannelIds[celebName];
-    if (channelId == null) {
-      print('❌ 채널 ID를 찾을 수 없습니다: $celebName');
-      return [];
-    }
-
-    try {
-      final url =
-          '$_baseUrl?key=$_apiKey&part=snippet&channelId=$channelId&order=viewCount&maxResults=3&type=video';
-      print('🔍 YouTube API 호출 중: $celebName');
-      print('🔗 URL: $url');
-
-      final response = await http.get(Uri.parse(url));
-
-      print('📊 응답 상태 코드: ${response.statusCode}');
-      print('📄 응답 내용: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-
-        // 에러 응답 확인
-        if (data.containsKey('error')) {
-          print('❌ YouTube API 에러: ${data['error']}');
-          return [];
-        }
-
-        final items = data['items'] as List;
-        print('✅ 동영상 ${items.length}개 로드 성공');
-
-        return items.map((item) => YouTubeVideo.fromJson(item)).toList();
-      } else {
-        print('❌ HTTP 에러: ${response.statusCode}');
-        print('📄 에러 내용: ${response.body}');
-      }
-    } catch (e) {
-      print('❌ YouTube API 호출 실패: $e');
-    }
-    */
-
-    // 기본값으로 빈 배열 반환
-    return [];
+    // 다른 셀럽들을 위한 기본 데이터 반환
+    print("🎬 [DEBUG] '$celebName'에 대한 전용 데이터가 없어서 기본 데이터 반환");
+    return _getDefaultVideos(celebName);
   }
 }
 

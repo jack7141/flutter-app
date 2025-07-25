@@ -928,7 +928,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // Instagram 이미지 표시 메서드
+  // Instagram 이미지 표시 메서드 (현재 셀럽 이름 출력 추가)
   Widget _buildInstagramImages(double screenWidth) {
     if (_celebData.celebs.isEmpty) {
       return SizedBox(
@@ -941,6 +941,12 @@ class _HomeScreenState extends State<HomeScreen> {
       valueListenable: _currentCelebIndex,
       builder: (context, currentIndex, child) {
         final currentCeleb = _celebData.celebs[currentIndex];
+
+        // 현재 셀럽 정보 출력
+        print("📸 [DEBUG] 현재 셀럽 정보:");
+        print("   - ID: ${currentCeleb.id}");
+        print("   - 이름: '${currentCeleb.name}'");
+        print("   - 이미지 경로: ${currentCeleb.imagePath}");
 
         return FutureBuilder<List<InstagramImage>>(
           future: InstagramService.getCelebInstagramImages(currentCeleb.name),
@@ -960,20 +966,16 @@ class _HomeScreenState extends State<HomeScreen> {
             }
 
             final images = snapshot.data!;
-            final imageSize =
-                (screenWidth - 64) / 3; // Container padding(32) + 이미지 간격(32) 고려
+            final imageSize = (screenWidth - 64) / 3;
 
             return Row(
-              mainAxisAlignment: MainAxisAlignment.start, // 왼쪽 정렬
+              mainAxisAlignment: MainAxisAlignment.start,
               children: images.take(3).map((image) {
-                // 최대 3개만 표시
                 final index = images.indexOf(image);
                 return Container(
                   width: imageSize,
                   height: imageSize,
-                  margin: EdgeInsets.only(
-                    right: index == 2 ? 0 : 16, // 마지막 이미지는 오른쪽 여백 없음
-                  ),
+                  margin: EdgeInsets.only(right: index == 2 ? 0 : 16),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -981,7 +983,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
                       image.imageUrl,
-                      fit: BoxFit.cover, // cover로 변경해서 정사각형으로 채우기
+                      fit: BoxFit.cover,
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
                         return Container(
