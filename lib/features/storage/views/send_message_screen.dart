@@ -26,14 +26,63 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
     print("🎭 SendMessageScreen - 받은 celeb 정보: ${widget.celeb?.name}");
   }
 
+  // 메시지 검토 안내 다이얼로그
+  void _showMessageReviewDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          insetPadding: EdgeInsets.symmetric(horizontal: 40), // 다이얼로그 전체 너비 조정
+          contentPadding: EdgeInsets.fromLTRB(24, 20, 24, 10), // 내용 패딩 조정
+          content: Text(
+            '직접 작성하는 메시지는\n검토 후 발송 가능하며,\n1~2일 소요될 수 있습니다.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          actions: [
+            Center(
+              // 버튼을 가운데 정렬
+              child: SizedBox(
+                width: 120, // 버튼 너비 지정
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // 다이얼로그 닫기
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Color(0xff9e9ef4),
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 2), // 세로 패딩만 지정
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: Text(
+                    '확인',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 10), // 하단 여백 추가
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       appBar: CommonAppBar(
-        title: widget.celeb != null
-            ? "${widget.celeb!.name}에게 메시지"
-            : "메시지 작성", // 제목에 셀럽 이름 추가
+        title: widget.celeb != null ? "${widget.celeb!.name}에게 메시지" : "메시지 작성",
       ),
       body: SafeArea(
         child: Padding(
@@ -67,7 +116,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 셀럽 아바타와 이름 - 개선된 버전
+                    // 셀럽 아바타와 이름
                     if (widget.celeb != null) ...[
                       Container(
                         padding: EdgeInsets.all(8),
@@ -219,10 +268,13 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                 ),
               ),
               Gaps.v14,
-              FormButton(
-                text: widget.celeb != null
-                    ? '${widget.celeb!.name} 목소리로 들어보기'
-                    : '들어보기',
+              GestureDetector(
+                onTap: _showMessageReviewDialog, // 팝업 다이얼로그 표시
+                child: FormButton(
+                  text: widget.celeb != null
+                      ? '${widget.celeb!.name} 목소리로 들어보기'
+                      : '들어보기',
+                ),
               ),
             ],
           ),
