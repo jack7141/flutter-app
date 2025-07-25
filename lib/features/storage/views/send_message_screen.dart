@@ -22,7 +22,9 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
   // 템플릿 선택 상태 변수들
   String? _selectedCategory;
   String? _selectedSituation;
-  String? _selectedNickname;
+  String _nicknameInput = ""; // String?에서 String으로 변경
+  final TextEditingController _nicknameController =
+      TextEditingController(); // 컨트롤러 추가
 
   @override
   void initState() {
@@ -33,6 +35,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
   // 템플릿 선택 바텀 시트
   void _showTemplateBottomSheet() {
     showModalBottomSheet(
+      backgroundColor: Colors.white,
       context: context,
       isScrollControlled: true,
       useRootNavigator: true, // 이 옵션 추가 - 하단 네비게이션바까지 덮음
@@ -59,14 +62,6 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
-
-                  Text(
-                    "템플릿으로 메시지 만들기",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 30),
-
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
@@ -94,13 +89,49 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
 
                           SizedBox(height: 30),
 
-                          // 3. 호칭 선택
-                          _buildTemplateQuestion(
-                            "3. 메시지 받을 사람을 뭐라고 부르면 좋을까요?",
-                            _getNicknameOptions(),
-                            _selectedNickname,
-                            (value) =>
-                                setState(() => _selectedNickname = value),
+                          // 3. 호칭 입력 (선택에서 입력으로 변경)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "3. 메시지 받을 사람을 뭐라고 부르면 좋을까요?",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xff463e8d),
+                                ),
+                              ),
+                              SizedBox(height: 12),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Color(0xffc3c7cb)),
+                                ),
+                                child: TextField(
+                                  controller: _nicknameController,
+                                  onChanged: (value) =>
+                                      setState(() => _nicknameInput = value),
+                                  decoration: InputDecoration(
+                                    hintText: "예: 민수야, 친구, 언니 등",
+                                    hintStyle: TextStyle(
+                                      color: Color(0xffc3c7cb),
+                                      fontSize: 14,
+                                    ),
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xff463e8d),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
 
                           SizedBox(height: 40),
@@ -112,7 +143,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                               onPressed:
                                   _selectedCategory != null &&
                                       _selectedSituation != null &&
-                                      _selectedNickname != null
+                                      _nicknameInput.isNotEmpty
                                   ? () {
                                       Navigator.pop(context);
                                       _applyTemplate();
@@ -126,7 +157,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                                 ),
                               ),
                               child: Text(
-                                "템플릿 적용하기",
+                                "메시지 완성",
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
@@ -163,7 +194,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: Color(0xff463e8d),
           ),
         ),
         SizedBox(height: 12),
@@ -194,14 +225,16 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                       border: Border.all(
                         color: isSelected
                             ? const Color(0xff4d458e)
-                            : Colors.black.withOpacity(0.1),
+                            : Color(0xffc3c7cb),
                       ),
                     ),
                     child: Text(
                       option,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: isSelected ? Color(0xff4d458e) : Colors.black87,
+                        color: isSelected
+                            ? Color(0xff4d458e)
+                            : Color(0xffc3c7cb),
                       ),
                     ),
                   ),
@@ -234,7 +267,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
     print("✅ 선택된 템플릿:");
     print("카테고리: $_selectedCategory");
     print("상황: $_selectedSituation");
-    print("호칭: $_selectedNickname");
+    print("호칭: $_nicknameInput"); // _selectedNickname → _nicknameInput
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
