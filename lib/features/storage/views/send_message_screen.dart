@@ -20,10 +20,21 @@ class SendMessageScreen extends StatefulWidget {
 
 class _SendMessageScreenState extends State<SendMessageScreen> {
   @override
+  void initState() {
+    super.initState();
+    // 디버그용 로그 추가
+    print("🎭 SendMessageScreen - 받은 celeb 정보: ${widget.celeb?.name}");
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-      appBar: const CommonAppBar(),
+      appBar: CommonAppBar(
+        title: widget.celeb != null
+            ? "${widget.celeb!.name}에게 메시지"
+            : "메시지 작성", // 제목에 셀럽 이름 추가
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(Sizes.size20),
@@ -56,75 +67,122 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 셀럽 아바타와 이름 추가
+                    // 셀럽 아바타와 이름 - 개선된 버전
                     if (widget.celeb != null) ...[
-                      Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.grey.shade200,
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Image.network(
-                                AppConfig.getImageUrl(widget.celeb!.imagePath),
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  // 이미지 로딩 실패 시 기본 아이콘 표시
-                                  return Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.grey.shade200,
-                                    ),
-                                    child: Icon(
-                                      Icons.person,
-                                      size: 24,
-                                      color: Colors.grey.shade500,
-                                    ),
-                                  );
-                                },
-                                loadingBuilder:
-                                    (context, child, loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      // 로딩 중일 때 표시
-                                      return Container(
-                                        width: 40,
-                                        height: 40,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.grey.shade200,
-                                        ),
-                                        child: Center(
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                                  Colors.grey.shade400,
-                                                ),
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Color(0xff9e9ef4).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 45,
+                              height: 45,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.grey.shade200,
+                                border: Border.all(
+                                  color: Color(0xff9e9ef4).withOpacity(0.3),
+                                  width: 2,
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(22.5),
+                                child: Image.network(
+                                  AppConfig.getImageUrl(
+                                    widget.celeb!.imagePath,
+                                  ),
+                                  width: 45,
+                                  height: 45,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    print(
+                                      "❌ 이미지 로딩 실패: ${widget.celeb!.imagePath}",
+                                    );
+                                    return Container(
+                                      width: 45,
+                                      height: 45,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.grey.shade200,
+                                      ),
+                                      child: Icon(
+                                        Icons.person,
+                                        size: 26,
+                                        color: Colors.grey.shade500,
+                                      ),
+                                    );
+                                  },
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                        if (loadingProgress == null)
+                                          return child;
+                                        return Container(
+                                          width: 45,
+                                          height: 45,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.grey.shade200,
                                           ),
-                                        ),
-                                      );
-                                    },
+                                          child: Center(
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                    Color(0xff9e9ef4),
+                                                  ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                ),
                               ),
                             ),
-                          ),
-                          Gaps.h12,
-                          Text(
-                            widget.celeb!.name,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
+                            Gaps.h12,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.celeb!.name,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                Text(
+                                  "목소리로 메시지 전송",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                      ),
+                      Gaps.v16,
+                    ] else ...[
+                      // celeb 정보가 없을 때 표시
+                      Container(
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.warning, color: Colors.orange),
+                            Gaps.h8,
+                            Text(
+                              "셀럽을 선택해주세요",
+                              style: TextStyle(color: Colors.orange.shade700),
+                            ),
+                          ],
+                        ),
                       ),
                       Gaps.v16,
                     ],
@@ -133,7 +191,9 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                       child: TextField(
                         maxLines: 6,
                         decoration: InputDecoration(
-                          hintText: "메시지를 입력해주세요",
+                          hintText: widget.celeb != null
+                              ? "${widget.celeb!.name}의 목소리로 전할 메시지를 입력해주세요"
+                              : "메시지를 입력해주세요",
                           hintStyle: TextStyle(
                             color: Colors.grey.shade500,
                             fontSize: 14,
@@ -158,27 +218,23 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                     color: const Color(0xff9e9ef4).withOpacity(0.16),
                     borderRadius: BorderRadius.circular(Sizes.size64),
                   ),
-                  child: AnimatedDefaultTextStyle(
-                    duration: const Duration(milliseconds: 300),
+                  child: Text(
+                    '템플릿 사용하기',
                     style: TextStyle(
-                      fontSize: Sizes.size18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
+                      fontSize: Sizes.size16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xff4638d9),
                     ),
-                    child: Text(
-                      '템플릿 사용하기',
-                      style: TextStyle(
-                        fontSize: Sizes.size16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xff4638d9),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ),
               Gaps.v14,
-              FormButton(text: '들어보기'),
+              FormButton(
+                text: widget.celeb != null
+                    ? '${widget.celeb!.name} 목소리로 들어보기'
+                    : '들어보기',
+              ),
             ],
           ),
         ),

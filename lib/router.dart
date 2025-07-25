@@ -142,7 +142,10 @@ final router = GoRouter(
         GoRoute(
           path: "/sendMessage",
           name: SendMessageScreen.routeName,
-          builder: (context, state) => const SendMessageScreen(),
+          builder: (context, state) {
+            final celeb = state.extra as CelebModel?;
+            return SendMessageScreen(celeb: celeb);
+          },
         ),
         GoRoute(
           path: "/generateMessage",
