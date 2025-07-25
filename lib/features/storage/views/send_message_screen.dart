@@ -71,10 +71,6 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                     if (widget.celeb != null) ...[
                       Container(
                         padding: EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Color(0xff9e9ef4).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
                         child: Row(
                           children: [
                             Container(
@@ -152,13 +148,6 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                                     color: Colors.black,
                                   ),
                                 ),
-                                Text(
-                                  "목소리로 메시지 전송",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
                               ],
                             ),
                           ],
@@ -192,7 +181,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                         maxLines: 6,
                         decoration: InputDecoration(
                           hintText: widget.celeb != null
-                              ? "${widget.celeb!.name}의 목소리로 전할 메시지를 입력해주세요"
+                              ? "${widget.celeb!.name}의 목소리로 어떤 메시지를 전달할까요?"
                               : "메시지를 입력해주세요",
                           hintStyle: TextStyle(
                             color: Colors.grey.shade500,
