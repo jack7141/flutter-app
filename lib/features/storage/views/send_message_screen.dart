@@ -33,54 +33,109 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
     print("🎭 SendMessageScreen - 받은 celeb 정보: ${widget.celeb?.name}");
   }
 
-  // 템플릿 메시지 생성 (더미 데이터로 확장)
+  // 한국어 조사 처리 함수 (home_screen.dart에서 가져옴)
+  String _getNameWithJosa(String name, String josaType) {
+    if (name.isEmpty) return name;
+
+    // 마지막 글자의 유니코드
+    int lastChar = name.codeUnitAt(name.length - 1);
+
+    // 한글 범위 확인 (가-힣)
+    if (lastChar >= 0xAC00 && lastChar <= 0xD7A3) {
+      // 받침 있는지 확인 (종성이 있으면 받침 있음)
+      bool hasBatchim = (lastChar - 0xAC00) % 28 != 0;
+
+      switch (josaType) {
+        case '이/가':
+          return hasBatchim ? '$name이' : '$name가';
+        case '을/를':
+          return hasBatchim ? '$name을' : '$name를';
+        case '은/는':
+          return hasBatchim ? '$name은' : '$name는';
+        case '과/와':
+          return hasBatchim ? '$name과' : '$name와';
+        case '아/야':
+          return hasBatchim ? '$name아' : '$name야';
+        case '의':
+          return '$name의'; // 의는 받침과 상관없이 동일
+        default:
+          return name;
+      }
+    }
+
+    // 한글이 아닌 경우 (영어, 숫자 등)
+    // 영어의 경우 대부분 받침이 있다고 가정
+    switch (josaType) {
+      case '이/가':
+        return '$name이';
+      case '을/를':
+        return '$name을';
+      case '은/는':
+        return '$name은';
+      case '과/와':
+        return '$name과';
+      case '아/야':
+        return '$name아';
+      case '의':
+        return '$name의';
+      default:
+        return name;
+    }
+  }
+
+  // 템플릿 메시지 생성 (한국어 조사 처리 적용)
   String _generateTemplateMessage() {
     String celebName = widget.celeb?.name ?? "셀럽";
     String nickname = _nicknameInput;
 
-    // 카테고리별 더미 메시지 템플릿들
+    // 조사가 적용된 이름들
+    String celebWithI = _getNameWithJosa(celebName, '이/가');
+    String celebWithUi = _getNameWithJosa(celebName, '의');
+    String nicknameWithA = _getNameWithJosa(nickname, '아/야');
+
+    // 카테고리별 더미 메시지 템플릿들 (조사 처리 적용)
     Map<String, List<String>> templateMessages = {
       "생일축하": [
-        "$nickname아, 네가 태어난 그 날도 세상도 조금 더 반짝였을거야. $celebName의 오늘도 반짝이는 하루이길 바랄게. 생일 축하해!",
-        "$nickname아, 오늘은 네가 이 세상에 온 소중한 날이야! $celebName이 진심으로 축하해. 앞으로도 행복한 일만 가득하길!",
-        "생일 축하해 $nickname아! $celebName이 너의 새로운 한 살을 응원할게. 올해는 더욱 멋진 일들이 기다리고 있을거야!",
-        "$nickname아, 생일 정말 축하해! $celebName도 너처럼 특별한 사람을 알게 되어 기뻐. 행복한 하루 보내!",
+        "$nicknameWithA, 네가 태어난 그 날도 세상도 조금 더 반짝였을거야. $celebWithUi 오늘도 반짝이는 하루이길 바랄게. 생일 축하해!",
+        "$nicknameWithA, 오늘은 네가 이 세상에 온 소중한 날이야! $celebWithI 진심으로 축하해. 앞으로도 행복한 일만 가득하길!",
+        "생일 축하해 $nicknameWithA! $celebWithI 너의 새로운 한 살을 응원할게. 올해는 더욱 멋진 일들이 기다리고 있을거야!",
+        "$nicknameWithA, 생일 정말 축하해! $celebName도 너처럼 특별한 사람을 알게 되어 기뻐. 행복한 하루 보내!",
       ],
       "응원메시지": [
-        "$nickname아, 힘든 일이 있어도 $celebName이 항상 네 곁에 있다는 걸 잊지마. 넌 정말 잘하고 있어. 화이팅!",
-        "$nickname아, 때로는 힘들어도 괜찮아. $celebName이 너를 믿고 있으니까 포기하지 말고 조금만 더 힘내자!",
-        "힘들 때일수록 $celebName을 생각해줘, $nickname아. 넌 생각보다 훨씬 강한 사람이야. 할 수 있어!",
-        "$nickname아, 어려운 시간이지만 $celebName이 응원하고 있어. 이 또한 지나갈거야. 조금만 더 버텨보자!",
+        "$nicknameWithA, 힘든 일이 있어도 $celebWithI 항상 네 곁에 있다는 걸 잊지마. 넌 정말 잘하고 있어. 화이팅!",
+        "$nicknameWithA, 때로는 힘들어도 괜찮아. $celebWithI 너를 믿고 있으니까 포기하지 말고 조금만 더 힘내자!",
+        "힘들 때일수록 $celebName을 생각해줘, $nicknameWithA. 넌 생각보다 훨씬 강한 사람이야. 할 수 있어!",
+        "$nicknameWithA, 어려운 시간이지만 $celebWithI 응원하고 있어. 이 또한 지나갈거야. 조금만 더 버텨보자!",
       ],
       "고마운 마음": [
-        "$nickname아, 네가 있어서 $celebName의 하루가 더 특별해져. 고마워, 정말로.",
-        "$nickname아, 항상 고마워. $celebName에게 너는 정말 소중한 존재야. 네가 있어서 행복해!",
-        "고맙다는 말로는 부족하지만, $nickname아, $celebName이 진심으로 감사하고 있어. 네가 있어서 다행이야.",
-        "$nickname아, 네 덕분에 $celebName이 웃을 수 있어. 언제나 고마운 마음 잊지 않을게!",
+        "$nicknameWithA, 네가 있어서 $celebWithUi 하루가 더 특별해져. 고마워, 정말로.",
+        "$nicknameWithA, 항상 고마워. $celebName에게 너는 정말 소중한 존재야. 네가 있어서 행복해!",
+        "고맙다는 말로는 부족하지만, $nicknameWithA, $celebWithI 진심으로 감사하고 있어. 네가 있어서 다행이야.",
+        "$nicknameWithA, 네 덕분에 $celebWithI 웃을 수 있어. 언제나 고마운 마음 잊지 않을게!",
       ],
       "사랑고백": [
-        "$nickname아, $celebName의 마음을 전하고 싶어. 너를 정말 많이 좋아해.",
-        "$nickname아, 솔직히 말할게. $celebName에게 너는 정말 특별한 사람이야. 사랑해!",
-        "$nickname아, 이 말을 꼭 해주고 싶었어. $celebName이 너를 진심으로 사랑한다는 걸...",
-        "$nickname아, 네가 없으면 $celebName의 하루가 의미가 없어져. 정말 많이 사랑해!",
+        "$nicknameWithA, $celebWithUi 마음을 전하고 싶어. 너를 정말 많이 좋아해.",
+        "$nicknameWithA, 솔직히 말할게. $celebName에게 너는 정말 특별한 사람이야. 사랑해!",
+        "$nicknameWithA, 이 말을 꼭 해주고 싶었어. $celebWithI 너를 진심으로 사랑한다는 걸...",
+        "$nicknameWithA, 네가 없으면 $celebWithUi 하루가 의미가 없어져. 정말 많이 사랑해!",
       ],
       "위로": [
-        "$nickname아, 힘들 때는 $celebName을 생각해줘. 모든 게 괜찮아질거야.",
-        "$nickname아, 지금은 힘들겠지만 $celebName이 네 편에 있어. 혼자가 아니야, 괜찮을거야.",
-        "괜찮아 $nickname아, $celebName이 너의 아픔을 함께 나눌게. 시간이 약이 될거야.",
-        "$nickname아, 울고 싶을 때는 울어도 돼. $celebName이 네 곁에서 기다리고 있을게.",
+        "$nicknameWithA, 힘들 때는 $celebName을 생각해줘. 모든 게 괜찮아질거야.",
+        "$nicknameWithA, 지금은 힘들겠지만 $celebWithI 네 편에 있어. 혼자가 아니야, 괜찮을거야.",
+        "괜찮아 $nicknameWithA, $celebWithI 너의 아픔을 함께 나눌게. 시간이 약이 될거야.",
+        "$nicknameWithA, 울고 싶을 때는 울어도 돼. $celebWithI 네 곁에서 기다리고 있을게.",
       ],
       "축하": [
-        "$nickname아, 정말 축하해! $celebName도 네가 이뤄낸 일들이 너무 자랑스러워.",
-        "와! $nickname아, 정말 대단해! $celebName이 너를 진심으로 축하해. 너라면 할 수 있을 줄 알았어!",
-        "$nickname아, 축하한다! $celebName도 네가 성공했다는 소식에 정말 기뻐. 앞으로도 승승장구하자!",
-        "축하해 $nickname아! $celebName이 봐도 네 노력이 빛을 발한 것 같아. 정말 멋져!",
+        "$nicknameWithA, 정말 축하해! $celebName도 네가 이뤄낸 일들이 너무 자랑스러워.",
+        "와! $nicknameWithA, 정말 대단해! $celebWithI 너를 진심으로 축하해. 너라면 할 수 있을 줄 알았어!",
+        "$nicknameWithA, 축하한다! $celebName도 네가 성공했다는 소식에 정말 기뻐. 앞으로도 승승장구하자!",
+        "축하해 $nicknameWithA! $celebWithI 봐도 네 노력이 빛을 발한 것 같아. 정말 멋져!",
       ],
       "안부": [
-        "$nickname아, 잘 지내고 있어? $celebName이 안부를 전하고 싶었어. 오늘도 좋은 하루 보내!",
-        "$nickname아, 요즘 어떻게 지내? $celebName이 네 소식이 궁금했어. 건강하게 잘 지내고 있길!",
-        "안녕 $nickname아! $celebName이야. 갑자기 네 생각이 나서 안부 인사 드리고 싶었어. 잘 지내지?",
-        "$nickname아, 오랜만이야! $celebName이 너를 생각하며 안부를 물어보고 싶었어. 건강하게 지내고 있어?",
+        "$nicknameWithA, 잘 지내고 있어? $celebWithI 안부를 전하고 싶었어. 오늘도 좋은 하루 보내!",
+        "$nicknameWithA, 요즘 어떻게 지내? $celebWithI 네 소식이 궁금했어. 건강하게 잘 지내고 있길!",
+        "안녕 $nicknameWithA! $celebName이야. 갑자기 네 생각이 나서 안부 인사 드리고 싶었어. 잘 지내지?",
+        "$nicknameWithA, 오랜만이야! $celebWithI 너를 생각하며 안부를 물어보고 싶었어. 건강하게 지내고 있어?",
       ],
     };
 
@@ -97,7 +152,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
     // 선택된 카테고리의 메시지 목록 가져오기
     List<String> messages =
         templateMessages[_selectedCategory] ??
-        ["$nickname아, $celebName이 너에게 특별한 메시지를 전하고 싶어!"];
+        ["$nicknameWithA, $celebWithI 너에게 특별한 메시지를 전하고 싶어!"];
 
     // 랜덤으로 메시지 선택
     String selectedMessage =
