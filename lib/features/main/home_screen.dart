@@ -696,6 +696,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
+        Gaps.v20,
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           alignment: Alignment.topLeft,
@@ -707,11 +708,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   Icon(
                     FontAwesomeIcons.instagram,
                     size: 24,
-                    color: Colors.black,
+                    color: Color(0xff463e8d),
                   ),
                   Gaps.h8,
                   Text(
-                    '@dlwlrma',
+                    'dlwlrma',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -737,7 +738,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Icon(
                         FontAwesomeIcons.youtube,
                         size: 24,
-                        color: Colors.black,
+                        color: Color(0xff463e8d),
                       ),
                       Gaps.h8,
                       Text(
