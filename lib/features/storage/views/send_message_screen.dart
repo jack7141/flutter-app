@@ -46,7 +46,8 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Container(
-              height: MediaQuery.of(context).size.height * 0.75,
+              height:
+                  MediaQuery.of(context).size.height * 0.6, // 0.75 → 0.6으로 줄임
               padding: EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,6 +63,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                       ),
                     ),
                   ),
+                  SizedBox(height: 15), // 여백 조정
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
@@ -76,8 +78,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                                 setState(() => _selectedCategory = value),
                           ),
 
-                          SizedBox(height: 30),
-
+                          SizedBox(height: 25), // 간격 줄임
                           // 2. 상황/문구 선택
                           _buildTemplateQuestion(
                             "2. 어울리는 상황/문구를 선택해주세요.",
@@ -87,9 +88,8 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                                 setState(() => _selectedSituation = value),
                           ),
 
-                          SizedBox(height: 30),
-
-                          // 3. 호칭 입력 (선택에서 입력으로 변경)
+                          SizedBox(height: 25), // 간격 줄임
+                          // 3. 호칭 입력
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -134,8 +134,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                             ],
                           ),
 
-                          SizedBox(height: 40),
-
+                          SizedBox(height: 30), // 완료 버튼 위 간격 줄임
                           // 완료 버튼
                           SizedBox(
                             width: double.infinity,
@@ -153,7 +152,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                                 backgroundColor: Color(0xff9e9ef4),
                                 padding: EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(30),
                                 ),
                               ),
                               child: Text(
