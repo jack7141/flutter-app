@@ -76,118 +76,135 @@ class _SendMessageChoiceCelebState
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(Sizes.size20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "어떤 셀럽의\n목소리를 원하나요?",
-                style: TextStyle(
-                  fontSize: Sizes.size28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Gaps.v20,
-              Expanded(
-                child: _isLoading
-                    ? Center(child: CircularProgressIndicator())
-                    : _error != null
-                    ? Center(child: Text(_error!))
-                    : GridView.builder(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3, // 한 줄에 3개
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 20,
-                          childAspectRatio: 0.8, // 높이를 조금 더 주어서 이름까지 들어가게
-                        ),
-                        itemCount: _celebs.length,
-                        itemBuilder: (context, index) {
-                          final celeb = _celebs[index];
-                          final isSubscribed = _isSubscribed(celeb.id);
-
-                          return GestureDetector(
-                            onTap: () {
-                              if (isSubscribed) {
-                                // 구독한 셀럽만 선택 가능
-                                context.push('/sendMessage', extra: celeb);
-                              } else {
-                                // 구독하지 않은 셀럽 클릭 시 구독 안내
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      '${celeb.name}을 구독해야 이용할 수 있습니다.',
-                                    ),
-                                    backgroundColor: Colors.orange,
+        child: Column(
+          children: [
+            SizedBox(height: 40), // AppBar 기본 높이만큼 여백
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(Sizes.size20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "어떤 셀럽의\n목소리를 원하나요?",
+                      style: TextStyle(
+                        fontSize: Sizes.size28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Gaps.v20,
+                    Expanded(
+                      child: _isLoading
+                          ? Center(child: CircularProgressIndicator())
+                          : _error != null
+                          ? Center(child: Text(_error!))
+                          : GridView.builder(
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3, // 한 줄에 3개
+                                    crossAxisSpacing: 16,
+                                    mainAxisSpacing: 20,
+                                    childAspectRatio:
+                                        0.8, // 높이를 조금 더 주어서 이름까지 들어가게
                                   ),
-                                );
-                              }
-                            },
-                            child: Column(
-                              children: [
-                                Stack(
-                                  children: [
-                                    Container(
-                                      width: 80,
-                                      height: 80,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.grey.shade200,
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(40),
-                                        child: isSubscribed
-                                            ? _buildCelebImage(
-                                                celeb,
-                                              ) // 구독한 경우 일반 이미지
-                                            : ImageFiltered(
-                                                // 구독하지 않은 경우 blur 처리
-                                                imageFilter: ImageFilter.blur(
-                                                  sigmaX: 3,
-                                                  sigmaY: 3,
-                                                ),
-                                                child: _buildCelebImage(celeb),
-                                              ),
-                                      ),
-                                    ),
-                                    // 구독하지 않은 경우 잠금 아이콘 표시
-                                    if (!isSubscribed)
-                                      Positioned.fill(
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: Colors.black.withOpacity(
-                                              0.1,
+                              itemCount: _celebs.length,
+                              itemBuilder: (context, index) {
+                                final celeb = _celebs[index];
+                                final isSubscribed = _isSubscribed(celeb.id);
+
+                                return GestureDetector(
+                                  onTap: () {
+                                    if (isSubscribed) {
+                                      // 구독한 셀럽만 선택 가능
+                                      context.push(
+                                        '/sendMessage',
+                                        extra: celeb,
+                                      );
+                                    } else {
+                                      // 구독하지 않은 셀럽 클릭 시 구독 안내
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            '${celeb.name}을 구독해야 이용할 수 있습니다.',
+                                          ),
+                                          backgroundColor: Colors.orange,
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Stack(
+                                        children: [
+                                          Container(
+                                            width: 80,
+                                            height: 80,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Colors.grey.shade200,
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(40),
+                                              child: isSubscribed
+                                                  ? _buildCelebImage(
+                                                      celeb,
+                                                    ) // 구독한 경우 일반 이미지
+                                                  : ImageFiltered(
+                                                      // 구독하지 않은 경우 blur 처리
+                                                      imageFilter:
+                                                          ImageFilter.blur(
+                                                            sigmaX: 3,
+                                                            sigmaY: 3,
+                                                          ),
+                                                      child: _buildCelebImage(
+                                                        celeb,
+                                                      ),
+                                                    ),
                                             ),
                                           ),
-                                        ),
+                                          // 구독하지 않은 경우 잠금 아이콘 표시
+                                          if (!isSubscribed)
+                                            Positioned.fill(
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Colors.black
+                                                      .withOpacity(0.1),
+                                                ),
+                                              ),
+                                            ),
+                                        ],
                                       ),
-                                  ],
-                                ),
-                                Gaps.v8,
-                                Text(
-                                  isSubscribed
-                                      ? celeb.name
-                                      : "셀럽", // 구독하지 않은 경우 "셀럽"으로 표시
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: isSubscribed
-                                        ? Colors.black
-                                        : Colors.grey.shade600,
+                                      Gaps.v8,
+                                      Text(
+                                        isSubscribed
+                                            ? celeb.name
+                                            : "셀럽", // 구독하지 않은 경우 "셀럽"으로 표시
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: isSubscribed
+                                              ? Colors.black
+                                              : Colors.grey.shade600,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
                                   ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
+                                );
+                              },
                             ),
-                          );
-                        },
-                      ),
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
