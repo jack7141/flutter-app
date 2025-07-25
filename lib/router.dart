@@ -7,6 +7,7 @@ import 'package:celeb_voice/features/generation/views/my_message_tts_screen.dart
 import 'package:celeb_voice/features/generation/views/preview_tts_screen.dart';
 import 'package:celeb_voice/features/main/home_screen.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
+import 'package:celeb_voice/features/storage/views/send_message_choice_celeb.dart';
 import 'package:celeb_voice/features/storage/views/send_message_screen.dart';
 import 'package:celeb_voice/features/user_info/views/attitude_screen.dart';
 import 'package:celeb_voice/features/user_info/views/birthday_screen.dart';
@@ -176,6 +177,11 @@ final router = GoRouter(
           path: "/update_profile",
           name: UpdateProfileScreen.routeName,
           builder: (context, state) => const UpdateProfileScreen(),
+        ),
+        GoRoute(
+          path: "/sendMessageChoiceCeleb",
+          name: SendMessageChoiceCeleb.routeName,
+          builder: (context, state) => const SendMessageChoiceCeleb(),
         ),
       ],
     ),

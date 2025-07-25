@@ -60,34 +60,55 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                     if (widget.celeb != null) ...[
                       Row(
                         children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: Colors.grey.shade200,
-                            child: ClipOval(
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.grey.shade200,
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
                               child: Image.network(
                                 AppConfig.getImageUrl(widget.celeb!.imagePath),
-                                width: 30,
-                                height: 30,
+                                width: 40,
+                                height: 40,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
                                   // 이미지 로딩 실패 시 기본 아이콘 표시
-                                  return Icon(
-                                    Icons.person,
-                                    size: 24,
-                                    color: Colors.grey.shade500,
+                                  return Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.grey.shade200,
+                                    ),
+                                    child: Icon(
+                                      Icons.person,
+                                      size: 24,
+                                      color: Colors.grey.shade500,
+                                    ),
                                   );
                                 },
                                 loadingBuilder:
                                     (context, child, loadingProgress) {
                                       if (loadingProgress == null) return child;
                                       // 로딩 중일 때 표시
-                                      return Center(
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                Colors.grey.shade400,
-                                              ),
+                                      return Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.grey.shade200,
+                                        ),
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Colors.grey.shade400,
+                                                ),
+                                          ),
                                         ),
                                       );
                                     },

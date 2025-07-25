@@ -33,7 +33,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         context.go("/gernerateMessage");
         break;
       case 2:
-        context.go("/sendMessage");
+        context.go("/sendMessageChoiceCeleb");
         break;
       case 3:
         context.go("/profile");
