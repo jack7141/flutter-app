@@ -384,9 +384,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-      appBar: CommonAppBar(
-        title: widget.celeb != null ? "${widget.celeb!.name}에게 메시지" : "메시지 작성",
-      ),
+      appBar: CommonAppBar(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(Sizes.size20),
