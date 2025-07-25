@@ -22,9 +22,10 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
   // 템플릿 선택 상태 변수들
   String? _selectedCategory;
   String? _selectedSituation;
-  String _nicknameInput = ""; // String?에서 String으로 변경
-  final TextEditingController _nicknameController =
-      TextEditingController(); // 컨트롤러 추가
+  String _nicknameInput = "";
+  final TextEditingController _nicknameController = TextEditingController();
+  final TextEditingController _mainMessageController = TextEditingController();
+  bool _isTemplateApplied = false; // 템플릿 적용 여부 다시 추가
 
   @override
   void initState() {
@@ -274,7 +275,16 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
     print("✅ 선택된 템플릿:");
     print("카테고리: $_selectedCategory");
     print("상황: $_selectedSituation");
-    print("호칭: $_nicknameInput"); // _selectedNickname → _nicknameInput
+    print("호칭: $_nicknameInput");
+
+    // 템플릿 메시지 생성
+    String templateMessage = _generateTemplateMessage();
+
+    // 메인 TextField에 템플릿 적용
+    setState(() {
+      _mainMessageController.text = templateMessage;
+      _isTemplateApplied = true; // 템플릿 적용 상태로 변경
+    });
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -282,6 +292,42 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
         backgroundColor: Color(0xff9e9ef4),
       ),
     );
+  }
+
+  // 템플릿 메시지 생성
+  String _generateTemplateMessage() {
+    String celebName = widget.celeb?.name ?? "셀럽";
+    String nickname = _nicknameInput;
+
+    // 카테고리와 상황에 따른 템플릿 생성
+    if (_selectedCategory == "생일축하") {
+      return "$nickname아, 네가 태어난 그 날도 세상도 조금 더 반짝였을거야. $celebName의 오늘도 반짝이는 하루이길 바랄게. 생일 축하해!";
+    } else if (_selectedCategory == "응원메시지") {
+      return "$nickname아, 힘든 일이 있어도 $celebName이 항상 네 곁에 있다는 걸 잊지마. 넌 정말 잘하고 있어. 화이팅!";
+    } else if (_selectedCategory == "고마운 마음") {
+      return "$nickname아, 네가 있어서 $celebName의 하루가 더 특별해져. 고마워, 정말로.";
+    } else if (_selectedCategory == "사랑고백") {
+      return "$nickname아, $celebName의 마음을 전하고 싶어. 너를 정말 많이 좋아해.";
+    } else if (_selectedCategory == "위로") {
+      return "$nickname아, 힘들 때는 $celebName을 생각해줘. 모든 게 괜찮아질거야.";
+    } else if (_selectedCategory == "축하") {
+      return "$nickname아, 정말 축하해! $celebName도 네가 이뤄낸 일들이 너무 자랑스러워.";
+    } else {
+      // 안부
+      return "$nickname아, 잘 지내고 있어? $celebName이 안부를 전하고 싶었어. 오늘도 좋은 하루 보내!";
+    }
+  }
+
+  // 템플릿 초기화
+  void _resetTemplate() {
+    setState(() {
+      _mainMessageController.clear();
+      _isTemplateApplied = false;
+      _selectedCategory = null;
+      _selectedSituation = null;
+      _nicknameInput = "";
+      _nicknameController.clear();
+    });
   }
 
   // 메시지 검토 안내 다이얼로그
@@ -355,153 +401,158 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                 ),
               ),
               Gaps.v20,
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade300),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      spreadRadius: 1,
-                      blurRadius: 3,
-                      offset: Offset(0, 1),
+              Stack(
+                // Stack 다시 추가
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade300),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          spreadRadius: 1,
+                          blurRadius: 3,
+                          offset: Offset(0, 1),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 셀럽 아바타와 이름
-                    if (widget.celeb != null) ...[
-                      Container(
-                        padding: EdgeInsets.all(8),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 45,
-                              height: 45,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.grey.shade200,
-                                border: Border.all(
-                                  color: Color(0xff9e9ef4).withOpacity(0.3),
-                                  width: 2,
-                                ),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(22.5),
-                                child: Image.network(
-                                  AppConfig.getImageUrl(
-                                    widget.celeb!.imagePath,
-                                  ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 셀럽 아바타와 이름
+                        if (widget.celeb != null) ...[
+                          Container(
+                            padding: EdgeInsets.all(8),
+                            child: Row(
+                              children: [
+                                Container(
                                   width: 45,
                                   height: 45,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.grey.shade200,
+                                    border: Border.all(
+                                      color: Color(0xff9e9ef4).withOpacity(0.3),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(22.5),
+                                    child: Image.network(
+                                      AppConfig.getImageUrl(
+                                        widget.celeb!.imagePath,
+                                      ),
                                       width: 45,
                                       height: 45,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.grey.shade200,
-                                      ),
-                                      child: Icon(
-                                        Icons.person,
-                                        size: 26,
-                                        color: Colors.grey.shade500,
-                                      ),
-                                    );
-                                  },
-                                  loadingBuilder:
-                                      (context, child, loadingProgress) {
-                                        if (loadingProgress == null)
-                                          return child;
-                                        return Container(
-                                          width: 45,
-                                          height: 45,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: Colors.grey.shade200,
-                                          ),
-                                          child: Center(
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                    Color(0xff9e9ef4),
-                                                  ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                ),
-                              ),
-                            ),
-                            Gaps.h12,
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.celeb!.name,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                            return Container(
+                                              width: 45,
+                                              height: 45,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.grey.shade200,
+                                              ),
+                                              child: Icon(
+                                                Icons.person,
+                                                size: 26,
+                                                color: Colors.grey.shade500,
+                                              ),
+                                            );
+                                          },
+                                      loadingBuilder:
+                                          (context, child, loadingProgress) {
+                                            if (loadingProgress == null)
+                                              return child;
+                                            return Container(
+                                              width: 45,
+                                              height: 45,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.grey.shade200,
+                                              ),
+                                              child: Center(
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                        Color
+                                                      >(Color(0xff9e9ef4)),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                    ),
                                   ),
+                                ),
+                                Gaps.h12,
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      widget.celeb!.name,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-                      Gaps.v16,
-                    ] else ...[
-                      Container(
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.warning, color: Colors.orange),
-                            Gaps.h8,
-                            Text(
-                              "셀럽을 선택해주세요",
-                              style: TextStyle(color: Colors.orange.shade700),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Gaps.v16,
-                    ],
-                    Container(
-                      margin: const EdgeInsets.only(left: 2.0, right: 2.0),
-                      child: TextField(
-                        maxLines: 6,
-                        decoration: InputDecoration(
-                          hintText: widget.celeb != null
-                              ? "${widget.celeb!.name}의 목소리로 어떤 메시지를 전달할까요?"
-                              : "메시지를 입력해주세요",
-                          hintStyle: TextStyle(
-                            color: Colors.grey.shade500,
-                            fontSize: 14,
                           ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
+                          Gaps.v16,
+                        ],
+                        Container(
+                          margin: const EdgeInsets.only(left: 2.0, right: 2.0),
+                          child: TextField(
+                            controller: _mainMessageController,
+                            readOnly: _isTemplateApplied, // 템플릿 적용 시 읽기 전용
+                            maxLines: 6,
+                            decoration: InputDecoration(
+                              hintText: widget.celeb != null
+                                  ? "${widget.celeb!.name}의 목소리로 어떤 메시지를 전달할까요?"
+                                  : "메시지를 입력해주세요",
+                              hintStyle: TextStyle(
+                                color: Colors.grey.shade500,
+                                fontSize: 14,
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              height: 1.5,
+                              color: _isTemplateApplied
+                                  ? Colors.grey.shade700
+                                  : Colors.black, // 템플릿 적용 시 회색
+                            ),
+                          ),
                         ),
-                        style: TextStyle(fontSize: 14, height: 1.5),
+                        Gaps.v12,
+                      ],
+                    ),
+                  ),
+                  // 템플릿 적용 시 회색 오버레이 다시 추가
+                  if (_isTemplateApplied)
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.1), // 회색 오버레이
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                     ),
-                    Gaps.v12,
-                  ],
-                ),
+                ],
               ),
               Gaps.v28,
               GestureDetector(
-                onTap: _showTemplateBottomSheet, // 바텀 시트 표시
+                onTap: _showTemplateBottomSheet, // 항상 클릭 가능 (새 템플릿으로 교체)
                 child: FractionallySizedBox(
                   widthFactor: 1,
                   child: AnimatedContainer(
