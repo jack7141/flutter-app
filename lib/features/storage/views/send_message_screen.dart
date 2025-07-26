@@ -5,6 +5,7 @@ import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart'; // Added for context.push
 
 class SendMessageScreen extends StatefulWidget {
   static const String routeName = "sendMessage";
@@ -26,6 +27,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _mainMessageController = TextEditingController();
   bool _isTemplateApplied = false;
+  bool _isMessageReviewConfirmed = false; // 메시지 검토 확인 상태 추가
 
   @override
   void initState() {
@@ -425,7 +427,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
     );
   }
 
-  // 메시지 검토 안내 다이얼로그
+  // 메시지 검토 안내 다이얼로그 (수정)
   void _showMessageReviewDialog() {
     showDialog(
       context: context,
@@ -452,6 +454,10 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                 child: TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
+                    // 확인 상태를 true로 설정
+                    setState(() {
+                      _isMessageReviewConfirmed = true;
+                    });
                   },
                   style: TextButton.styleFrom(
                     backgroundColor: Color(0xff9e9ef4),
@@ -473,6 +479,17 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
         );
       },
     );
+  }
+
+  // 들어보기 버튼 핸들러 (수정)
+  void _handleListenButtonTap() {
+    if (_isMessageReviewConfirmed) {
+      // 이미 확인했으면 myMessageTts 페이지로 이동 (celeb만 전달)
+      context.push('/myMessageTts', extra: widget.celeb);
+    } else {
+      // 아직 확인하지 않았으면 다이얼로그 표시
+      _showMessageReviewDialog();
+    }
   }
 
   @override
@@ -669,7 +686,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
               ),
               Gaps.v14,
               GestureDetector(
-                onTap: _showMessageReviewDialog,
+                onTap: _handleListenButtonTap, // 수정된 핸들러 사용
                 child: FormButton(
                   text: widget.celeb != null
                       ? '${widget.celeb!.name} 목소리로 들어보기'
