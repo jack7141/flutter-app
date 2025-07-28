@@ -611,6 +611,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
+              Gaps.v16,
+              Text(
+                "Who's Next?",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Gaps.v12,
+              SizedBox(
+                width: screenWidth * 0.9,
+                child: Image.asset(
+                  'assets/images/whosnext.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+              Gaps.v12,
             ],
           ),
         ),
@@ -755,6 +769,19 @@ class _HomeScreenState extends State<HomeScreen> {
               Gaps.v12,
               // YouTube 썸네일 3개 표시
               _buildYouTubeVideos(screenWidth),
+              Text(
+                "Who's Next?",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Gaps.v12,
+              SizedBox(
+                width: screenWidth * 0.9,
+                child: Image.asset(
+                  'assets/images/whosnext.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+              Gaps.v12,
             ],
           ),
         ),
