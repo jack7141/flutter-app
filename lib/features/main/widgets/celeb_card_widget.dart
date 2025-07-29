@@ -4,15 +4,18 @@ import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:celeb_voice/features/subscription/services/subscription_service.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 
-class CelebCard extends StatelessWidget {
+// StatelessWidget에서 StatefulWidget으로 변경
+class CelebCard extends StatefulWidget {
   final double screenHeight;
   final double screenWidth;
   final List<CelebModel> celebs;
   final double pageViewHeightFactor;
-  final Function(int)? onPageChanged; // 페이지 변경 콜백 추가
+  final Function(int)? onPageChanged;
 
   const CelebCard({
     super.key,
@@ -20,12 +23,45 @@ class CelebCard extends StatelessWidget {
     required this.screenWidth,
     required this.celebs,
     required this.pageViewHeightFactor,
-    this.onPageChanged, // 선택적 매개변수
+    this.onPageChanged,
   });
 
+  @override
+  State<CelebCard> createState() => _CelebCardState();
+}
+
+class _CelebCardState extends State<CelebCard> {
+  // 구독 상태를 추적하기 위한 Set
+  Set<String> _subscribedCelebIds = {};
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSubscriptionStatus();
+  }
+
+  // 구독 상태 로드
+  Future<void> _loadSubscriptionStatus() async {
+    try {
+      final subscriptionService = SubscriptionService();
+      final subscriptionStatus = await subscriptionService
+          .getSubscriptionStatus();
+
+      if (mounted) {
+        setState(() {
+          _subscribedCelebIds = subscriptionStatus.subscribedCelebIds.toSet();
+        });
+      }
+    } catch (e) {
+      print("❌ 구독 상태 로드 실패: $e");
+    }
+  }
+
   void _onTapCelebCard(int celebIndex, BuildContext context) async {
-    final selectedCeleb = celebs[celebIndex];
+    final selectedCeleb = widget.celebs[celebIndex];
     print("🔍 셀럽 카드 클릭: ${selectedCeleb.name}");
+    print("🔍 클릭한 셀럽 ID: ${selectedCeleb.id}");
 
     // 혹시 떠있는 로딩 다이얼로그 강제로 닫기
     try {
@@ -38,33 +74,215 @@ class CelebCard extends StatelessWidget {
     }
 
     try {
-      final subscriptionService = SubscriptionService();
-      final subscriptionStatus = await subscriptionService
-          .getSubscriptionStatus();
-      final isSubscribed = subscriptionStatus.subscribedCelebIds.contains(
-        selectedCeleb.id,
-      );
+      final isSubscribed = _subscribedCelebIds.contains(selectedCeleb.id);
+      print("✅ 구독 여부: $isSubscribed");
 
       if (isSubscribed) {
         // 이미 구독된 경우 → TTS로 이동
         print("✅ 이미 ${selectedCeleb.name} 구독자 → TTS로 이동");
 
         if (context.mounted) {
-          context.push('/previewTts', extra: selectedCeleb);
+          context.go('/previewTts', extra: selectedCeleb);
         }
       } else {
-        // 미구독 상태 → 구독 API 호출하지 않고 바로 온보딩으로
-        print("📝 미구독 셀럽 - 온보딩 시작: ${selectedCeleb.name}");
-        if (context.mounted) {
-          // 구독 API 호출 부분 제거하고 바로 온보딩으로 이동
-          context.push('/welcome', extra: selectedCeleb);
+        // 미구독 상태 → is_onboarded 상태 확인
+        print("📝 미구독 셀럽 - 온보딩 상태 확인: ${selectedCeleb.name}");
+
+        // 사용자 프로필에서 is_onboarded 상태 확인
+        final isOnboarded = await _checkOnboardingStatus();
+
+        if (isOnboarded) {
+          // 온보딩 완료된 사용자 - 바로 구독 처리
+          print("✅ 온보딩 완료 사용자 - 바로 구독 처리");
+          await _subscribeDirectly(selectedCeleb, context);
+        } else {
+          // 온보딩 미완료 사용자 - 온보딩 시작
+          print("📝 온보딩 미완료 사용자 - 온보딩 시작");
+          if (context.mounted) {
+            context.go('/welcome', extra: selectedCeleb);
+          }
         }
       }
     } catch (e) {
       print("❌ 구독 상태 확인 실패: $e");
       if (context.mounted) {
         // 에러 시에도 온보딩으로 이동 (셀럽 정보 전달)
-        context.push('/welcome', extra: selectedCeleb);
+        context.go('/welcome', extra: selectedCeleb);
+      }
+    }
+  }
+
+  // 온보딩 상태 확인 메서드
+  Future<bool> _checkOnboardingStatus() async {
+    try {
+      const storage = FlutterSecureStorage();
+      final accessToken = await storage.read(key: 'access_token');
+
+      if (accessToken == null) {
+        print('❌ 액세스 토큰 없음');
+        return false;
+      }
+
+      print('🔍 사용자 프로필 조회 시작: /api/v1/users/me/');
+
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: AppConfig.baseUrl,
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $accessToken',
+          },
+        ),
+      );
+
+      final response = await dio.get('/api/v1/users/me/');
+
+      print('📥 사용자 프로필 응답: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final userData = response.data;
+        final isOnboarded = userData['profile']?['isOnboarded'] ?? false;
+
+        print('📋 사용자 온보딩 상태: $isOnboarded');
+        print('📋 전체 사용자 데이터: $userData');
+
+        return isOnboarded == true;
+      } else {
+        print('❌ 사용자 데이터 조회 실패');
+        return false;
+      }
+    } catch (e) {
+      print('💥 온보딩 상태 확인 에러: $e');
+      if (e is DioException) {
+        print('💥 DioException 상세:');
+        print('   - 상태코드: ${e.response?.statusCode}');
+        print('   - 응답 데이터: ${e.response?.data}');
+        print('   - 에러 메시지: ${e.message}');
+      }
+      return false;
+    }
+  }
+
+  // 직접 구독 처리 메서드 수정
+  Future<void> _subscribeDirectly(
+    CelebModel celeb,
+    BuildContext context,
+  ) async {
+    print('🚀 직접 구독 처리 시작: ${celeb.name}');
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    // 로딩 다이얼로그 표시
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) =>
+          const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      const storage = FlutterSecureStorage();
+      final accessToken = await storage.read(key: 'access_token');
+      final tokenType = await storage.read(key: 'token_type');
+
+      if (accessToken == null) {
+        throw Exception('액세스 토큰이 없습니다.');
+      }
+
+      print('📤 구독 API 호출: /api/v1/celeb/${celeb.id}/subscribe');
+
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: AppConfig.baseUrl,
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+        ),
+      );
+
+      final response = await dio.post(
+        '/api/v1/celeb/${celeb.id}/subscribe',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': '${tokenType ?? 'Bearer'} $accessToken',
+          },
+        ),
+      );
+
+      print('📥 구독 API 응답: ${response.statusCode}');
+      print('📋 구독 API 응답 데이터: ${response.data}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print('✅ 구독 성공: ${celeb.name}');
+
+        // 구독 상태 업데이트
+        if (mounted) {
+          setState(() {
+            _subscribedCelebIds.add(celeb.id);
+            _isLoading = false;
+          });
+        }
+
+        print('🔄 구독 완료 - UI 상태 업데이트 완료');
+      } else {
+        throw Exception('구독 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('💥 구독 처리 에러: $e');
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+
+      // 에러 메시지 표시 (다이얼로그 닫은 후)
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('구독 처리 중 오류가 발생했습니다: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      // finally 블록에서 반드시 다이얼로그 닫기
+      print('🚪 다이얼로그 닫기 시도...');
+
+      if (context.mounted) {
+        try {
+          // 모든 다이얼로그 강제로 닫기
+          Navigator.of(context, rootNavigator: true).pop();
+          print('🚪 다이얼로그 닫기 성공');
+        } catch (e) {
+          print('💥 다이얼로그 닫기 실패: $e');
+
+          // 다른 방법으로 시도
+          try {
+            Navigator.of(context).pop();
+            print('🚪 대체 방법으로 다이얼로그 닫기 성공');
+          } catch (e2) {
+            print('💥 대체 방법도 실패: $e2');
+          }
+        }
+      }
+
+      // 성공 메시지는 다이얼로그 닫은 후에 표시
+      if (context.mounted && _subscribedCelebIds.contains(celeb.id)) {
+        await Future.delayed(const Duration(milliseconds: 200));
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${celeb.name} 구독이 완료되었습니다!'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
       }
     }
   }
@@ -74,24 +292,23 @@ class CelebCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 20),
       child: SizedBox(
-        height: screenHeight * pageViewHeightFactor, // 전체화면에서 78% 높이
+        height: widget.screenHeight * widget.pageViewHeightFactor,
         child: PageView.builder(
           controller: PageController(
             viewportFraction: 0.85,
-            initialPage: 10000, // 큰 숫자로 시작해서 양방향 무한 스크롤
+            initialPage: 10000,
           ),
-          onPageChanged: onPageChanged, // 페이지 변경 콜백 연결
+          onPageChanged: widget.onPageChanged,
           clipBehavior: Clip.none,
           itemBuilder: (context, index) {
-            final celebIndex = index % celebs.length; // 실제 데이터 인덱스
+            final celebIndex = index % widget.celebs.length;
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 10),
               child: Column(
                 children: [
-                  // 셀럽 카드 박스
                   Container(
                     clipBehavior: Clip.none,
-                    height: screenHeight * 0.5,
+                    height: widget.screenHeight * 0.5,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
@@ -106,11 +323,8 @@ class CelebCard extends StatelessWidget {
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        // 이미지
                         _buildCelebImage(celebIndex),
-                        // 이름과 태그
                         _buildCelebInfo(celebIndex),
-                        // 구독하기 버튼
                         GestureDetector(
                           onTap: () => _onTapCelebCard(celebIndex, context),
                           child: Align(
@@ -120,22 +334,7 @@ class CelebCard extends StatelessWidget {
                                 horizontal: Sizes.size20,
                                 vertical: 20,
                               ),
-                              child: FutureBuilder<bool>(
-                                future: _checkSubscriptionStatus(
-                                  celebs[celebIndex].id,
-                                ),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return FormButton(text: '확인 중...');
-                                  }
-
-                                  final isSubscribed = snapshot.data ?? false;
-                                  return FormButton(
-                                    text: isSubscribed ? '메세지 들으러가기' : '구독하기',
-                                  );
-                                },
-                              ),
+                              child: _buildSubscriptionButton(celebIndex),
                             ),
                           ),
                         ),
@@ -149,6 +348,18 @@ class CelebCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // 구독 버튼 빌드 (상태에 따라 다른 텍스트 표시)
+  Widget _buildSubscriptionButton(int celebIndex) {
+    final celebId = widget.celebs[celebIndex].id;
+    final isSubscribed = _subscribedCelebIds.contains(celebId);
+
+    if (_isLoading) {
+      return FormButton(text: '처리 중...');
+    }
+
+    return FormButton(text: isSubscribed ? '메세지 들으러가기' : '구독하기');
   }
 
   Widget _buildMessageBanner(int celebIndex, String message) {
@@ -178,7 +389,7 @@ class CelebCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    celebs[celebIndex].name,
+                    widget.celebs[celebIndex].name,
                     style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
@@ -224,11 +435,11 @@ class CelebCard extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.only(bottom: 100, left: Sizes.size20),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // Column이 필요한 만큼만 공간 차지
-          crossAxisAlignment: CrossAxisAlignment.start, // 왼쪽 정렬
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              celebs[celebIndex].name,
+              widget.celebs[celebIndex].name,
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             Gaps.v8,
@@ -236,7 +447,7 @@ class CelebCard extends StatelessWidget {
               child: Wrap(
                 spacing: 10,
                 runSpacing: 4,
-                children: celebs[celebIndex].tags
+                children: widget.celebs[celebIndex].tags
                     .map(
                       (tag) => Container(
                         padding: EdgeInsets.symmetric(
@@ -287,7 +498,7 @@ class CelebCard extends StatelessWidget {
             widthFactor: 1,
             heightFactor: 1,
             child: Image.network(
-              AppConfig.getImageUrl(celebs[celebIndex].imagePath),
+              AppConfig.getImageUrl(widget.celebs[celebIndex].imagePath),
               fit: BoxFit.contain,
               alignment: Alignment.bottomRight,
               errorBuilder: (context, error, stackTrace) {
@@ -301,12 +512,10 @@ class CelebCard extends StatelessWidget {
     );
   }
 
-  // 폴백 이미지 위젯
   Widget _buildFallbackImage(int celebIndex) {
-    // 연예인 이름에 따라 기본 asset 이미지 매핑
-    String assetPath = 'assets/images/celebs/card.png'; // 기본값
+    String assetPath = 'assets/images/celebs/card.png';
 
-    switch (celebs[celebIndex].name) {
+    switch (widget.celebs[celebIndex].name) {
       case '아이유':
         assetPath = 'assets/images/celebs/IU.png';
         break;
@@ -324,7 +533,6 @@ class CelebCard extends StatelessWidget {
       assetPath,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
-        // asset도 실패하면 기본 아이콘
         return Container(
           color: Colors.grey[300],
           child: Column(
@@ -333,7 +541,7 @@ class CelebCard extends StatelessWidget {
               Icon(Icons.person, size: 80, color: Colors.grey[600]),
               SizedBox(height: 8),
               Text(
-                celebs[celebIndex].name,
+                widget.celebs[celebIndex].name,
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontWeight: FontWeight.bold,
@@ -344,24 +552,5 @@ class CelebCard extends StatelessWidget {
         );
       },
     );
-  }
-
-  Future<bool> _checkSubscriptionStatus(String celebId) async {
-    try {
-      final subscriptionService = SubscriptionService();
-      final subscriptionStatus = await subscriptionService
-          .getSubscriptionStatus();
-
-      print("🔍 구독 상태 확인 - 셀럽 ID: $celebId");
-      print("📋 구독한 셀럽들: ${subscriptionStatus.subscribedCelebIds}");
-      print(
-        "✅ 구독 여부: ${subscriptionStatus.subscribedCelebIds.contains(celebId)}",
-      );
-
-      return subscriptionStatus.subscribedCelebIds.contains(celebId);
-    } catch (e) {
-      print("❌ 구독 상태 확인 실패: $e");
-      return false;
-    }
   }
 }

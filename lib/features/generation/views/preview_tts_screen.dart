@@ -158,7 +158,18 @@ class _PreviewTtsScreenState extends State<PreviewTtsScreen> {
         centerTitle: false,
         leading: IconButton(
           onPressed: () {
-            context.pop();
+            try {
+              // 네비게이션 스택이 있으면 pop, 없으면 홈으로 이동
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              } else {
+                context.go('/home');
+              }
+            } catch (e) {
+              print('💥 뒤로가기 에러: $e');
+              // 에러 발생 시 홈으로 이동
+              context.go('/home');
+            }
           },
           icon: const Icon(Icons.arrow_back),
         ),
