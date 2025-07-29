@@ -1,4 +1,5 @@
 import 'package:celeb_voice/router.dart';
+import 'package:celeb_voice/services/dio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
@@ -6,6 +7,11 @@ import 'package:naver_login_sdk/naver_login_sdk.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // DioService 초기화 확인
+  DioService().init();
+  print('🔧 DioService 초기화 완료');
+
   // 네이버 로그인 SDK 초기화
   NaverLoginSDK.initialize(
     urlScheme: 'com.example.celebVoice', // iOS용

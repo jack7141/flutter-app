@@ -1,6 +1,6 @@
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
-import 'package:celeb_voice/features/authentication/widgets/circular_checkbox.dart';
+import 'package:celeb_voice/features/authentication/widget/circular_checkbox.dart';
 import 'package:celeb_voice/services/dio_service.dart'; // DioService 추가
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -31,16 +31,12 @@ class _TermsScreenState extends State<TermsScreen> {
 
   // 전체 동의 체크박스 처리
   void _onAgreeAllChanged(bool value) {
-    print('🔍 전체 동의 변경: $value');
     setState(() {
       _agreeAll = value;
       _agreeService = _agreeAll;
       _agreePrivacy = _agreeAll;
       _agreeMarketing = _agreeAll;
     });
-    print(
-      '🔍 변경 후 상태 - Service: $_agreeService, Privacy: $_agreePrivacy, Marketing: $_agreeMarketing',
-    );
   }
 
   // 개별 체크박스 처리
@@ -48,10 +44,14 @@ class _TermsScreenState extends State<TermsScreen> {
     setState(() {
       _agreeAll = _agreeService && _agreePrivacy && _agreeMarketing;
     });
-    print(
-      '🔍 개별 체크박스 변경 - Service: $_agreeService, Privacy: $_agreePrivacy, Marketing: $_agreeMarketing',
-    );
-    print('🔍 _canProceed: $_canProceed');
+
+    // 디버깅 로그 추가
+    print('🔍 체크박스 상태 변경:');
+    print('   - _agreeService: $_agreeService');
+    print('   - _agreePrivacy: $_agreePrivacy');
+    print('   - _agreeMarketing: $_agreeMarketing');
+    print('   - _agreeAll: $_agreeAll');
+    print('   - _canProceed: $_canProceed');
   }
 
   void _onPressIconButton() {
@@ -61,9 +61,9 @@ class _TermsScreenState extends State<TermsScreen> {
   // 다음 버튼 활성화 조건 (필수 항목만 체크되면 됨)
   bool get _canProceed => _agreeService && _agreePrivacy;
 
-  // 약관 동의 API 호출
+  // 약관 동의 API 호출 메서드 수정 (디버깅 강화)
   Future<void> _confirmTerms() async {
-    print('🚀 _confirmTerms 메서드 호출됨!');
+    print('🔍 _confirmTerms 메서드 호출됨');
 
     setState(() {
       _isLoading = true;
@@ -132,7 +132,11 @@ class _TermsScreenState extends State<TermsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('🔍 [BUILD] _canProceed: $_canProceed, _isLoading: $_isLoading');
+    // 디버깅을 위한 상태 출력
+    print('🔍 [BUILD] _canProceed: $_canProceed');
+    print('🔍 [BUILD] _agreeService: $_agreeService');
+    print('🔍 [BUILD] _agreePrivacy: $_agreePrivacy');
+    print('🔍 [BUILD] _isLoading: $_isLoading');
 
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
@@ -328,12 +332,12 @@ class _TermsScreenState extends State<TermsScreen> {
         color: _canProceed ? const Color(0xff9e9ef4) : Colors.grey,
         child: GestureDetector(
           onTap: () {
-            print('🔍 다음 버튼 클릭됨!');
+            print('🔍 GestureDetector onTap 호출됨');
             print('🔍 _canProceed: $_canProceed');
             print('🔍 _isLoading: $_isLoading');
 
             if (_canProceed && !_isLoading) {
-              print('🔍 조건 통과 - API 호출 시작');
+              print('🔍 조건 통과 - _confirmTerms 호출');
               _confirmTerms();
             } else {
               print('❌ 조건 실패');
@@ -344,6 +348,7 @@ class _TermsScreenState extends State<TermsScreen> {
           child: Container(
             width: double.infinity,
             height: 60,
+            color: Colors.transparent, // 터치 영역 확인을 위해 투명색 추가
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
