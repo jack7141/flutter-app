@@ -19,57 +19,80 @@ import 'package:celeb_voice/features/user_profile/views/update_profile_screen.da
 import 'package:celeb_voice/features/user_profile/views/user_profile_screen.dart';
 import 'package:celeb_voice/features/user_profile/views/user_settings_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // 토큰 체크용
 import 'package:go_router/go_router.dart';
 
-// 공통 셀럽 데이터 파싱 함수
-CelebModel? _parseCelebFromQuery(GoRouterState state) {
-  print("🔍 Router - 전체 URI: ${state.uri}");
-  print("🔍 Router - Query Parameters: ${state.uri.queryParameters}");
+// 자동 로그인 체크 함수 (간단하게)
+Future<String> _checkAutoLogin() async {
+  const storage = FlutterSecureStorage();
 
-  final celebId = state.uri.queryParameters['celebId'];
-  final celebName = state.uri.queryParameters['celebName'];
-  final celebImage = state.uri.queryParameters['celebImage'];
+  try {
+    final accessToken = await storage.read(key: 'access_token');
+    final userId = await storage.read(key: 'user_id');
 
-  print("🔍 Router - celebId: $celebId");
-  print("🔍 Router - celebName: $celebName");
-  print("🔍 Router - celebImage: $celebImage");
+    print('🔐 자동 로그인 체크 - Access Token: ${accessToken != null ? '존재' : '없음'}');
+    print('🔐 자동 로그인 체크 - User ID: ${userId != null ? '존재' : '없음'}');
 
-  if (celebId != null && celebName != null && celebImage != null) {
-    final celeb = CelebModel(
-      id: celebId,
-      name: celebName,
-      imagePath: celebImage,
-      detailImagePath: 'sample_detail_image_path', // 추가
-      tags: [],
-      description: '',
-      status: '',
-      index: 0,
-    );
-    print("🔍 Router - 생성된 셀럽: ${celeb.name}");
-    return celeb;
+    if (accessToken != null &&
+        accessToken.isNotEmpty &&
+        userId != null &&
+        userId.isNotEmpty) {
+      print('✅ 토큰 존재 - 홈 화면으로 이동');
+      return "/home";
+    } else {
+      print('❌ 토큰 없음 - 로그인 화면으로 이동');
+      return "/login";
+    }
+  } catch (e) {
+    print('💥 자동 로그인 체크 에러: $e');
+    return "/login";
   }
+}
 
-  print("🔍 Router - 셀럽 데이터 null 반환");
+String? _handleException(
+  BuildContext context,
+  GoRouterState state,
+  GoRouter router,
+) {
+  // 카카오 OAuth 관련 에러는 무시하고 로그인 화면으로 이동
+  if (state.uri.toString().contains('oauth') ||
+      state.uri.toString().contains('kakao')) {
+    return null;
+  }
   return null;
 }
 
 final router = GoRouter(
-  initialLocation: "/login",
-  onException: (context, state, router) {
-    // 카카오 OAuth 관련 에러는 무시하고 로그인 화면으로 이동
-    if (state.error.toString().contains(
-      'kakaoe1b50342b8edb35b7eb4e09d6b1fa33f',
-    )) {
-      print("🔗 Ignoring Kakao OAuth URL error");
-      router.go('/login');
-      return;
-    }
-    // 다른 에러는 기본 처리
-    router.go('/login');
-  },
+  initialLocation: "/splash", // 스플래시에서 시작
+  onException: _handleException,
   routes: [
+    // 스플래시 화면 (자동 로그인 체크)
+    GoRoute(
+      path: "/splash",
+      builder: (context, state) => FutureBuilder<String>(
+        future: _checkAutoLogin(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          // 결정된 라우트로 리다이렉트
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.go(snapshot.data ?? "/login");
+          });
+
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        },
+      ),
+    ),
+
     // 카카오 OAuth 콜백만 처리하고 아무것도 하지 않음
     GoRoute(path: "/oauth", builder: (context, state) => const SizedBox()),
+
     ShellRoute(
       builder: (context, state, child) {
         return MainNavigationScreen(child: child);

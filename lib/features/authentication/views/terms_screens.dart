@@ -1,10 +1,10 @@
+import 'package:celeb_voice/config/app_config.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/authentication/widgets/circular_checkbox.dart';
-import 'package:celeb_voice/services/dio_service.dart'; // DioService 추가
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // SecureStorage 추가
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 
 // 이용약관 동의 화면
@@ -23,24 +23,47 @@ class _TermsScreenState extends State<TermsScreen> {
   bool _agreeService = false; // 서비스 이용약관 동의
   bool _agreePrivacy = false; // 개인정보 수집 및 이용 동의
   bool _agreeMarketing = false; // 광고 및 마케팅 활용 동의
-  bool _isLoading = false; // 로딩 상태 추가
+  bool _isLoading = false; // API 호출 로딩 상태 추가
 
-  // DioService와 SecureStorage 추가
-  Dio get _dio => DioService().dio;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  late final Dio _dio;
+
+  @override
+  void initState() {
+    super.initState();
+    // Dio 직접 초기화
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: AppConfig.baseUrl,
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+        headers: {'Content-Type': 'application/json'},
+      ),
+    );
+
+    // 토큰 자동 추가 인터셉터
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final token = await _storage.read(key: 'access_token');
+          if (token != null && token.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $token';
+            print('🔑 토큰 추가됨: Bearer ${token.substring(0, 10)}...');
+          }
+          handler.next(options);
+        },
+      ),
+    );
+  }
 
   // 전체 동의 체크박스 처리
   void _onAgreeAllChanged(bool value) {
-    print('🔍 전체 동의 변경: $value');
     setState(() {
       _agreeAll = value;
       _agreeService = _agreeAll;
       _agreePrivacy = _agreeAll;
       _agreeMarketing = _agreeAll;
     });
-    print(
-      '🔍 변경 후 상태 - Service: $_agreeService, Privacy: $_agreePrivacy, Marketing: $_agreeMarketing',
-    );
   }
 
   // 개별 체크박스 처리
@@ -48,10 +71,6 @@ class _TermsScreenState extends State<TermsScreen> {
     setState(() {
       _agreeAll = _agreeService && _agreePrivacy && _agreeMarketing;
     });
-    print(
-      '🔍 개별 체크박스 변경 - Service: $_agreeService, Privacy: $_agreePrivacy, Marketing: $_agreeMarketing',
-    );
-    print('🔍 _canProceed: $_canProceed');
   }
 
   void _onPressIconButton() {
@@ -61,62 +80,59 @@ class _TermsScreenState extends State<TermsScreen> {
   // 다음 버튼 활성화 조건 (필수 항목만 체크되면 됨)
   bool get _canProceed => _agreeService && _agreePrivacy;
 
-  // 약관 동의 API 호출
+  // 약관 동의 API 호출 메서드 추가
   Future<void> _confirmTerms() async {
-    print('🚀 _confirmTerms 메서드 호출됨!');
+    print('🚀 약관 동의 API 호출 시작');
 
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // 저장된 user_id 가져오기
       final userId = await _storage.read(key: 'user_id');
-
-      print('🔍 저장된 User ID: $userId');
 
       if (userId == null || userId.isEmpty) {
         throw Exception('사용자 ID를 찾을 수 없습니다.');
       }
 
-      print('🚀 약관 동의 API 호출 시작');
       print('📤 요청 URL: /api/v1/users/$userId/');
       print('📤 요청 데이터: {"is_confirm": true}');
 
-      // PATCH 요청으로 is_confirm만 true로 업데이트
       final response = await _dio.patch(
         '/api/v1/users/$userId/',
         data: {'is_confirm': true},
       );
 
-      print('📥 응답 상태코드: ${response.statusCode}');
-      print('📥 응답 데이터: ${response.data}');
+      print('✅ 약관 동의 API 응답: ${response.statusCode}');
 
       if (response.statusCode == 200) {
-        print('✅ 약관 동의 처리 성공');
+        print('🎉 약관 동의 성공!');
 
-        if (context.mounted) {
-          // 뒤로가기 불가능하게 이동
-          context.pushReplacement('/nickname');
+        if (mounted) {
+          // 약관 동의 완료 후 홈 화면으로 이동
+          context.go('/home');
         }
       } else {
         throw Exception('약관 동의 처리 실패: ${response.statusCode}');
       }
     } catch (e) {
       print('❌ 약관 동의 처리 에러: $e');
-      print('❌ 에러 타입: ${e.runtimeType}');
 
       if (e is DioException) {
-        print('❌ DioException 상세:');
-        print('   - 상태코드: ${e.response?.statusCode}');
-        print('   - 응답 데이터: ${e.response?.data}');
-        print('   - 에러 메시지: ${e.message}');
+        // 이미 동의 완료된 경우
+        if (e.response?.statusCode == 409) {
+          print('⚠️ 이미 약관 동의 완료된 사용자 - 홈으로 이동');
+          if (mounted) {
+            context.go('/home');
+          }
+          return;
+        }
       }
 
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('약관 동의 처리에 실패했습니다: ${e.toString()}'),
+            content: Text('약관 동의 처리 중 오류가 발생했습니다: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -132,8 +148,6 @@ class _TermsScreenState extends State<TermsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('🔍 [BUILD] _canProceed: $_canProceed, _isLoading: $_isLoading');
-
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       appBar: AppBar(
@@ -327,46 +341,34 @@ class _TermsScreenState extends State<TermsScreen> {
       bottomNavigationBar: BottomAppBar(
         color: _canProceed ? const Color(0xff9e9ef4) : Colors.grey,
         child: GestureDetector(
-          onTap: () {
-            print('🔍 다음 버튼 클릭됨!');
-            print('🔍 _canProceed: $_canProceed');
-            print('🔍 _isLoading: $_isLoading');
-
-            if (_canProceed && !_isLoading) {
-              print('🔍 조건 통과 - API 호출 시작');
-              _confirmTerms();
-            } else {
-              print('❌ 조건 실패');
-              print('   - _canProceed: $_canProceed');
-              print('   - _isLoading: $_isLoading');
-            }
-          },
-          child: Container(
-            width: double.infinity,
-            height: 60,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (_isLoading)
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                else
-                  Text(
-                    "다음",
-                    style: TextStyle(
-                      color: _canProceed ? Colors.white : Colors.white70,
-                      fontSize: Sizes.size24,
-                      fontWeight: FontWeight.w600,
-                    ),
+          onTap: (_canProceed && !_isLoading)
+              ? () {
+                  print('🔍 다음 버튼 클릭됨!');
+                  _confirmTerms(); // API 호출 추가
+                }
+              : null,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (_isLoading)
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
-              ],
-            ),
+                )
+              else
+                Text(
+                  "다음",
+                  style: TextStyle(
+                    color: _canProceed ? Colors.white : Colors.white70,
+                    fontSize: Sizes.size24,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+            ],
           ),
         ),
       ),
