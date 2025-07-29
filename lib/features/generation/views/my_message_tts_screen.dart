@@ -164,9 +164,18 @@ class _MyMessageTtsScreenState extends State<MyMessageTtsScreen> {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.grey[300]!),
             ),
-            child: Text(
-              '음성 무단 사용, 허위 사실 생성 유포 등의 행위는 관련 법령에 따라 민형사상 책임을 질 수 있습니다.',
-              style: TextStyle(fontSize: 16),
+            child: RichText(
+              textAlign: TextAlign.start,
+              text: TextSpan(
+                style: TextStyle(fontSize: 16, color: Colors.black),
+                children: [
+                  TextSpan(text: '음성 무단 사용, 허위 사실 생성 유포 등의 행위는 '),
+                  TextSpan(
+                    text: '관련 법령에 따라 민형사상 책임을 질 수 있습니다.',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
