@@ -116,8 +116,170 @@ class _MyMessageTtsScreenState extends State<MyMessageTtsScreen> {
     }
   }
 
-  void _onSaveTap() {
-    context.pop();
+  void _onSaveTap() async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // 저장 로직 수행 (기존 코드)
+      // ... 저장 관련 코드 ...
+
+      // 저장 완료 다이얼로그 표시
+      _showSaveSuccessDialog();
+    } catch (e) {
+      print('💥 저장 실패: $e');
+
+      // 저장 실패 다이얼로그 표시
+      _showSaveErrorDialog(e.toString());
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  // 저장 성공 다이얼로그
+  void _showSaveSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            '생성한 음성 메시지가\n셀럽의 명예를 훼손하거나 허위사실에\n해당하지 않음을 확인합니다.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          content: Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey[300]!),
+            ),
+            child: Text(
+              '음성 무단 사용, 허위 사실 생성 유포 등의 행위는 관련 법령에 따라 민형사상 책임을 질 수 있습니다.',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // 다이얼로그만 닫기
+                    },
+                    child: Text(
+                      '취소',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // 다이얼로그 닫기
+                      context.go('/home'); // 홈으로 이동
+                    },
+                    child: Text(
+                      '확인',
+                      style: TextStyle(
+                        color: Color(0xff9e9ef4),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 저장 실패 다이얼로그
+  void _showSaveErrorDialog(String errorMessage) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            '저장 실패',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          content: Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.red[200]!),
+            ),
+            child: Text(
+              '메시지 저장 중 오류가 발생했습니다.\n다시 시도해주세요.',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // 다이얼로그만 닫기
+                    },
+                    child: Text(
+                      '취소',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // 다이얼로그 닫기
+                      // 재시도 로직이 필요하면 여기에 추가
+                    },
+                    child: Text(
+                      '확인',
+                      style: TextStyle(
+                        color: Color(0xff9e9ef4),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

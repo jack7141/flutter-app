@@ -359,7 +359,7 @@ class _CelebCardState extends State<CelebCard> {
       return FormButton(text: '처리 중...');
     }
 
-    return FormButton(text: isSubscribed ? '메세지 들으러가기' : '구독하기');
+    return FormButton(text: isSubscribed ? '오늘의 메시지 들어보기' : '구독하기');
   }
 
   Widget _buildMessageBanner(int celebIndex, String message) {
