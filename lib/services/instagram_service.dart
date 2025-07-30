@@ -53,6 +53,48 @@ class InstagramService {
         'timestamp': '2일 전',
       },
     ],
+    '이연복': [
+      {
+        'imageUrl':
+            'https://scontent-icn2-1.cdninstagram.com/v/t51.2885-15/523408425_1430443188197322_4291189398930071529_n.heic?stp=dst-jpg_e35_s640x640_sh0.08_tt6&_nc_ht=scontent-icn2-1.cdninstagram.com&_nc_cat=106&_nc_oc=Q6cZ2QE00F6lcPEJ1hbVOVlQ56Gc0peZb3cfCkDRx42_7OXbS-Wu9wECUg5m5z14-ylT8RA&_nc_ohc=8f4C595OX8gQ7kNvwHaTDqJ&_nc_gid=wYFP_FfqfADH7LabUld7PA&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AfQUCwzTDEvyApg3MzigrMFeXv3lNcyCp-nFN78quc6v7w&oe=688F2EF5&_nc_sid=8b3546',
+        'caption': '요즘 저녁 하늘이 정말 아름답고 이쁘네요 그와중에 생일이 는 사색에 잠기고 아름다운 저녁 하늘 꼭 보세요',
+        'timestamp': '5시간 전',
+      },
+      {
+        'imageUrl':
+            'https://scontent-icn2-1.cdninstagram.com/v/t51.2885-15/522057713_1518323666246822_4988982805109769024_n.jpg?stp=dst-jpg_e15_tt6&_nc_ht=scontent-icn2-1.cdninstagram.com&_nc_cat=102&_nc_oc=Q6cZ2QE00F6lcPEJ1hbVOVlQ56Gc0peZb3cfCkDRx42_7OXbS-Wu9wECUg5m5z14-ylT8RA&_nc_ohc=jA0tmW9eUgYQ7kNvwFuRF9t&_nc_gid=wYFP_FfqfADH7LabUld7PA&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AfR97xw0VMBvrRGmKCmDRb6vATJU_VKM2mxOpKgwFAjykA&oe=688F3730&_nc_sid=8b3546',
+        'caption':
+            '비가 오나 눈이오나 산책 은 꼭 해야 잠을 자는 우리 생일이 생일이와 비를 흠뻑 같이 맞으며 지난 날을 다시 한번 되돌아봅니다.',
+        'timestamp': '1일 전',
+      },
+      {
+        'imageUrl':
+            'https://scontent-icn2-1.cdninstagram.com/v/t51.29350-15/520783987_797737089243572_2178168836586557830_n.heic?stp=dst-jpg_e35_p640x640_sh0.08_tt6&_nc_ht=scontent-icn2-1.cdninstagram.com&_nc_cat=108&_nc_oc=Q6cZ2QE00F6lcPEJ1hbVOVlQ56Gc0peZb3cfCkDRx42_7OXbS-Wu9wECUg5m5z14-ylT8RA&_nc_ohc=TkR-TMTnuTsQ7kNvwHWrrWU&_nc_gid=wYFP_FfqfADH7LabUld7PA&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AfR4vsWH3HRymOwaHLtk12mgXxhb1jRlYwACh6uYEG9Lrw&oe=688F56E7&_nc_sid=8b3546',
+        'caption': '안녕하세요, 이연복입니다.',
+        'timestamp': '2일 전',
+      },
+    ],
+    '크리스티나': [
+      {
+        'imageUrl':
+            'https://scontent-icn2-1.cdninstagram.com/v/t51.2885-15/502155105_745843767871839_8717367241312653174_n.jpg?stp=dst-jpg_e15_tt6&_nc_ht=scontent-icn2-1.cdninstagram.com&_nc_cat=103&_nc_oc=Q6cZ2QEkGcPOUcga_gLzHVnPo0KJQrVI7RkTZdSjeGzfdYVxtUlUPZh7xCgvNwb25S7FklQ&_nc_ohc=A9GhB-y3kmUQ7kNvwFY-Epi&_nc_gid=q1WGbNE41Q2RRpXt6z_Giw&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AfQ0RGKL6UWhtsk-J6TARdfpHkBspNWKH1fBGHOmYq7lKg&oe=688F38B1&_nc_sid=8b3546',
+        'caption': '요즘 저녁 하늘이 정말 아름답고 이쁘네요 그와중에 생일이 는 사색에 잠기고 아름다운 저녁 하늘 꼭 보세요',
+        'timestamp': '5시간 전',
+      },
+      {
+        'imageUrl':
+            'https://scontent-icn2-1.cdninstagram.com/v/t51.2885-15/503016608_3917044318607391_4952896623076070681_n.jpg?stp=dst-jpg_e15_tt6&_nc_ht=scontent-icn2-1.cdninstagram.com&_nc_cat=103&_nc_oc=Q6cZ2QEkGcPOUcga_gLzHVnPo0KJQrVI7RkTZdSjeGzfdYVxtUlUPZh7xCgvNwb25S7FklQ&_nc_ohc=pf2PF_zw6uEQ7kNvwFYytgi&_nc_gid=q1WGbNE41Q2RRpXt6z_Giw&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AfSkIHXH1Fu8wc0eQUVVxzEIe0rh_WLI6rA1_YdQF03Eyg&oe=688F2EFC&_nc_sid=8b3546',
+        'caption':
+            '비가 오나 눈이오나 산책 은 꼭 해야 잠을 자는 우리 생일이 생일이와 비를 흠뻑 같이 맞으며 지난 날을 다시 한번 되돌아봅니다.',
+        'timestamp': '1일 전',
+      },
+      {
+        'imageUrl':
+            'https://scontent-icn2-1.cdninstagram.com/v/t51.2885-15/525932536_18495424063065820_506160292681647571_n.jpg?stp=dst-jpg_e35_p640x640_sh0.08_tt6&_nc_ht=scontent-icn2-1.cdninstagram.com&_nc_cat=104&_nc_oc=Q6cZ2QEkGcPOUcga_gLzHVnPo0KJQrVI7RkTZdSjeGzfdYVxtUlUPZh7xCgvNwb25S7FklQ&_nc_ohc=6f70uqN2hLMQ7kNvwFBaYtt&_nc_gid=q1WGbNE41Q2RRpXt6z_Giw&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AfSLn_yiwz7gGTe3yAgZFt76vB5P7RZ0RgcHszqlQDazcA&oe=688F630D&_nc_sid=8b3546',
+        'caption': '안녕하세요, 이연복입니다.',
+        'timestamp': '2일 전',
+      },
+    ],
     // 기본 데이터 추가 (어떤 셀럽이든 보여줄 수 있도록)
     'default': [
       {

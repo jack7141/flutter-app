@@ -497,8 +497,10 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       appBar: CommonAppBar(),
+      resizeToAvoidBottomInset: true, // 키보드가 올라올 때 화면 크기 조정
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
+          // 스크롤 가능하게 만들기
           padding: const EdgeInsets.all(Sizes.size20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -512,7 +514,6 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
               ),
               Gaps.v20,
               Stack(
-                // Stack 다시 추가
                 children: [
                   Container(
                     padding: const EdgeInsets.all(16.0),
@@ -648,7 +649,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                       ],
                     ),
                   ),
-                  // 템플릿 적용 시 회색 오버레이 다시 추가
+                  // 템플릿 적용 시 회색 오버레이
                   if (_isTemplateApplied)
                     Positioned.fill(
                       child: Container(
@@ -692,6 +693,10 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                       ? '${widget.celeb!.name} 목소리로 들어보기'
                       : '들어보기',
                 ),
+              ),
+              // 키보드가 올라올 때 추가 여백 제공
+              SizedBox(
+                height: MediaQuery.of(context).viewInsets.bottom > 0 ? 20 : 0,
               ),
             ],
           ),

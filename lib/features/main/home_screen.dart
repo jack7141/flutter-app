@@ -726,7 +726,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   Gaps.h8,
                   Text(
-                    'dlwlrma',
+                    'fuxtom',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -756,7 +756,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       Gaps.h8,
                       Text(
-                        '이지금 [IU Official]',
+                        '이연복의 복주머니',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

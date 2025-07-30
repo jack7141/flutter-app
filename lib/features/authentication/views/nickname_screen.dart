@@ -48,7 +48,7 @@ class _NicknameScreenState extends State<NicknameScreen> {
         throw Exception('인증 토큰이 없습니다.');
       }
 
-      // PATCH 요청으로 닉네임 업데이트
+      // PATCH 요청으로 닉네임과 약관 동의 상태 함께 업데이트
       final response = await http.patch(
         Uri.parse('${AppConfig.baseUrl}/api/v1/users/profile/'),
         headers: {
@@ -56,14 +56,17 @@ class _NicknameScreenState extends State<NicknameScreen> {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
-        body: json.encode({'nickname': nickname}),
+        body: json.encode({
+          'nickname': nickname,
+          'is_confirm': true, // 약관 동의 상태도 함께 업데이트
+        }),
       );
 
-      print('📤 닉네임 업데이트 요청: $nickname');
+      print('📤 업데이트 요청: nickname=$nickname, is_confirm=true');
       print('📡 응답 상태코드: ${response.statusCode}');
 
       if (response.statusCode == 200) {
-        print('✅ 닉네임 업데이트 성공');
+        print('✅ 닉네임 및 약관 동의 업데이트 성공');
 
         // 성공시 localStorage에 닉네임 저장
         await _secureStorage.write(key: 'user_nickname', value: nickname);
@@ -73,22 +76,23 @@ class _NicknameScreenState extends State<NicknameScreen> {
           context.pushReplacement('/home');
         }
       } else {
-        throw Exception('닉네임 업데이트 실패: ${response.statusCode}');
+        throw Exception('업데이트 실패: ${response.statusCode}');
       }
     } catch (e) {
-      print('❌ 닉네임 업데이트 에러: $e');
+      print('❌ 업데이트 에러: $e');
 
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('닉네임 저장에 실패했습니다. 다시 시도해주세요.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('저장에 실패했습니다: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 

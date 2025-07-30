@@ -14,20 +14,23 @@ class YouTubeService {
       YouTubeVideo(
         videoId: 'JleoAppaxi0',
         title: '$celebName - 최신 영상',
-        thumbnailUrl: 'https://i.ytimg.com/vi/JleoAppaxi0/hqdefault.jpg',
-        description: '$celebName의 최신 영상입니다',
+        thumbnailUrl:
+            'https://i.ytimg.com/vi/VkZ2FviXsFE/hqdefault.jpg?sqp=-oaymwEnCNACELwBSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLB06vDO25IStk5CLIH-Xm66MM57IA',
+        description: '입안에 넣자마자 샤르르~ 푸딩계란찜!',
       ),
       YouTubeVideo(
         videoId: 'o_nxIQTM_B0',
         title: '$celebName - 인기 영상',
-        thumbnailUrl: 'https://i.ytimg.com/vi/o_nxIQTM_B0/hqdefault.jpg',
-        description: '$celebName의 인기 영상입니다',
+        thumbnailUrl:
+            'https://i.ytimg.com/vi/QPH869YXL_4/hqdefault.jpg?sqp=-oaymwEnCNACELwBSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLCnqiyL9r7kfhvUtAS-XCkd4M_bKg',
+        description: '비법간장 하나로 세가지 반찬 뚝딱!',
       ),
       YouTubeVideo(
         videoId: '3iM_06QeZi8',
         title: '$celebName - 추천 영상',
-        thumbnailUrl: 'https://i.ytimg.com/vi/3iM_06QeZi8/hqdefault.jpg',
-        description: '$celebName의 추천 영상입니다',
+        thumbnailUrl:
+            'https://i.ytimg.com/vi/JALXIHKui7U/hqdefault.jpg?sqp=-oaymwEnCNACELwBSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLAgsj9aZFpmC9ZeJiVvCbTio93TRA',
+        description: '비빔국수에 이걸?',
       ),
     ];
   }

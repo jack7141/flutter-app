@@ -1,4 +1,5 @@
 import 'package:celeb_voice/common/main_navigation_screen.dart';
+import 'package:celeb_voice/config/app_config.dart';
 import 'package:celeb_voice/features/authentication/views/login_screen.dart';
 import 'package:celeb_voice/features/authentication/views/nickname_screen.dart';
 import 'package:celeb_voice/features/authentication/views/terms_screens.dart';
@@ -18,13 +19,15 @@ import 'package:celeb_voice/features/user_info/views/welcome_screen.dart';
 import 'package:celeb_voice/features/user_profile/views/update_profile_screen.dart';
 import 'package:celeb_voice/features/user_profile/views/user_profile_screen.dart';
 import 'package:celeb_voice/features/user_profile/views/user_settings_screen.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // 토큰 체크용
 import 'package:go_router/go_router.dart';
 
-// 자동 로그인 체크 함수 (간단하게)
+// 자동 로그인 체크 함수 수정
 Future<String> _checkAutoLogin() async {
   const storage = FlutterSecureStorage();
+  final dio = Dio();
 
   try {
     final accessToken = await storage.read(key: 'access_token');
@@ -33,14 +36,59 @@ Future<String> _checkAutoLogin() async {
     print('🔐 자동 로그인 체크 - Access Token: ${accessToken != null ? '존재' : '없음'}');
     print('🔐 자동 로그인 체크 - User ID: ${userId != null ? '존재' : '없음'}');
 
-    if (accessToken != null &&
-        accessToken.isNotEmpty &&
-        userId != null &&
-        userId.isNotEmpty) {
-      print('✅ 토큰 존재 - 홈 화면으로 이동');
-      return "/home";
-    } else {
+    // 토큰이 없으면 로그인 화면으로
+    if (accessToken == null ||
+        accessToken.isEmpty ||
+        userId == null ||
+        userId.isEmpty) {
       print('❌ 토큰 없음 - 로그인 화면으로 이동');
+      return "/login";
+    }
+
+    // 사용자 정보 조회로 상태 확인
+    try {
+      final tokenType = await storage.read(key: 'token_type');
+      final response = await dio.get(
+        '${AppConfig.baseUrl}${AppConfig.usersMeEndpoint}',
+        options: Options(
+          headers: {
+            ...AppConfig.defaultHeaders,
+            'Authorization': '${tokenType ?? 'Bearer'} $accessToken',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final userData = response.data;
+        print('👤 사용자 정보 조회 성공: $userData');
+
+        // is_confirm 상태 확인
+        final isConfirm = userData['is_confirm'] ?? false;
+        final nickname = userData['nickname'];
+
+        print('🔍 사용자 상태 확인:');
+        print('   - is_confirm: $isConfirm');
+        print('   - nickname: $nickname');
+
+        if (!isConfirm) {
+          print('📋 약관 동의 미완료 - 약관 화면으로 이동');
+          return "/terms";
+        }
+
+        if (nickname == null || nickname.toString().isEmpty) {
+          print('📝 닉네임 미설정 - 닉네임 화면으로 이동');
+          return "/nickname";
+        }
+
+        print('✅ 모든 조건 충족 - 홈 화면으로 이동');
+        return "/home";
+      } else {
+        print('❌ 사용자 정보 조회 실패 - 로그인 화면으로 이동');
+        return "/login";
+      }
+    } catch (apiError) {
+      print('💥 사용자 정보 조회 에러: $apiError');
+      // API 에러 시 토큰이 유효하지 않을 수 있으므로 로그인 화면으로
       return "/login";
     }
   } catch (e) {

@@ -4,11 +4,11 @@ class AppConfig {
   // 플랫폼별 baseUrl
   static String get baseUrl {
     if (Platform.isAndroid) {
-      // Android 에뮬레이터용
-      return 'http://10.0.2.2:8000';
+      // 실제 기기 테스트용 (같은 Wi-Fi 망)
+      return 'http://10.10.20.59:8000';
     } else if (Platform.isIOS) {
-      // iOS 시뮬레이터용
-      return 'http://127.0.0.1:8000';
+      // 실제 iOS 기기 테스트용 (같은 Wi-Fi 망)
+      return 'http://10.10.20.59:8000';
     } else {
       // 기타 플랫폼 (웹, 데스크탑 등)
       return 'http://127.0.0.1:8000';

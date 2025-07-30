@@ -63,63 +63,16 @@ class _TermsScreenState extends State<TermsScreen> {
 
   // 약관 동의 API 호출 메서드 수정 (디버깅 강화)
   Future<void> _confirmTerms() async {
-    print('🔍 _confirmTerms 메서드 호출됨');
+    print('🔍 약관 동의 완료 - 닉네임 페이지로 이동');
 
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // 저장된 user_id 가져오기
-      final userId = await _storage.read(key: 'user_id');
-
-      print('🔍 저장된 User ID: $userId');
-
-      if (userId == null || userId.isEmpty) {
-        throw Exception('사용자 ID를 찾을 수 없습니다.');
-      }
-
-      print('🚀 약관 동의 API 호출 시작');
-      print('📤 요청 URL: /api/v1/users/$userId/');
-      print('📤 요청 데이터: {"is_confirm": true}');
-
-      // PATCH 요청으로 is_confirm만 true로 업데이트
-      final response = await _dio.patch(
-        '/api/v1/users/$userId/',
-        data: {'is_confirm': true},
-      );
-
-      print('📥 응답 상태코드: ${response.statusCode}');
-      print('📥 응답 데이터: ${response.data}');
-
-      if (response.statusCode == 200) {
-        print('✅ 약관 동의 처리 성공');
-
-        if (context.mounted) {
-          // 뒤로가기 불가능하게 이동
-          context.pushReplacement('/nickname');
-        }
-      } else {
-        throw Exception('약관 동의 처리 실패: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('❌ 약관 동의 처리 에러: $e');
-      print('❌ 에러 타입: ${e.runtimeType}');
-
-      if (e is DioException) {
-        print('❌ DioException 상세:');
-        print('   - 상태코드: ${e.response?.statusCode}');
-        print('   - 응답 데이터: ${e.response?.data}');
-        print('   - 에러 메시지: ${e.message}');
-      }
-
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('약관 동의 처리에 실패했습니다: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        // 바로 닉네임 페이지로 이동
+        context.pushReplacement('/nickname');
       }
     } finally {
       if (mounted) {
