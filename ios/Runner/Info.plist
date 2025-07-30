@@ -78,6 +78,11 @@
 		<array>
 			<string>naversearchapp</string>
 			<string>naversearchthirdlogin</string>
+			<!-- 카카오톡 스키마 추가 -->
+			<string>kakaokompassauth</string>
+			<string>storykompassauth</string>
+			<string>kakaolink</string>
+			<string>kakaotalk</string>
 		</array>
 	<key>naverServiceAppUrlScheme</key>
 	<string>com.example.celebVoice</string>

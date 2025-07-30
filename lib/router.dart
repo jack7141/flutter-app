@@ -27,7 +27,16 @@ import 'package:go_router/go_router.dart';
 // 자동 로그인 체크 함수 수정
 Future<String> _checkAutoLogin() async {
   const storage = FlutterSecureStorage();
-  final dio = Dio();
+
+  // Dio 설정을 다른 곳과 동일하게 수정
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: AppConfig.baseUrl,
+      connectTimeout: const Duration(seconds: 30), // 연결 타임아웃 30초
+      receiveTimeout: const Duration(seconds: 30), // 응답 타임아웃 30초
+      headers: AppConfig.defaultHeaders,
+    ),
+  );
 
   try {
     final accessToken = await storage.read(key: 'access_token');
@@ -49,12 +58,9 @@ Future<String> _checkAutoLogin() async {
     try {
       final tokenType = await storage.read(key: 'token_type');
       final response = await dio.get(
-        '${AppConfig.baseUrl}${AppConfig.usersMeEndpoint}',
+        AppConfig.usersMeEndpoint, // baseUrl이 이미 설정되어 있으므로 경로만
         options: Options(
-          headers: {
-            ...AppConfig.defaultHeaders,
-            'Authorization': '${tokenType ?? 'Bearer'} $accessToken',
-          },
+          headers: {'Authorization': '${tokenType ?? 'Bearer'} $accessToken'},
         ),
       );
 

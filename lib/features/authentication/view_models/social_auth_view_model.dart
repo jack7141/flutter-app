@@ -103,6 +103,8 @@ class SocialAuthViewModel extends AsyncNotifier<void> {
         try {
           // 웹 로그인 시도 전 잠시 대기
           await Future.delayed(Duration(milliseconds: 500));
+          print("🌐 Starting Kakao web login...");
+
           token = await UserApi.instance.loginWithKakaoAccount().timeout(
             Duration(seconds: 60),
             onTimeout: () {
@@ -114,15 +116,20 @@ class SocialAuthViewModel extends AsyncNotifier<void> {
             },
           );
           print("✅ [3/5] Kakao Account login successful.");
+          print("🔑 Received token: ${token.accessToken.substring(0, 10)}...");
         } catch (webError) {
           print("🚨 Both KakaoTalk and Account login failed.");
           print("🚨 Web login error: $webError");
+          print("🚨 Error type: ${webError.runtimeType}");
+          print("🚨 Error details: ${webError.toString()}");
 
           // 사용자가 취소한 경우와 다른 에러 구분
-          if (webError.toString().contains("CANCELED")) {
+          if (webError.toString().contains("CANCELED") ||
+              webError.toString().contains("cancelled") ||
+              webError.toString().contains("cancel")) {
             throw Exception("카카오 로그인이 취소되었습니다. 로그인을 완료해주세요.");
           } else {
-            throw Exception("카카오 로그인 오류: 앱 설정을 확인하고 다시 시도해주세요.");
+            throw Exception("카카오 로그인 오류: 앱 설정을 확인하고 다시 시도해주세요. ($webError)");
           }
         }
       }

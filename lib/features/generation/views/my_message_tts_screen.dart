@@ -95,7 +95,7 @@ class _MyMessageTtsScreenState extends State<MyMessageTtsScreen> {
         });
 
         // 로컬 assets 파일 사용
-        await _audioPlayer.play(AssetSource('tts/minji.mp3'));
+        await _audioPlayer.play(AssetSource('tts/cris.mp3'));
 
         // 재생 시작 후 로딩 상태 해제
         setState(() {
