@@ -5,10 +5,12 @@ class AppConfig {
   static String get baseUrl {
     if (Platform.isAndroid) {
       // 실제 기기 테스트용 (같은 Wi-Fi 망)
-      return 'http://10.10.20.59:8000';
+      return 'https://stage.celebvoice.sellbuymusic.com';
+      // return 'http://10.10.20.222:8000';
     } else if (Platform.isIOS) {
       // 실제 iOS 기기 테스트용 (같은 Wi-Fi 망)
-      return 'http://10.10.20.59:8000';
+      return 'https://stage.celebvoice.sellbuymusic.com';
+      // return 'http://10.10.20.222:8000';
     } else {
       // 기타 플랫폼 (웹, 데스크탑 등)
       return 'http://127.0.0.1:8000';
@@ -23,6 +25,7 @@ class AppConfig {
   static const String refreshTokenEndpoint = '/api/v1/users/refresh-token';
   static const String celebEndpoint = '/api/v1/celeb/';
   static const String hobbyEndpoint = '/api/v1/users/hobby/';
+  static const String jobEndpoint = '/api/v1/users/job/';
 
   // CloudFront
   static const String cloudFrontDomain = String.fromEnvironment(

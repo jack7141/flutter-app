@@ -1,4 +1,4 @@
-package com.example.celeb_voice
+package com.sellbuymusic.celebvoice
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 
