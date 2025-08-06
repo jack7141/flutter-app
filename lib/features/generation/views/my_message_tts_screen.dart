@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:celeb_voice/common/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/common/widgets/form_button.dart';
@@ -6,6 +8,10 @@ import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MyMessageTtsScreen extends StatefulWidget {
   final CelebModel? celeb;
@@ -43,7 +49,6 @@ class _MyMessageTtsScreenState extends State<MyMessageTtsScreen> {
       if (mounted) {
         setState(() {
           _isPlaying = state == PlayerState.playing;
-          // 로딩 상태 로직 제거
         });
       }
     });
@@ -116,6 +121,196 @@ class _MyMessageTtsScreenState extends State<MyMessageTtsScreen> {
     }
   }
 
+  // Instagram Story 공유 함수 (간단한 방법)
+  Future<void> _shareToInstagramStory() async {
+    try {
+      print('🚀 Instagram Story 공유 시작');
+
+      setState(() {
+        _isLoading = true;
+      });
+
+      // 1. 셀럽 이미지를 로컬에 다운로드
+      String? localImagePath = await _downloadImageToLocal();
+
+      if (localImagePath == null) {
+        throw Exception('이미지 다운로드에 실패했습니다.');
+      }
+
+      print('📱 플랫폼: ${Platform.operatingSystem}');
+
+      // 2. Instagram 앱 확인 및 공유
+      bool success = false;
+
+      if (Platform.isAndroid) {
+        success = await _shareToInstagramAndroid(localImagePath);
+      } else if (Platform.isIOS) {
+        success = await _shareToInstagramIOS(localImagePath);
+      }
+
+      if (success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Instagram으로 공유되었습니다!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        // Instagram이 없으면 일반 공유
+        await _shareWithGeneralShare(localImagePath);
+      }
+    } catch (e) {
+      print('❌ Instagram 공유 실패: $e');
+      if (mounted) {
+        // 실패 시 일반 공유로 대체
+        String? localImagePath = await _downloadImageToLocal();
+        if (localImagePath != null) {
+          await _shareWithGeneralShare(localImagePath);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('공유에 실패했습니다. 다시 시도해주세요.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  // Android Instagram 공유
+  Future<bool> _shareToInstagramAndroid(String imagePath) async {
+    try {
+      // Instagram 앱 직접 실행 시도
+      final instagramUrl = Uri.parse('instagram://camera');
+
+      if (await canLaunchUrl(instagramUrl)) {
+        print('✅ Instagram 앱 발견, 실행 중...');
+        await launchUrl(instagramUrl, mode: LaunchMode.externalApplication);
+
+        // 잠시 대기 후 이미지 공유
+        await Future.delayed(Duration(seconds: 1));
+
+        // 이미지 공유
+        await Share.shareXFiles([
+          XFile(imagePath),
+        ], text: '${widget.celeb?.name ?? "셀럽"}의 목소리로 만든 메시지! #CelebVoice');
+
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print('❌ Android Instagram 공유 에러: $e');
+      return false;
+    }
+  }
+
+  // iOS Instagram 공유
+  Future<bool> _shareToInstagramIOS(String imagePath) async {
+    try {
+      // Instagram 앱 확인
+      final instagramUrl = Uri.parse('instagram://camera');
+
+      if (await canLaunchUrl(instagramUrl)) {
+        print('✅ Instagram 앱 발견, 실행 중...');
+        await launchUrl(instagramUrl, mode: LaunchMode.externalApplication);
+
+        // 잠시 대기 후 이미지 공유
+        await Future.delayed(Duration(seconds: 1));
+
+        // 이미지 공유
+        await Share.shareXFiles([
+          XFile(imagePath),
+        ], text: '${widget.celeb?.name ?? "셀럽"}의 목소리로 만든 메시지! #CelebVoice');
+
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print('❌ iOS Instagram 공유 에러: $e');
+      return false;
+    }
+  }
+
+  // 일반 공유 (Instagram이 없을 때)
+  Future<void> _shareWithGeneralShare(String imagePath) async {
+    try {
+      await Share.shareXFiles(
+        [XFile(imagePath)],
+        text:
+            '${widget.celeb?.name ?? "셀럽"}의 목소리로 만든 메시지! #CelebVoice\n\n📸 Instagram에서 Story로 공유해보세요!',
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('이미지가 공유되었습니다! Instagram Story에 추가해보세요.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      print('❌ 일반 공유 에러: $e');
+    }
+  }
+
+  // 이미지를 로컬에 다운로드
+  Future<String?> _downloadImageToLocal() async {
+    try {
+      final celeb = widget.celeb;
+      if (celeb == null) {
+        print('❌ celeb이 null입니다.');
+        return null;
+      }
+
+      // 사용할 이미지 URL 결정
+      String imageUrl = celeb.detailImagePath.isNotEmpty
+          ? celeb.detailImagePath
+          : celeb.imagePath;
+
+      print('🔍 사용할 이미지 URL: $imageUrl');
+
+      if (imageUrl.isEmpty) {
+        print('❌ 이미지 URL이 비어있습니다.');
+        return null;
+      }
+
+      print('📥 이미지 다운로드 시작: $imageUrl');
+
+      // HTTP 요청으로 이미지 다운로드
+      final response = await http.get(Uri.parse(imageUrl));
+
+      print('📥 HTTP 응답 상태: ${response.statusCode}');
+
+      if (response.statusCode != 200) {
+        print('❌ HTTP 요청 실패: ${response.statusCode}');
+        return null;
+      }
+
+      // 임시 디렉토리에 저장
+      final directory = await getTemporaryDirectory();
+      final fileName =
+          'celeb_voice_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final file = File('${directory.path}/$fileName');
+
+      await file.writeAsBytes(response.bodyBytes);
+
+      print('✅ 이미지 저장 완료: ${file.path}');
+      print('📊 파일 크기: ${response.bodyBytes.length} bytes');
+
+      return file.path;
+    } catch (e) {
+      print('❌ 이미지 다운로드 에러: $e');
+      return null;
+    }
+  }
+
   void _onSaveTap() async {
     if (_isLoading) return;
 
@@ -141,7 +336,7 @@ class _MyMessageTtsScreenState extends State<MyMessageTtsScreen> {
     }
   }
 
-  // 저장 성공 다이얼로그
+  // 저장 성공 다이얼로그 (Instagram 공유 옵션 추가)
   void _showSaveSuccessDialog() {
     showDialog(
       context: context,
@@ -179,39 +374,71 @@ class _MyMessageTtsScreenState extends State<MyMessageTtsScreen> {
             ),
           ),
           actions: [
-            Row(
+            Column(
               children: [
-                Expanded(
-                  child: TextButton(
+                // Instagram 공유 버튼
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton.icon(
                     onPressed: () {
-                      Navigator.of(context).pop(); // 다이얼로그만 닫기
+                      Navigator.of(context).pop(); // 다이얼로그 닫기
+                      _shareToInstagramStory(); // Instagram 공유
                     },
-                    child: Text(
-                      '취소',
+                    icon: Icon(Icons.camera_alt, color: Colors.purple),
+                    label: Text(
+                      'Instagram Story에 공유하기',
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: Colors.purple,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.purple.withOpacity(0.1),
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(width: 8),
-                Expanded(
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(); // 다이얼로그 닫기
-                      context.go('/home'); // 홈으로 이동
-                    },
-                    child: Text(
-                      '확인',
-                      style: TextStyle(
-                        color: Color(0xff9e9ef4),
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                SizedBox(height: 12),
+                // 기존 버튼들
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // 다이얼로그만 닫기
+                        },
+                        child: Text(
+                          '취소',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // 다이얼로그 닫기
+                          context.go('/home'); // 홈으로 이동
+                        },
+                        child: Text(
+                          '확인',
+                          style: TextStyle(
+                            color: Color(0xff9e9ef4),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
