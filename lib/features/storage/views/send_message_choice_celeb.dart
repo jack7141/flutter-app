@@ -1,11 +1,8 @@
-import 'dart:ui'; // blur 효과를 위해 추가
-
 import 'package:celeb_voice/config/app_config.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:celeb_voice/features/main/repos/celeb_repo.dart';
-import 'package:celeb_voice/features/subscription/services/subscription_service.dart'; // 추가
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -24,7 +21,6 @@ class SendMessageChoiceCeleb extends ConsumerStatefulWidget {
 class _SendMessageChoiceCelebState
     extends ConsumerState<SendMessageChoiceCeleb> {
   List<CelebModel> _celebs = [];
-  List<String> _subscribedCelebIds = []; // 구독한 셀럽 ID 목록
   bool _isLoading = true;
   String? _error;
 
@@ -36,13 +32,9 @@ class _SendMessageChoiceCelebState
 
   Future<void> _loadData() async {
     try {
-      // 셀럽 데이터와 구독 상태를 동시에 로딩
+      // 셀럽 데이터 로딩
       final celebRepo = CelebRepo();
-      final subscriptionService = SubscriptionService();
-
       final celebs = await celebRepo.getCelebs();
-      final subscriptionStatus = await subscriptionService
-          .getSubscriptionStatus();
 
       if (celebs == null) {
         throw Exception("셀럽 데이터가 null입니다.");
@@ -51,7 +43,6 @@ class _SendMessageChoiceCelebState
       if (mounted) {
         setState(() {
           _celebs = celebs;
-          _subscribedCelebIds = subscriptionStatus.subscribedCelebIds;
           _isLoading = false;
         });
       }
@@ -64,11 +55,6 @@ class _SendMessageChoiceCelebState
         });
       }
     }
-  }
-
-  // 구독 여부 확인
-  bool _isSubscribed(String celebId) {
-    return _subscribedCelebIds.contains(celebId);
   }
 
   @override
@@ -110,29 +96,11 @@ class _SendMessageChoiceCelebState
                               itemCount: _celebs.length,
                               itemBuilder: (context, index) {
                                 final celeb = _celebs[index];
-                                final isSubscribed = _isSubscribed(celeb.id);
 
                                 return GestureDetector(
                                   onTap: () {
-                                    if (isSubscribed) {
-                                      // 구독한 셀럽만 선택 가능
-                                      context.push(
-                                        '/sendMessage',
-                                        extra: celeb,
-                                      );
-                                    } else {
-                                      // 구독하지 않은 셀럽 클릭 시 구독 안내
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            '${celeb.name}을 구독해야 이용할 수 있습니다.',
-                                          ),
-                                          backgroundColor: Colors.orange,
-                                        ),
-                                      );
-                                    }
+                                    // 모든 셀럽 선택 가능
+                                    context.push('/sendMessage', extra: celeb);
                                   },
                                   child: Column(
                                     children: [
@@ -148,47 +116,18 @@ class _SendMessageChoiceCelebState
                                             child: ClipRRect(
                                               borderRadius:
                                                   BorderRadius.circular(40),
-                                              child: isSubscribed
-                                                  ? _buildCelebImage(
-                                                      celeb,
-                                                    ) // 구독한 경우 일반 이미지
-                                                  : ImageFiltered(
-                                                      // 구독하지 않은 경우 blur 처리
-                                                      imageFilter:
-                                                          ImageFilter.blur(
-                                                            sigmaX: 3,
-                                                            sigmaY: 3,
-                                                          ),
-                                                      child: _buildCelebImage(
-                                                        celeb,
-                                                      ),
-                                                    ),
+                                              child: _buildCelebImage(celeb),
                                             ),
                                           ),
-                                          // 구독하지 않은 경우 잠금 아이콘 표시
-                                          if (!isSubscribed)
-                                            Positioned.fill(
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: Colors.black
-                                                      .withOpacity(0.1),
-                                                ),
-                                              ),
-                                            ),
                                         ],
                                       ),
                                       Gaps.v8,
                                       Text(
-                                        isSubscribed
-                                            ? celeb.name
-                                            : "셀럽", // 구독하지 않은 경우 "셀럽"으로 표시
+                                        celeb.name,
                                         style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
-                                          color: isSubscribed
-                                              ? Colors.black
-                                              : Colors.grey.shade600,
+                                          color: Colors.black,
                                         ),
                                         textAlign: TextAlign.center,
                                         maxLines: 1,

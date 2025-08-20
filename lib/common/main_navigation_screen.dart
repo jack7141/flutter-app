@@ -73,7 +73,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               ),
               NavTab(
                 text: "",
-                isSelected: _selectedIndex == 3,
+                isSelected: _selectedIndex == 2,
                 icon: FontAwesomeIcons.user,
                 selectedIcon: FontAwesomeIcons.user,
                 onTap: () => _onTap(3),

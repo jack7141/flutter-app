@@ -10,12 +10,6 @@ import 'package:celeb_voice/features/main/home_screen.dart';
 import 'package:celeb_voice/features/main/models/celeb_models.dart';
 import 'package:celeb_voice/features/storage/views/send_message_choice_celeb.dart';
 import 'package:celeb_voice/features/storage/views/send_message_screen.dart';
-import 'package:celeb_voice/features/user_info/views/attitude_screen.dart';
-import 'package:celeb_voice/features/user_info/views/birthday_screen.dart';
-import 'package:celeb_voice/features/user_info/views/interest_screen.dart';
-import 'package:celeb_voice/features/user_info/views/job_screen.dart';
-import 'package:celeb_voice/features/user_info/views/mbti_screen.dart';
-import 'package:celeb_voice/features/user_info/views/welcome_screen.dart';
 import 'package:celeb_voice/features/user_profile/views/update_profile_screen.dart';
 import 'package:celeb_voice/features/user_profile/views/user_profile_screen.dart';
 import 'package:celeb_voice/features/user_profile/views/user_settings_screen.dart';
@@ -158,63 +152,9 @@ final router = GoRouter(
           builder: (context, state) => const HomeScreen(),
         ),
         GoRoute(
-          path: "/welcome",
-          name: WelcomeScreen.routeName,
-          builder: (context, state) {
-            final celeb = state.extra as CelebModel?;
-            return WelcomeScreen(celeb: celeb);
-          },
-        ),
-        GoRoute(
           path: "/profile",
           name: UserProfileScreen.routeName,
           builder: (context, state) => const UserProfileScreen(),
-        ),
-        GoRoute(
-          path: "/interest",
-          name: InterestScreen.routeName,
-          builder: (context, state) {
-            final celeb = state.extra as CelebModel?;
-            return InterestScreen(celeb: celeb);
-          },
-        ),
-        GoRoute(
-          path: "/mbti",
-          name: MbtiScreen.routeName,
-          builder: (context, state) {
-            print("🔍 Router - /mbti 경로 진입");
-            print("🔍 Router - state.extra: ${state.extra}");
-            print("🔍 Router - state.extra type: ${state.extra.runtimeType}");
-
-            final celeb = state.extra as CelebModel?;
-            print("🔍 Router - 변환된 celeb: ${celeb?.name}");
-
-            return MbtiScreen(celeb: celeb);
-          },
-        ),
-        GoRoute(
-          path: "/birthday",
-          name: BirthdayScreen.routeName,
-          builder: (context, state) {
-            final celeb = state.extra as CelebModel?;
-            return BirthdayScreen(celeb: celeb);
-          },
-        ),
-        GoRoute(
-          path: "/job",
-          name: JobScreen.routeName,
-          builder: (context, state) {
-            final celeb = state.extra as CelebModel?;
-            return JobScreen(celeb: celeb);
-          },
-        ),
-        GoRoute(
-          path: "/attitude",
-          name: AttitudeScreen.routeName,
-          builder: (context, state) {
-            final celeb = state.extra as CelebModel?;
-            return AttitudeScreen(celeb: celeb);
-          },
         ),
         GoRoute(
           path: "/sendMessage",
