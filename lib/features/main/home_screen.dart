@@ -33,6 +33,10 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isSampleLoading = true;
   String? _sampleError;
 
+  // 오디오 재생 상태 관리
+  final Map<String, bool> _playingStates = {}; // 각 샘플별 재생 상태
+  final Map<String, double> _progressStates = {}; // 각 샘플별 진행률
+
   @override
   void initState() {
     super.initState();
@@ -336,13 +340,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                    Text(
-                      _formatDate(sample['created']),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade500,
-                      ),
-                    ),
                   ],
                 ),
                 SizedBox(height: 12),
@@ -351,6 +348,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   sample['message'] ?? '샘플 메시지',
                   style: TextStyle(fontSize: 14, color: Colors.black87),
                 ),
+                SizedBox(height: 16),
+                // 프로그레스 바
+                _buildProgressBar(sample['id'] ?? ''),
+                SizedBox(height: 12),
+                // 재생 버튼
+                _buildPlayButton(sample['id'] ?? ''),
               ],
             ),
           );
@@ -427,6 +430,154 @@ class _HomeScreenState extends State<HomeScreen> {
         _currentCelebIndex.value % _celebData.celebs.length;
     final currentCeleb = _celebData.celebs[currentCelebIndex];
     return currentCeleb.name;
+  }
+
+  // 프로그레스 바 빌드
+  Widget _buildProgressBar(String sampleId) {
+    final progress = _progressStates[sampleId] ?? 0.0;
+
+    return Column(
+      children: [
+        // 프로그레스 바
+        LinearProgressIndicator(
+          value: progress,
+          backgroundColor: Colors.grey.shade300,
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xff9e9ef4)),
+          minHeight: 4,
+        ),
+        SizedBox(height: 4),
+      ],
+    );
+  }
+
+  // 재생 버튼 빌드
+  Widget _buildPlayButton(String sampleId) {
+    final isPlaying = _playingStates[sampleId] ?? false;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // 재생/일시정지 버튼
+        GestureDetector(
+          onTap: () => _togglePlayPause(sampleId),
+          child: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isPlaying ? Icons.pause : Icons.play_arrow,
+              color: Color(0xff463E8D),
+              size: 24,
+            ),
+          ),
+        ),
+
+        // 오른쪽 버튼들
+        Row(
+          children: [
+            // Export 버튼
+            GestureDetector(
+              onTap: () => _onExportTap(sampleId),
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.share,
+                  color: Color(0xff9e9ef4),
+                  size: Sizes.size20,
+                ),
+              ),
+            ),
+            SizedBox(width: 12),
+            // 확대 버튼
+            GestureDetector(
+              onTap: () => _onExpandTap(sampleId),
+              child: Container(
+                width: Sizes.size32,
+                height: Sizes.size32,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.fullscreen,
+                  color: Color(0xff9e9ef4),
+                  size: Sizes.size20,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // 재생/일시정지 토글
+  void _togglePlayPause(String sampleId) {
+    setState(() {
+      final isCurrentlyPlaying = _playingStates[sampleId] ?? false;
+
+      // 다른 모든 재생 중인 샘플 정지
+      _playingStates.updateAll((key, value) => false);
+
+      // 현재 샘플 재생 상태 토글
+      _playingStates[sampleId] = !isCurrentlyPlaying;
+
+      if (_playingStates[sampleId] == true) {
+        // 재생 시작 - 임시 프로그레스 애니메이션
+        _simulateProgress(sampleId);
+      }
+    });
+
+    print('🎵 샘플 재생 토글: $sampleId, 재생중: ${_playingStates[sampleId]}');
+  }
+
+  // Export 버튼 핸들러
+  void _onExportTap(String sampleId) {
+    print('📤 Export 버튼 클릭: $sampleId');
+    // TODO: 실제 export 로직 구현
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('샘플 메시지를 공유합니다.'), duration: Duration(seconds: 2)),
+    );
+  }
+
+  // 확대 버튼 핸들러
+  void _onExpandTap(String sampleId) {
+    print('🔍 확대 버튼 클릭: $sampleId');
+    // TODO: 실제 확대/상세 보기 로직 구현
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('상세 보기로 이동합니다.'), duration: Duration(seconds: 2)),
+    );
+  }
+
+  // 임시 프로그레스 시뮬레이션 (실제 오디오 연동 전까지)
+  void _simulateProgress(String sampleId) {
+    if (_playingStates[sampleId] != true) return;
+
+    Future.delayed(Duration(milliseconds: 100), () {
+      if (mounted && _playingStates[sampleId] == true) {
+        setState(() {
+          final currentProgress = _progressStates[sampleId] ?? 0.0;
+          final newProgress = currentProgress + 0.01; // 1% 씩 증가
+
+          if (newProgress >= 1.0) {
+            // 재생 완료
+            _progressStates[sampleId] = 0.0;
+            _playingStates[sampleId] = false;
+          } else {
+            _progressStates[sampleId] = newProgress;
+            _simulateProgress(sampleId); // 재귀 호출로 계속 진행
+          }
+        });
+      }
+    });
   }
 
   Widget _buildNonSubscriberMenu(double screenHeight, double screenWidth) {
