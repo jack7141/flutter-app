@@ -76,7 +76,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 isSelected: _selectedIndex == 2,
                 icon: FontAwesomeIcons.user,
                 selectedIcon: FontAwesomeIcons.user,
-                onTap: () => _onTap(3),
+                onTap: () => _onTap(2),
                 selectedIndex: _selectedIndex,
               ),
             ],
