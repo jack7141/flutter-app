@@ -81,7 +81,7 @@ class _CelebCardState extends State<CelebCard> {
         // 구독 성공 시 TTS로 이동
         if (_subscribedCelebIds.contains(selectedCeleb.id) && context.mounted) {
           print("✅ 구독 완료 → TTS로 이동");
-          context.go('/generateMessage', extra: selectedCeleb);
+          context.push('/generateMessage', extra: selectedCeleb);
         }
       }
     } catch (e) {
