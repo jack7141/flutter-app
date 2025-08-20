@@ -100,7 +100,10 @@ class _SendMessageChoiceCelebState
                                 return GestureDetector(
                                   onTap: () {
                                     // 모든 셀럽 선택 가능
-                                    context.push('/sendMessage', extra: celeb);
+                                    context.push(
+                                      '/generateMessage',
+                                      extra: celeb,
+                                    );
                                   },
                                   child: Column(
                                     children: [
