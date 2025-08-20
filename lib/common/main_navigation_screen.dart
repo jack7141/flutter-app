@@ -30,12 +30,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         context.go("/home");
         break;
       case 1:
-        context.go("/gernerateMessage");
-        break;
-      case 2:
         context.go("/sendMessageChoiceCeleb");
         break;
-      case 3:
+      case 2:
         context.go("/profile");
         break;
     }
@@ -72,14 +69,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 icon: Icons.add_circle_outline,
                 selectedIcon: Icons.add_circle_outline,
                 onTap: () => _onTap(1),
-                selectedIndex: _selectedIndex,
-              ),
-              NavTab(
-                text: "",
-                isSelected: _selectedIndex == 2,
-                icon: FontAwesomeIcons.paperPlane,
-                selectedIcon: FontAwesomeIcons.paperPlane,
-                onTap: () => _onTap(2),
                 selectedIndex: _selectedIndex,
               ),
               NavTab(
