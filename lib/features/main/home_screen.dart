@@ -367,27 +367,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 날짜 포맷팅 헬퍼 메서드
-  String _formatDate(String? dateString) {
-    if (dateString == null) return '';
-
-    try {
-      final date = DateTime.parse(dateString);
-      final now = DateTime.now();
-      final difference = now.difference(date);
-
-      if (difference.inMinutes < 60) {
-        return '${difference.inMinutes}분 전';
-      } else if (difference.inHours < 24) {
-        return '${difference.inHours}시간 전';
-      } else {
-        return '${difference.inDays}일 전';
-      }
-    } catch (e) {
-      return '';
-    }
-  }
-
   // 현재 셀럽의 아바타 이미지 빌드
   Widget _buildCelebAvatar() {
     if (_celebData.celebs.isEmpty) {
@@ -471,17 +450,6 @@ class _HomeScreenState extends State<HomeScreen> {
             decoration: BoxDecoration(
               color: Colors.white, // White background
               shape: BoxShape.circle,
-              border: Border.all(
-                color: Color(0xff463E8D), // #463E8D border
-                width: 2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
-                ),
-              ],
             ),
             child: Icon(
               isPlaying ? Icons.pause : Icons.play_arrow,
@@ -503,7 +471,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey.shade300, width: 1),
                 ),
                 child: Icon(Icons.share, color: Colors.grey.shade600, size: 20),
               ),
@@ -518,7 +485,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey.shade300, width: 1),
                 ),
                 child: Icon(
                   Icons.fullscreen,
