@@ -15,10 +15,17 @@ import 'package:url_launcher/url_launcher.dart';
 
 class MyMessageTtsScreen extends StatefulWidget {
   final CelebModel? celeb;
+  final dynamic messageData; // API 응답 데이터
+  final String? requestText; // 사용자가 입력한 원본 텍스트
   static const String routeName = "myMessageTts";
   static const String routePath = "/myMessageTts";
 
-  const MyMessageTtsScreen({super.key, this.celeb});
+  const MyMessageTtsScreen({
+    super.key,
+    this.celeb,
+    this.messageData,
+    this.requestText,
+  });
 
   @override
   State<MyMessageTtsScreen> createState() => _MyMessageTtsScreenState();
@@ -38,6 +45,8 @@ class _MyMessageTtsScreenState extends State<MyMessageTtsScreen> {
   void initState() {
     super.initState();
     print("나만의 메세지 미리듣기 화면: ${widget.celeb}");
+    print("메시지 데이터: ${widget.messageData}");
+    print("요청 텍스트: ${widget.requestText}");
     _initializeAudioPlayer();
   }
 

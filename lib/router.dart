@@ -175,8 +175,23 @@ final router = GoRouter(
           path: "/myMessageTts",
           name: MyMessageTtsScreen.routeName,
           builder: (context, state) {
-            final celeb = state.extra as CelebModel?;
-            return MyMessageTtsScreen(celeb: celeb);
+            // Map 형태의 데이터를 받아서 처리
+            final extraData = state.extra;
+            if (extraData is Map<String, dynamic>) {
+              final celeb = extraData['celeb'] as CelebModel?;
+              final messageData = extraData['messageData'];
+              final requestText = extraData['requestText'] as String?;
+              return MyMessageTtsScreen(
+                celeb: celeb,
+                messageData: messageData,
+                requestText: requestText,
+              );
+            } else if (extraData is CelebModel) {
+              // 이전 방식 호환성을 위해
+              return MyMessageTtsScreen(celeb: extraData);
+            } else {
+              return MyMessageTtsScreen(celeb: null);
+            }
           },
         ),
         GoRoute(
