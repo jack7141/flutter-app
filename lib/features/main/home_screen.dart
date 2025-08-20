@@ -5,6 +5,7 @@ import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/authentication/repos/authentication_repo.dart'; // 추가
 import 'package:celeb_voice/features/main/views_models/celeb_data.dart';
 import 'package:celeb_voice/features/user_profile/repos/user_profile_repo.dart'; // 추가
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // 추가
 
@@ -27,13 +28,31 @@ class _HomeScreenState extends State<HomeScreen> {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   late final UserProfileRepo _userProfileRepo; // 추가
 
+  // 샘플 메시지 상태 관리
+  List<Map<String, dynamic>> _sampleMessages = [];
+  bool _isSampleLoading = true;
+  String? _sampleError;
+
   @override
   void initState() {
     super.initState();
     _celebData = CelebData();
     _celebData.loadInitialCelebs();
     _celebData.addListener(() {
-      if (mounted) setState(() {});
+      if (mounted) {
+        setState(() {});
+        // 셀럽 데이터가 로드되면 샘플 메시지도 로드
+        if (_celebData.celebs.isNotEmpty && _sampleMessages.isEmpty) {
+          _loadSampleMessages();
+        }
+      }
+    });
+
+    // 셀럽 인덱스 변경 시 샘플 메시지 다시 로드
+    _currentCelebIndex.addListener(() {
+      if (mounted && _celebData.celebs.isNotEmpty) {
+        _loadSampleMessages();
+      }
     });
 
     // UserProfileRepo 초기화
@@ -166,6 +185,250 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // 샘플 메시지 로드 메서드
+  Future<void> _loadSampleMessages() async {
+    try {
+      setState(() {
+        _isSampleLoading = true;
+        _sampleError = null;
+      });
+
+      // 현재 선택된 셀럽의 ID 가져오기
+      if (_celebData.celebs.isEmpty) {
+        throw Exception('셀럽 데이터가 없습니다.');
+      }
+
+      final currentCelebIndex =
+          _currentCelebIndex.value % _celebData.celebs.length;
+      final currentCeleb = _celebData.celebs[currentCelebIndex];
+      final sampleCelebId = currentCeleb.id;
+
+      print('📤 샘플 메시지 API 호출: /api/v1/celeb/$sampleCelebId/sample');
+      print('📋 현재 셀럽: ${currentCeleb.name} ($sampleCelebId)');
+
+      // 토큰 가져오기
+      final accessToken = await _secureStorage.read(key: 'access_token');
+      final tokenType = await _secureStorage.read(key: 'token_type');
+
+      if (accessToken == null) {
+        throw Exception('액세스 토큰이 없습니다.');
+      }
+
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: AppConfig.baseUrl,
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+        ),
+      );
+
+      final response = await dio.get(
+        '/api/v1/celeb/$sampleCelebId/sample',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': '${tokenType ?? 'Bearer'} $accessToken',
+          },
+        ),
+      );
+
+      print('📥 샘플 메시지 API 응답: ${response.statusCode}');
+      print('📋 응답 데이터: ${response.data}');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> sampleData = response.data;
+
+        if (mounted) {
+          setState(() {
+            _sampleMessages = sampleData.cast<Map<String, dynamic>>();
+            _isSampleLoading = false;
+          });
+        }
+
+        print('✅ 샘플 메시지 로드 성공: ${_sampleMessages.length}개');
+      } else {
+        throw Exception('샘플 메시지 로드 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('💥 샘플 메시지 로드 에러: $e');
+
+      if (mounted) {
+        setState(() {
+          _isSampleLoading = false;
+          _sampleError = '샘플 메시지를 불러올 수 없습니다.';
+        });
+      }
+    }
+  }
+
+  // 보이스 예시 위젯
+  Widget _buildVoiceExamples() {
+    // 로딩 상태
+    if (_isSampleLoading) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    // 에러 상태
+    if (_sampleError != null) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        child: Center(
+          child: Column(
+            children: [
+              Text(
+                _sampleError!,
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+              ),
+              SizedBox(height: 8),
+              TextButton(onPressed: _loadSampleMessages, child: Text('다시 시도')),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // 데이터가 없는 경우
+    if (_sampleMessages.isEmpty) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        child: Center(
+          child: Text(
+            '샘플 메시지가 없습니다.',
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+          ),
+        ),
+      );
+    }
+
+    // 실제 데이터 표시
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: _sampleMessages.map((sample) {
+          return Container(
+            margin: EdgeInsets.symmetric(vertical: 4),
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 헤더 부분 (아바타, 셀럽 이름, 날짜)
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: ClipOval(child: _buildCelebAvatar()),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _getCurrentCelebName(),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      _formatDate(sample['created']),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12),
+                // 메시지 부분
+                Text(
+                  sample['message'] ?? '샘플 메시지',
+                  style: TextStyle(fontSize: 14, color: Colors.black87),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // 날짜 포맷팅 헬퍼 메서드
+  String _formatDate(String? dateString) {
+    if (dateString == null) return '';
+
+    try {
+      final date = DateTime.parse(dateString);
+      final now = DateTime.now();
+      final difference = now.difference(date);
+
+      if (difference.inMinutes < 60) {
+        return '${difference.inMinutes}분 전';
+      } else if (difference.inHours < 24) {
+        return '${difference.inHours}시간 전';
+      } else {
+        return '${difference.inDays}일 전';
+      }
+    } catch (e) {
+      return '';
+    }
+  }
+
+  // 현재 셀럽의 아바타 이미지 빌드
+  Widget _buildCelebAvatar() {
+    if (_celebData.celebs.isEmpty) {
+      return Container(
+        color: Colors.grey.shade200,
+        child: Icon(Icons.person, size: 20, color: Colors.grey),
+      );
+    }
+
+    final currentCelebIndex =
+        _currentCelebIndex.value % _celebData.celebs.length;
+    final currentCeleb = _celebData.celebs[currentCelebIndex];
+
+    return Image.network(
+      AppConfig.getImageUrl(currentCeleb.imagePath),
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          color: Colors.grey.shade200,
+          child: Icon(Icons.person, size: 20, color: Colors.grey),
+        );
+      },
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          color: Colors.grey.shade200,
+          child: Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.grey.shade400),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // 현재 셀럽의 이름 가져오기
+  String _getCurrentCelebName() {
+    if (_celebData.celebs.isEmpty) {
+      return '셀럽';
+    }
+
+    final currentCelebIndex =
+        _currentCelebIndex.value % _celebData.celebs.length;
+    final currentCeleb = _celebData.celebs[currentCelebIndex];
+    return currentCeleb.name;
+  }
+
   Widget _buildNonSubscriberMenu(double screenHeight, double screenWidth) {
     // 데일리 메세지 - 비구독자만 보이게
     return Column(
@@ -184,9 +447,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-        // TODO: 이런 보이스는 어때요 위젯 필요
+        _buildVoiceExamples(),
         Gaps.v20,
-        // TODO: 이런 보이스는 어때요 위젯 필요
         Container(
           alignment: Alignment.topLeft,
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
