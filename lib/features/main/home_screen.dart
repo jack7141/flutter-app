@@ -1,5 +1,6 @@
 // lib/features/main/home_screen.dart
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:celeb_voice/features/authentication/repos/authentication_repo.dart'; // 추가
@@ -36,6 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
   // 오디오 재생 상태 관리
   final Map<String, bool> _playingStates = {}; // 각 샘플별 재생 상태
   final Map<String, double> _progressStates = {}; // 각 샘플별 진행률
+  AudioPlayer? _audioPlayer; // 오디오 플레이어
+  String? _currentPlayingSampleId; // 현재 재생 중인 샘플 ID
 
   @override
   void initState() {
@@ -64,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _userProfileRepo = UserProfileRepo(authRepo: authRepo);
 
     _loadUserNickname(); // 사용자 nickname 로드 추가
+    _initializeAudioPlayer(); // 오디오 플레이어 초기화
   }
 
   // 사용자 nickname 로드 메서드 (localStorage 우선, 없으면 API 호출)
@@ -110,6 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _currentCelebIndex.dispose();
     _celebData.dispose();
+    _audioPlayer?.dispose(); // 오디오 플레이어 정리
     super.dispose();
   }
 
@@ -464,12 +469,23 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.white, // White background
               shape: BoxShape.circle,
+              border: Border.all(
+                color: Color(0xff463E8D), // #463E8D border
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
             child: Icon(
               isPlaying ? Icons.pause : Icons.play_arrow,
-              color: Color(0xff463E8D),
+              color: Color(0xff463E8D), // #463E8D icon
               size: 24,
             ),
           ),
@@ -487,12 +503,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
+                  border: Border.all(color: Colors.grey.shade300, width: 1),
                 ),
-                child: Icon(
-                  Icons.share,
-                  color: Color(0xff9e9ef4),
-                  size: Sizes.size20,
-                ),
+                child: Icon(Icons.share, color: Colors.grey.shade600, size: 20),
               ),
             ),
             SizedBox(width: 12),
@@ -500,16 +513,17 @@ class _HomeScreenState extends State<HomeScreen> {
             GestureDetector(
               onTap: () => _onExpandTap(sampleId),
               child: Container(
-                width: Sizes.size32,
-                height: Sizes.size32,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
+                  border: Border.all(color: Colors.grey.shade300, width: 1),
                 ),
                 child: Icon(
                   Icons.fullscreen,
-                  color: Color(0xff9e9ef4),
-                  size: Sizes.size20,
+                  color: Colors.grey.shade600,
+                  size: 20,
                 ),
               ),
             ),
@@ -520,23 +534,139 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // 재생/일시정지 토글
-  void _togglePlayPause(String sampleId) {
-    setState(() {
-      final isCurrentlyPlaying = _playingStates[sampleId] ?? false;
+  void _togglePlayPause(String sampleId) async {
+    final isCurrentlyPlaying = _playingStates[sampleId] ?? false;
 
-      // 다른 모든 재생 중인 샘플 정지
-      _playingStates.updateAll((key, value) => false);
+    if (!isCurrentlyPlaying) {
+      // 재생 시작 - 기존 audioFile 재생
+      _playExistingAudio(sampleId);
+    } else {
+      // 재생 정지
+      if (_audioPlayer != null) {
+        await _audioPlayer!.pause();
+      }
+      setState(() {
+        _playingStates[sampleId] = false;
+      });
+    }
 
-      // 현재 샘플 재생 상태 토글
-      _playingStates[sampleId] = !isCurrentlyPlaying;
+    print('🎵 샘플 재생 토글: $sampleId, 재생중: ${_playingStates[sampleId]}');
+  }
 
-      if (_playingStates[sampleId] == true) {
-        // 재생 시작 - 임시 프로그레스 애니메이션
-        _simulateProgress(sampleId);
+  // 오디오 플레이어 초기화
+  void _initializeAudioPlayer() {
+    _audioPlayer = AudioPlayer();
+
+    // 재생 상태 변화 리스너
+    _audioPlayer!.onPlayerStateChanged.listen((PlayerState state) {
+      if (mounted && _currentPlayingSampleId != null) {
+        setState(() {
+          _playingStates[_currentPlayingSampleId!] =
+              (state == PlayerState.playing);
+        });
       }
     });
 
-    print('🎵 샘플 재생 토글: $sampleId, 재생중: ${_playingStates[sampleId]}');
+    // 재생 위치 변화 리스너
+    _audioPlayer!.onPositionChanged.listen((Duration position) {
+      if (mounted && _currentPlayingSampleId != null) {
+        _audioPlayer!.getDuration().then((totalDuration) {
+          if (totalDuration != null && totalDuration.inMilliseconds > 0) {
+            setState(() {
+              _progressStates[_currentPlayingSampleId!] =
+                  position.inMilliseconds / totalDuration.inMilliseconds;
+            });
+          }
+        });
+      }
+    });
+
+    // 재생 완료 리스너
+    _audioPlayer!.onPlayerComplete.listen((event) {
+      if (mounted && _currentPlayingSampleId != null) {
+        setState(() {
+          _playingStates[_currentPlayingSampleId!] = false;
+          _progressStates[_currentPlayingSampleId!] = 0.0;
+        });
+        _currentPlayingSampleId = null;
+      }
+    });
+  }
+
+  // 기존 오디오 파일 재생
+  void _playExistingAudio(String sampleId) async {
+    try {
+      // 해당 샘플 메시지 찾기
+      final sample = _sampleMessages.firstWhere(
+        (msg) => msg['id'] == sampleId,
+        orElse: () => <String, dynamic>{},
+      );
+
+      if (sample.isEmpty) {
+        print('❌ 샘플을 찾을 수 없습니다: $sampleId');
+        return;
+      }
+
+      final audioUrl = sample['audioFile'];
+      final message = sample['message'] ?? '';
+
+      print('🎵 오디오 재생 시작: $message');
+      print('🎵 오디오 URL: $audioUrl');
+
+      // 다른 모든 재생 중인 샘플 정지
+      setState(() {
+        _playingStates.updateAll((key, value) => false);
+        _progressStates.updateAll((key, value) => 0.0);
+      });
+
+      // 기존 재생 정지
+      if (_audioPlayer != null) {
+        await _audioPlayer!.stop();
+      }
+
+      if (audioUrl != null && audioUrl.isNotEmpty) {
+        print('✅ 오디오 URL 확인됨: $audioUrl');
+
+        // 현재 재생 중인 샘플 ID 설정
+        _currentPlayingSampleId = sampleId;
+
+        setState(() {
+          _playingStates[sampleId] = true;
+        });
+
+        // 실제 오디오 재생
+        await _audioPlayer!.play(UrlSource(audioUrl));
+      } else {
+        print('⚠️ 오디오 URL이 없습니다');
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('오디오 파일을 찾을 수 없습니다.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('💥 오디오 재생 에러: $e');
+
+      // 에러 시 재생 상태 해제
+      setState(() {
+        _playingStates[sampleId] = false;
+        _progressStates[sampleId] = 0.0;
+      });
+      _currentPlayingSampleId = null;
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('오디오를 재생할 수 없습니다: ${e.toString()}'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   // Export 버튼 핸들러
@@ -555,29 +685,6 @@ class _HomeScreenState extends State<HomeScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('상세 보기로 이동합니다.'), duration: Duration(seconds: 2)),
     );
-  }
-
-  // 임시 프로그레스 시뮬레이션 (실제 오디오 연동 전까지)
-  void _simulateProgress(String sampleId) {
-    if (_playingStates[sampleId] != true) return;
-
-    Future.delayed(Duration(milliseconds: 100), () {
-      if (mounted && _playingStates[sampleId] == true) {
-        setState(() {
-          final currentProgress = _progressStates[sampleId] ?? 0.0;
-          final newProgress = currentProgress + 0.01; // 1% 씩 증가
-
-          if (newProgress >= 1.0) {
-            // 재생 완료
-            _progressStates[sampleId] = 0.0;
-            _playingStates[sampleId] = false;
-          } else {
-            _progressStates[sampleId] = newProgress;
-            _simulateProgress(sampleId); // 재귀 호출로 계속 진행
-          }
-        });
-      }
-    });
   }
 
   Widget _buildNonSubscriberMenu(double screenHeight, double screenWidth) {
