@@ -63,105 +63,38 @@ class _CelebCardState extends State<CelebCard> {
     print("🔍 셀럽 카드 클릭: ${selectedCeleb.name}");
     print("🔍 클릭한 셀럽 ID: ${selectedCeleb.id}");
 
-    // 혹시 떠있는 로딩 다이얼로그 강제로 닫기
-    try {
-      if (context.mounted && Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
-        print("🚪 기존 다이얼로그 닫기");
-      }
-    } catch (e) {
-      print("⚠️ 다이얼로그 닫기 실패: $e");
-    }
-
     try {
       final isSubscribed = _subscribedCelebIds.contains(selectedCeleb.id);
       print("✅ 구독 여부: $isSubscribed");
 
       if (isSubscribed) {
-        // 이미 구독된 경우 → TTS로 이동
+        // 이미 구독된 경우 → 바로 TTS로 이동
         print("✅ 이미 ${selectedCeleb.name} 구독자 → TTS로 이동");
-
         if (context.mounted) {
-          context.go('/previewTts', extra: selectedCeleb);
+          context.go('/generateMessage', extra: selectedCeleb);
         }
       } else {
-        // 미구독 상태 → is_onboarded 상태 확인
-        print("📝 미구독 셀럽 - 온보딩 상태 확인: ${selectedCeleb.name}");
+        // 미구독 상태 → 바로 구독 처리 후 TTS로 이동
+        print("🚀 미구독 셀럽 → 구독 처리 시작: ${selectedCeleb.name}");
+        await _subscribeDirectly(selectedCeleb, context);
 
-        // 사용자 프로필에서 is_onboarded 상태 확인
-        final isOnboarded = await _checkOnboardingStatus();
-
-        if (isOnboarded) {
-          // 온보딩 완료된 사용자 - 바로 구독 처리
-          print("✅ 온보딩 완료 사용자 - 바로 구독 처리");
-          await _subscribeDirectly(selectedCeleb, context);
-        } else {
-          // 온보딩 미완료 사용자 - 온보딩 시작
-          print("📝 온보딩 미완료 사용자 - 온보딩 시작");
-          if (context.mounted) {
-            context.go('/welcome', extra: selectedCeleb);
-          }
+        // 구독 성공 시 TTS로 이동
+        if (_subscribedCelebIds.contains(selectedCeleb.id) && context.mounted) {
+          print("✅ 구독 완료 → TTS로 이동");
+          context.go('/generateMessage', extra: selectedCeleb);
         }
       }
     } catch (e) {
-      print("❌ 구독 상태 확인 실패: $e");
+      print("❌ 셀럽 카드 처리 실패: $e");
       if (context.mounted) {
-        // 에러 시에도 온보딩으로 이동 (셀럽 정보 전달)
-        context.go('/welcome', extra: selectedCeleb);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('처리 중 오류가 발생했습니다: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
-    }
-  }
-
-  // 온보딩 상태 확인 메서드
-  Future<bool> _checkOnboardingStatus() async {
-    try {
-      const storage = FlutterSecureStorage();
-      final accessToken = await storage.read(key: 'access_token');
-
-      if (accessToken == null) {
-        print('❌ 액세스 토큰 없음');
-        return false;
-      }
-
-      print('🔍 사용자 프로필 조회 시작: /api/v1/users/me/');
-
-      final dio = Dio(
-        BaseOptions(
-          baseUrl: AppConfig.baseUrl,
-          connectTimeout: const Duration(seconds: 30),
-          receiveTimeout: const Duration(seconds: 30),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $accessToken',
-          },
-        ),
-      );
-
-      final response = await dio.get('/api/v1/users/me/');
-
-      print('📥 사용자 프로필 응답: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        final userData = response.data;
-        final isOnboarded = userData['profile']?['isOnboarded'] ?? false;
-
-        print('📋 사용자 온보딩 상태: $isOnboarded');
-        print('📋 전체 사용자 데이터: $userData');
-
-        return isOnboarded == true;
-      } else {
-        print('❌ 사용자 데이터 조회 실패');
-        return false;
-      }
-    } catch (e) {
-      print('💥 온보딩 상태 확인 에러: $e');
-      if (e is DioException) {
-        print('💥 DioException 상세:');
-        print('   - 상태코드: ${e.response?.statusCode}');
-        print('   - 응답 데이터: ${e.response?.data}');
-        print('   - 에러 메시지: ${e.message}');
-      }
-      return false;
     }
   }
 
@@ -359,74 +292,7 @@ class _CelebCardState extends State<CelebCard> {
       return FormButton(text: '처리 중...');
     }
 
-    return FormButton(text: isSubscribed ? '오늘의 메시지 들어보기' : '구독하기');
-  }
-
-  Widget _buildMessageBanner(int celebIndex, String message) {
-    return IntrinsicHeight(
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: Sizes.size18,
-          vertical: Sizes.size10,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(Sizes.size16),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/images/message/message_logo.png',
-              fit: BoxFit.contain,
-              height: 36,
-              width: 36,
-            ),
-            Gaps.h12,
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    widget.celebs[celebIndex].name,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: Sizes.size15,
-                    ),
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        message,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: Sizes.size14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '2시간전',
-                  style: TextStyle(
-                    color: Color(0xff4968a1),
-                    fontSize: Sizes.size11,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+    return FormButton(text: isSubscribed ? '오늘의 메시지 들어보기' : '보이스 생성하기');
   }
 
   Widget _buildCelebInfo(int celebIndex) {
