@@ -71,7 +71,7 @@ class _CelebCardState extends State<CelebCard> {
         // 이미 구독된 경우 → 바로 TTS로 이동
         print("✅ 이미 ${selectedCeleb.name} 구독자 → TTS로 이동");
         if (context.mounted) {
-          context.go('/generateMessage', extra: selectedCeleb);
+          context.push('/generateMessage', extra: selectedCeleb);
         }
       } else {
         // 미구독 상태 → 바로 구독 처리 후 TTS로 이동
@@ -292,7 +292,7 @@ class _CelebCardState extends State<CelebCard> {
       return FormButton(text: '처리 중...');
     }
 
-    return FormButton(text: isSubscribed ? '오늘의 메시지 들어보기' : '보이스 생성하기');
+    return FormButton(text: '보이스 생성하기');
   }
 
   Widget _buildCelebInfo(int celebIndex) {
