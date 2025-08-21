@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:celeb_voice/config/app_config.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
@@ -30,6 +31,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   bool _isMessagesLoading = true;
   String? _messagesError;
 
+  // 오디오 재생 상태 관리
+  final Map<String, bool> _playingStates = {}; // 각 메시지별 재생 상태
+  final Map<String, double> _progressStates = {}; // 각 메시지별 진행률
+  AudioPlayer? _audioPlayer; // 오디오 플레이어
+  String? _currentPlayingMessageId; // 현재 재생 중인 메시지 ID
+
   @override
   void initState() {
     super.initState();
@@ -37,6 +44,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     _userProfileRepo = UserProfileRepo(authRepo: authRepo);
     _loadUserProfile();
     _loadUserMessages(); // 사용자 메시지 목록 로드
+    _initializeAudioPlayer(); // 오디오 플레이어 초기화
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer?.dispose(); // 오디오 플레이어 정리
+    super.dispose();
   }
 
   Future<void> _loadUserProfile() async {
@@ -125,6 +139,208 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   void _navigateToSettings() {
     context.push(UserSettingsScreen.routeUrl);
+  }
+
+  // 오디오 플레이어 초기화
+  void _initializeAudioPlayer() {
+    _audioPlayer = AudioPlayer();
+
+    // 재생 상태 변화 리스너
+    _audioPlayer!.onPlayerStateChanged.listen((PlayerState state) {
+      if (mounted && _currentPlayingMessageId != null) {
+        setState(() {
+          _playingStates[_currentPlayingMessageId!] =
+              (state == PlayerState.playing);
+        });
+      }
+    });
+
+    // 재생 위치 변화 리스너
+    _audioPlayer!.onPositionChanged.listen((Duration position) {
+      if (mounted && _currentPlayingMessageId != null) {
+        _audioPlayer!.getDuration().then((totalDuration) {
+          if (totalDuration != null && totalDuration.inMilliseconds > 0) {
+            setState(() {
+              _progressStates[_currentPlayingMessageId!] =
+                  position.inMilliseconds / totalDuration.inMilliseconds;
+            });
+          }
+        });
+      }
+    });
+
+    // 재생 완료 리스너
+    _audioPlayer!.onPlayerComplete.listen((event) {
+      if (mounted && _currentPlayingMessageId != null) {
+        setState(() {
+          _playingStates[_currentPlayingMessageId!] = false;
+          _progressStates[_currentPlayingMessageId!] = 0.0;
+        });
+        _currentPlayingMessageId = null;
+      }
+    });
+  }
+
+  // 재생/일시정지 토글
+  void _togglePlayPause(String messageId) async {
+    final isCurrentlyPlaying = _playingStates[messageId] ?? false;
+
+    if (!isCurrentlyPlaying) {
+      // 재생 시작 - TTS 생성 후 재생
+      await _generateAndPlayMessage(messageId);
+    } else {
+      // 재생 정지
+      if (_audioPlayer != null) {
+        await _audioPlayer!.pause();
+      }
+      setState(() {
+        _playingStates[messageId] = false;
+      });
+    }
+
+    print('🎵 메시지 재생 토글: $messageId, 재생중: ${_playingStates[messageId]}');
+  }
+
+  // 메시지 TTS 생성 및 재생
+  Future<void> _generateAndPlayMessage(String messageId) async {
+    try {
+      // 해당 메시지 찾기
+      final message = _userMessages.firstWhere(
+        (msg) => msg['id'] == messageId,
+        orElse: () => <String, dynamic>{},
+      );
+
+      if (message.isEmpty) {
+        print('❌ 메시지를 찾을 수 없습니다: $messageId');
+        return;
+      }
+
+      final requestText = message['requestText'] ?? '';
+      final celebrity = message['celebrity'];
+
+      if (requestText.isEmpty || celebrity == null) {
+        print('❌ 메시지 텍스트 또는 셀럽 정보가 없습니다');
+        return;
+      }
+
+      print('🎤 TTS 생성 시작: $requestText (${celebrity['name']})');
+
+      // 다른 모든 재생 중인 메시지 정지
+      setState(() {
+        _playingStates.updateAll((key, value) => false);
+        _progressStates.updateAll((key, value) => 0.0);
+      });
+
+      // 기존 재생 정지
+      if (_audioPlayer != null) {
+        await _audioPlayer!.stop();
+      }
+
+      // 토큰 가져오기
+      final accessToken = await _secureStorage.read(key: 'access_token');
+      final tokenType = await _secureStorage.read(key: 'token_type');
+
+      if (accessToken == null) {
+        throw Exception('액세스 토큰이 없습니다.');
+      }
+
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: AppConfig.baseUrl,
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+        ),
+      );
+
+      // 현재 재생 중인 메시지 ID 설정
+      _currentPlayingMessageId = messageId;
+
+      setState(() {
+        _playingStates[messageId] = true;
+      });
+
+      // TTS 생성 API 호출
+      final response = await dio.post(
+        '/api/v1/celeb/message/my/',
+        data: {'celebrity_id': celebrity['id'], 'request_text': requestText},
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': '${tokenType ?? 'Bearer'} $accessToken',
+          },
+        ),
+      );
+
+      print('📥 TTS 생성 API 응답: ${response.statusCode}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = response.data;
+        final audioUrl = responseData['audioFile'];
+
+        if (audioUrl != null && audioUrl.isNotEmpty) {
+          print('🎵 오디오 URL 받음: $audioUrl');
+          // 실제 오디오 재생
+          await _audioPlayer!.play(UrlSource(audioUrl));
+        } else {
+          print('⚠️ 오디오 URL이 없음, 임시 프로그레스 실행');
+          // 임시 프로그레스 (실제 구현에서는 제거)
+          _simulateProgress(messageId);
+        }
+      } else {
+        throw Exception('TTS 생성 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('💥 TTS 생성 에러: $e');
+
+      // 에러 시 재생 상태 해제
+      setState(() {
+        _playingStates[messageId] = false;
+        _progressStates[messageId] = 0.0;
+      });
+      _currentPlayingMessageId = null;
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('음성을 재생할 수 없습니다.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
+  // 임시 프로그레스 시뮬레이션 (실제 오디오 URL이 없을 때)
+  void _simulateProgress(String messageId) {
+    if (_playingStates[messageId] != true) return;
+
+    Future.delayed(Duration(milliseconds: 100), () {
+      if (mounted && _playingStates[messageId] == true) {
+        setState(() {
+          final currentProgress = _progressStates[messageId] ?? 0.0;
+          final newProgress = currentProgress + 0.01; // 1% 씩 증가
+
+          if (newProgress >= 1.0) {
+            // 재생 완료
+            _progressStates[messageId] = 0.0;
+            _playingStates[messageId] = false;
+            _currentPlayingMessageId = null;
+          } else {
+            _progressStates[messageId] = newProgress;
+            _simulateProgress(messageId); // 재귀 호출로 계속 진행
+          }
+        });
+      }
+    });
+  }
+
+  // Export 버튼 핸들러
+  void _onExportTap(String messageId) {
+    print('📤 Export 버튼 클릭: $messageId');
+    // TODO: 실제 export 로직 구현
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('메시지를 공유합니다.'), duration: Duration(seconds: 2)),
+    );
   }
 
   @override
@@ -375,6 +591,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                 color: Colors.black87,
                               ),
                             ),
+                            SizedBox(height: 16),
+                            // 프로그레스 바
+                            _buildProgressBar(message['id'] ?? ''),
+                            SizedBox(height: 12),
+                            // 재생 버튼 및 공유 버튼
+                            _buildPlayButton(message['id'] ?? ''),
                           ],
                         ),
                       ),
@@ -386,6 +608,83 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           );
         },
       ),
+    );
+  }
+
+  // 프로그레스 바 빌드
+  Widget _buildProgressBar(String messageId) {
+    final progress = _progressStates[messageId] ?? 0.0;
+
+    return Column(
+      children: [
+        // 프로그레스 바
+        LinearProgressIndicator(
+          value: progress,
+          backgroundColor: Colors.grey.shade300,
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xff9e9ef4)),
+          minHeight: 4,
+        ),
+        SizedBox(height: 4),
+      ],
+    );
+  }
+
+  // 재생 버튼 빌드
+  Widget _buildPlayButton(String messageId) {
+    final isPlaying = _playingStates[messageId] ?? false;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // 재생/일시정지 버튼
+        GestureDetector(
+          onTap: () => _togglePlayPause(messageId),
+          child: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.white, // White background
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Color(0xff463E8D), // #463E8D border
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(
+              isPlaying ? Icons.pause : Icons.play_arrow,
+              color: Color(0xff463E8D), // #463E8D icon
+              size: 24,
+            ),
+          ),
+        ),
+
+        // 오른쪽 버튼들
+        Row(
+          children: [
+            // Export 버튼
+            GestureDetector(
+              onTap: () => _onExportTap(messageId),
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.grey.shade300, width: 1),
+                ),
+                child: Icon(Icons.share, color: Colors.grey.shade600, size: 20),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
