@@ -8,6 +8,7 @@ import 'package:celeb_voice/features/user_profile/views/user_settings_screen.dar
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 class UserProfileScreen extends StatefulWidget {
@@ -658,17 +659,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             decoration: BoxDecoration(
               color: Colors.white, // White background
               shape: BoxShape.circle,
-              border: Border.all(
-                color: Color(0xff463E8D), // #463E8D border
-                width: 2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
-                ),
-              ],
             ),
             child: Icon(
               isPlaying ? Icons.pause : Icons.play_arrow,
@@ -690,9 +680,30 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey.shade300, width: 1),
                 ),
-                child: Icon(Icons.share, color: Colors.grey.shade600, size: 20),
+                child: Icon(
+                  FontAwesomeIcons.arrowUpFromBracket,
+                  color: Color(0xff9E9EF4),
+                  size: 20,
+                ),
+              ),
+            ),
+            SizedBox(width: 12),
+            // 확대 버튼
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  FontAwesomeIcons.expand,
+                  color: Color(0xff9E9EF4),
+                  size: 20,
+                ),
               ),
             ),
           ],

@@ -9,6 +9,7 @@ import 'package:celeb_voice/features/user_profile/repos/user_profile_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // 추가
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../config/app_config.dart';
 import 'widgets/celeb_card_widget.dart';
@@ -472,7 +473,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.white,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.share, color: Colors.grey.shade600, size: 20),
+                child: Icon(
+                  FontAwesomeIcons.arrowUpFromBracket,
+                  color: Color(0xff9E9EF4),
+                  size: 20,
+                ),
               ),
             ),
             SizedBox(width: 12),
@@ -487,8 +492,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.fullscreen,
-                  color: Colors.grey.shade600,
+                  FontAwesomeIcons.expand,
+                  color: Color(0xff9E9EF4),
                   size: 20,
                 ),
               ),
