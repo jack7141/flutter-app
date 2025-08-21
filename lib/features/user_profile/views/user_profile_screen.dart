@@ -38,6 +38,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   AudioPlayer? _audioPlayer; // 오디오 플레이어
   String? _currentPlayingMessageId; // 현재 재생 중인 메시지 ID
 
+  // 카드 확장 상태 관리
+  final Map<String, bool> _expandedStates = {}; // 각 메시지별 확장 상태
+
   @override
   void initState() {
     super.initState();
@@ -560,6 +563,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       vertical: 8,
                     ),
                     childrenPadding: EdgeInsets.zero,
+                    onExpansionChanged: (expanded) {
+                      setState(() {
+                        _expandedStates[message['id'] ?? ''] = expanded;
+                      });
+                    },
                     leading: SizedBox(
                       width: 40,
                       height: 40,
@@ -572,12 +580,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         fontSize: 16,
                       ),
                     ),
-                    trailing: Text(
-                      _formatMessageDate(createdDate),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade500,
-                      ),
+                    trailing: _buildTrailingWidget(
+                      createdDate,
+                      message['id'] ?? '',
                     ),
                     children: [
                       Container(
@@ -623,6 +628,254 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         },
       ),
     );
+  }
+
+  // Trailing 위젯 빌드 (확장 상태에 따라 다르게 표시)
+  Widget _buildTrailingWidget(String createdDate, String messageId) {
+    final isExpanded = _expandedStates[messageId] ?? false;
+
+    if (isExpanded) {
+      // 확장된 상태: 더보기 버튼 (...)
+      return GestureDetector(
+        onTap: () => _showEditOptions(messageId),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Icon(Icons.more_horiz, color: Colors.grey.shade600, size: 20),
+        ),
+      );
+    } else {
+      // 접힌 상태: 상대적 시간 표시
+      return Text(
+        _formatMessageDate(createdDate),
+        style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+      );
+    }
+  }
+
+  // 수정 옵션 표시
+  void _showEditOptions(String messageId) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 제목 수정
+              ListTile(
+                leading: Icon(Icons.edit, color: Color(0xff9e9ef4)),
+                title: Text(
+                  '제목 수정',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _editMessageTitle(messageId);
+                },
+              ),
+              // 메시지 수정
+              ListTile(
+                leading: Icon(Icons.message_outlined, color: Color(0xff9e9ef4)),
+                title: Text(
+                  '메시지 수정',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _editMessageContent(messageId);
+                },
+              ),
+              // 삭제
+              ListTile(
+                leading: Icon(Icons.delete_outline, color: Colors.red),
+                title: Text(
+                  '삭제',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.red,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _deleteMessage(messageId);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // 제목 수정
+  void _editMessageTitle(String messageId) {
+    final message = _userMessages.firstWhere(
+      (msg) => msg['id'] == messageId,
+      orElse: () => <String, dynamic>{},
+    );
+
+    final currentTitle = message['title'] ?? '';
+    final TextEditingController controller = TextEditingController(
+      text: currentTitle,
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('제목 수정'),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              hintText: '새로운 제목을 입력하세요',
+              border: OutlineInputBorder(),
+            ),
+            maxLength: 50,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _updateMessageTitle(messageId, controller.text);
+              },
+              child: Text('저장', style: TextStyle(color: Color(0xff9e9ef4))),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 메시지 내용 수정
+  void _editMessageContent(String messageId) {
+    final message = _userMessages.firstWhere(
+      (msg) => msg['id'] == messageId,
+      orElse: () => <String, dynamic>{},
+    );
+
+    final currentContent = message['requestText'] ?? '';
+    final TextEditingController controller = TextEditingController(
+      text: currentContent,
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('메시지 수정'),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              hintText: '새로운 메시지를 입력하세요',
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 3,
+            maxLength: 200,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _updateMessageContent(messageId, controller.text);
+              },
+              child: Text('저장', style: TextStyle(color: Color(0xff9e9ef4))),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 제목 업데이트 (로컬에서만 - 실제 API 호출은 TODO)
+  void _updateMessageTitle(String messageId, String newTitle) {
+    setState(() {
+      final messageIndex = _userMessages.indexWhere(
+        (msg) => msg['id'] == messageId,
+      );
+      if (messageIndex != -1) {
+        _userMessages[messageIndex]['title'] = newTitle;
+      }
+    });
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('제목이 수정되었습니다.')));
+
+    // TODO: 실제 API 호출로 서버에 업데이트
+  }
+
+  // 메시지 내용 업데이트 (로컬에서만 - 실제 API 호출은 TODO)
+  void _updateMessageContent(String messageId, String newContent) {
+    setState(() {
+      final messageIndex = _userMessages.indexWhere(
+        (msg) => msg['id'] == messageId,
+      );
+      if (messageIndex != -1) {
+        _userMessages[messageIndex]['requestText'] = newContent;
+      }
+    });
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('메시지가 수정되었습니다.')));
+
+    // TODO: 실제 API 호출로 서버에 업데이트
+  }
+
+  // 메시지 삭제
+  void _deleteMessage(String messageId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('메시지 삭제'),
+          content: Text('정말로 이 메시지를 삭제하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _confirmDeleteMessage(messageId);
+              },
+              child: Text('삭제', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 메시지 삭제 확인 (로컬에서만 - 실제 API 호출은 TODO)
+  void _confirmDeleteMessage(String messageId) {
+    setState(() {
+      _userMessages.removeWhere((msg) => msg['id'] == messageId);
+      _expandedStates.remove(messageId);
+      _playingStates.remove(messageId);
+      _progressStates.remove(messageId);
+    });
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('메시지가 삭제되었습니다.')));
+
+    // TODO: 실제 API 호출로 서버에서 삭제
   }
 
   // 프로그레스 바 빌드
