@@ -529,6 +529,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           final message = _userMessages[index];
           final celebrity = message['celebrity'];
           final requestText = message['requestText'] ?? '';
+          final title = message['title'] ?? '${celebrity?['name'] ?? '셀럽'} 메시지';
+          final createdDate = message['created'] ?? '';
 
           return Card(
             margin: EdgeInsets.symmetric(vertical: 4),
@@ -563,14 +565,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       child: ClipOval(child: _buildCelebImage(celebrity)),
                     ),
                     title: Text(
-                      celebrity?['name'] ?? '셀럽',
+                      title,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                       ),
                     ),
                     trailing: Text(
-                      _formatMessageDate(message['created'] ?? ''),
+                      _formatMessageDate(createdDate),
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade500,
@@ -584,6 +586,17 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // 생성일자 표시
+                            Text(
+                              _formatFullDate(createdDate),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade500,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            // 메시지 내용
                             Text(
                               requestText,
                               style: TextStyle(
@@ -735,7 +748,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  // 메시지 날짜 포맷팅
+  // 메시지 날짜 포맷팅 (상대적 시간)
   String _formatMessageDate(String dateString) {
     if (dateString.isEmpty) return '';
 
@@ -753,6 +766,18 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       } else {
         return '${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')}';
       }
+    } catch (e) {
+      return '';
+    }
+  }
+
+  // 전체 날짜 포맷팅 (확장된 카드 내부용)
+  String _formatFullDate(String dateString) {
+    if (dateString.isEmpty) return '';
+
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.year}년 ${date.month}월 ${date.day}일 ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
     } catch (e) {
       return '';
     }
