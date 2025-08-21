@@ -723,25 +723,30 @@ class _HomeScreenState extends State<HomeScreen> {
             itemBuilder: (context, index) {
               return ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  _bannerImages[index],
+                child: SizedBox(
                   width: double.infinity,
                   height: 120,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '배너 ${index + 1}',
-                          style: TextStyle(color: Colors.grey.shade600),
+                  child: Image.asset(
+                    _bannerImages[index],
+                    width: double.infinity,
+                    height: 120,
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center, // 이미지를 정중앙에 정렬
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ),
-                    );
-                  },
+                        child: Center(
+                          child: Text(
+                            '배너 ${index + 1}',
+                            style: TextStyle(color: Colors.grey.shade600),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               );
             },
@@ -781,7 +786,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         // 배너 캐러셀
         _buildBannerCarousel(screenWidth),
-        Gaps.v20,
+        // Gaps.v10,
         Container(
           alignment: Alignment.topLeft,
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
