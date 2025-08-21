@@ -112,7 +112,7 @@ class _CelebCardState extends State<CelebCard> {
     return Align(
       alignment: Alignment.bottomLeft,
       child: Padding(
-        padding: EdgeInsets.only(bottom: 100, left: Sizes.size20),
+        padding: EdgeInsets.only(bottom: 85, left: Sizes.size20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,7 +121,7 @@ class _CelebCardState extends State<CelebCard> {
               widget.celebs[celebIndex].name,
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            Gaps.v8,
+            Gaps.v4,
             Container(
               child: Wrap(
                 spacing: 10,
@@ -135,7 +135,7 @@ class _CelebCardState extends State<CelebCard> {
                         ),
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Color(0xff0e0e0e),
+                            color: Color(0xff463E8D),
                             width: 1,
                           ),
                           borderRadius: BorderRadius.circular(16),
@@ -144,8 +144,8 @@ class _CelebCardState extends State<CelebCard> {
                           tag,
                           style: TextStyle(
                             fontSize: 14,
-                            color: Color(0xff0e0e0e),
-                            fontWeight: FontWeight.w500,
+                            color: Color(0xff463E8D),
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
