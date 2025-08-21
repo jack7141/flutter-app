@@ -1,5 +1,7 @@
 // lib/features/main/home_screen.dart
 
+import 'dart:async';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
@@ -41,6 +43,15 @@ class _HomeScreenState extends State<HomeScreen> {
   AudioPlayer? _audioPlayer; // 오디오 플레이어
   String? _currentPlayingSampleId; // 현재 재생 중인 샘플 ID
 
+  // 배너 캐러셀 상태 관리
+  late PageController _bannerPageController;
+  int _currentBannerIndex = 0;
+  final List<String> _bannerImages = [
+    'assets/images/banner.png',
+    'assets/images/banner2.png',
+    'assets/images/banner3.jpg',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -69,6 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _loadUserNickname(); // 사용자 nickname 로드 추가
     _initializeAudioPlayer(); // 오디오 플레이어 초기화
+    _initializeBannerCarousel(); // 배너 캐러셀 초기화
   }
 
   // 사용자 nickname 로드 메서드 (localStorage 우선, 없으면 API 호출)
@@ -116,6 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _currentCelebIndex.dispose();
     _celebData.dispose();
     _audioPlayer?.dispose(); // 오디오 플레이어 정리
+    _bannerPageController.dispose(); // 배너 페이지 컨트롤러 정리
     super.dispose();
   }
 
@@ -658,38 +671,116 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // 배너 캐러셀 초기화
+  void _initializeBannerCarousel() {
+    _bannerPageController = PageController(initialPage: 0);
+
+    // 자동 슬라이드 설정 (5초마다)
+    Future.delayed(Duration(seconds: 3), () {
+      _startBannerAutoSlide();
+    });
+  }
+
+  // 배너 자동 슬라이드 시작
+  void _startBannerAutoSlide() {
+    if (!mounted) return;
+
+    Timer.periodic(Duration(seconds: 5), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      setState(() {
+        _currentBannerIndex = (_currentBannerIndex + 1) % _bannerImages.length;
+      });
+
+      _bannerPageController.animateToPage(
+        _currentBannerIndex,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  // 배너 캐러셀 위젯
+  Widget _buildBannerCarousel(double screenWidth) {
+    return Container(
+      width: screenWidth,
+      height: 120,
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Stack(
+        children: [
+          // 페이지뷰
+          PageView.builder(
+            controller: _bannerPageController,
+            onPageChanged: (index) {
+              setState(() {
+                _currentBannerIndex = index;
+              });
+            },
+            itemCount: _bannerImages.length,
+            itemBuilder: (context, index) {
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  _bannerImages[index],
+                  width: double.infinity,
+                  height: 120,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '배너 ${index + 1}',
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+
+          // 인디케이터
+          Positioned(
+            bottom: 12,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                _bannerImages.length,
+                (index) => Container(
+                  width: 8,
+                  height: 8,
+                  margin: EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _currentBannerIndex == index
+                        ? Colors.white
+                        : Colors.white.withOpacity(0.5),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildNonSubscriberMenu(double screenHeight, double screenWidth) {
     // 데일리 메세지 - 비구독자만 보이게
     return Column(
       children: [
-        // 배너 이미지
-        Container(
-          width: screenWidth,
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              'assets/images/banner.png',
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '배너 이미지',
-                      style: TextStyle(color: Colors.grey.shade600),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
+        // 배너 캐러셀
+        _buildBannerCarousel(screenWidth),
         Gaps.v20,
         Container(
           alignment: Alignment.topLeft,
