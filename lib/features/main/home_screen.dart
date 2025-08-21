@@ -662,6 +662,35 @@ class _HomeScreenState extends State<HomeScreen> {
     // 데일리 메세지 - 비구독자만 보이게
     return Column(
       children: [
+        // 배너 이미지
+        Container(
+          width: screenWidth,
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.asset(
+              'assets/images/banner.png',
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '배너 이미지',
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        Gaps.v20,
         Container(
           alignment: Alignment.topLeft,
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
