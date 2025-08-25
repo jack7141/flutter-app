@@ -64,7 +64,7 @@ class _SendMessageChoiceCelebState
       body: SafeArea(
         child: Column(
           children: [
-            SizedBox(height: 40), // AppBar 기본 높이만큼 여백
+            Gaps.v40,
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(Sizes.size20),

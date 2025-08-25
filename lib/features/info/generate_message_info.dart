@@ -2,6 +2,7 @@ import 'package:celeb_voice/common/widgets/form_button.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class GenerateMessageInfo extends StatefulWidget {
   static const String routeName = "generateMessageInfo";
@@ -28,7 +29,43 @@ class _GenerateMessageInfoState extends State<GenerateMessageInfo> {
       body: SafeArea(
         child: Column(
           children: [
-            SizedBox(height: 40), // AppBar 기본 높이만큼 여백
+            // 헤더 부분
+            Container(
+              width: double.infinity,
+              height: 56,
+              padding: EdgeInsets.symmetric(
+                horizontal: Sizes.size20,
+                vertical: Sizes.size16,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    "보유 크레딧",
+                    style: TextStyle(
+                      fontSize: Sizes.size16,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF9E9EF4),
+                    ),
+                  ),
+                  SizedBox(width: Sizes.size8),
+                  Image.asset(
+                    'assets/images/coin_icon.png',
+                    width: Sizes.size16,
+                    height: Sizes.size16,
+                  ),
+                  SizedBox(width: Sizes.size4),
+                  Text(
+                    "4,500",
+                    style: TextStyle(
+                      fontSize: Sizes.size16,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF9E9EF4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(Sizes.size20),
@@ -161,7 +198,16 @@ class _GenerateMessageInfoState extends State<GenerateMessageInfo> {
                           ),
                         ),
                         SizedBox(width: Sizes.size16),
-                        Expanded(flex: 2, child: FormButton(text: "생성하기")),
+                        Expanded(
+                          flex: 2,
+                          child: GestureDetector(
+                            onTap: () {
+                              print("생성하기 버튼 클릭 - 셀럽 선택 페이지로 이동");
+                              context.push('/sendMessageChoiceCeleb');
+                            },
+                            child: FormButton(text: "생성하기"),
+                          ),
+                        ),
                       ],
                     ),
                   ],
