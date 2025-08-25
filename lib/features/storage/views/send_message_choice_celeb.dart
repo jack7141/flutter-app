@@ -58,6 +58,60 @@ class _SendMessageChoiceCelebState
     }
   }
 
+  void _showCreditDeductionToast(BuildContext context) {
+    final overlay = Overlay.of(context);
+    late OverlayEntry overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 30,
+        left: 0,
+        right: 0,
+        child: Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: Sizes.size32,
+                vertical: Sizes.size8,
+              ),
+              decoration: BoxDecoration(
+                color: Color(0xFF9E9EF4).withOpacity(0.16),
+                borderRadius: BorderRadius.circular(Sizes.size32),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    'assets/images/coin_icon.png',
+                    width: Sizes.size16,
+                    height: Sizes.size16,
+                  ),
+                  SizedBox(width: Sizes.size8),
+                  Text(
+                    "550이 차감되었습니다.",
+                    style: TextStyle(
+                      color: Color(0xFF463E8D),
+                      fontSize: Sizes.size14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+
+    // 2초 후 토스트 제거
+    Future.delayed(Duration(seconds: 2), () {
+      overlayEntry.remove();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,11 +154,18 @@ class _SendMessageChoiceCelebState
 
                                 return GestureDetector(
                                   onTap: () {
-                                    // 모든 셀럽 선택 가능
-                                    context.push(
-                                      '/generateMessage',
-                                      extra: celeb,
-                                    );
+                                    // 크레딧 차감 토스트 표시
+                                    _showCreditDeductionToast(context);
+
+                                    // 잠시 후 페이지 이동
+                                    Future.delayed(Duration(seconds: 1), () {
+                                      if (mounted) {
+                                        context.push(
+                                          '/generateMessage',
+                                          extra: celeb,
+                                        );
+                                      }
+                                    });
                                   },
                                   child: Column(
                                     children: [
