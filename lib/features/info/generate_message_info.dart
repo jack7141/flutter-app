@@ -56,12 +56,24 @@ class _GenerateMessageInfoState extends State<GenerateMessageInfo> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Text(
-                            "550",
-                            style: TextStyle(
-                              fontSize: Sizes.size16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset(
+                                'assets/images/coin_icon.png',
+                                width: Sizes.size16,
+                                height: Sizes.size16,
+                              ),
+                              SizedBox(width: Sizes.size4),
+                              Text(
+                                "550",
+                                style: TextStyle(
+                                  fontSize: Sizes.size16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
