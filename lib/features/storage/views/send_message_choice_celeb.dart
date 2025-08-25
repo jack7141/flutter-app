@@ -1,3 +1,4 @@
+import 'package:celeb_voice/common/widgets/common_app_%20bar.dart';
 import 'package:celeb_voice/config/app_config.dart';
 import 'package:celeb_voice/constants/gaps.dart';
 import 'package:celeb_voice/constants/sizes.dart';
@@ -60,11 +61,11 @@ class _SendMessageChoiceCelebState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: const CommonAppBar(),
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       body: SafeArea(
         child: Column(
           children: [
-            Gaps.v40,
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(Sizes.size20),
